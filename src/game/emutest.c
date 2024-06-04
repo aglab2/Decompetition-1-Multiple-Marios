@@ -14,9 +14,9 @@
 #include "lib/libpl/libpl-emu.h"
 #endif
 
-extern OSMesgQueue gSIEventMesgQueue;
-extern u8 __osContPifRam[];
-extern u8 __osContLastCmd;
+extern OSMesgQueue gSIEventMesgQueue __attribute__((section(".data")));
+extern u8 __osContPifRam[] __attribute__((section(".data")));
+extern u8 __osContLastCmd __attribute__((section(".data")));
 extern void __osSiGetAccess(void);
 extern void __osSiRelAccess(void);
 extern void __osPiGetAccess(void);
