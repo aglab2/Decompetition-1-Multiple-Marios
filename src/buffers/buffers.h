@@ -12,17 +12,17 @@
 
 extern u8 gAudioHeap[DOUBLE_SIZE_ON_64_BIT(AUDIO_HEAP_SIZE)];
 
-extern u8 gIdleThreadStack[THREAD1_STACK];
-extern u8 gThread3Stack[THREAD3_STACK];
-extern u8 gThread4Stack[THREAD4_STACK];
-extern u8 gThread5Stack[THREAD5_STACK];
+extern u8 gIdleThreadStack[THREAD1_STACK] __attribute__((section(".bss.gIdleThreadStack")));
+extern u8 gThread3Stack[THREAD3_STACK] __attribute__((section(".bss.gThread3Stack")));
+extern u8 gThread4Stack[THREAD4_STACK] __attribute__((section(".bss.gThread4Stack")));
+extern u8 gThread5Stack[THREAD5_STACK] __attribute__((section(".bss.gThread5Stack")));
 #if ENABLE_RUMBLE
-extern u8 gThread6Stack[THREAD6_STACK];
+extern u8 gThread6Stack[THREAD6_STACK] __attribute__((section(".bss.gThread6Stack")));
 #endif
 
 extern u8 gGfxSPTaskYieldBuffer[];
 
-extern struct SaveBuffer gSaveBuffer;
+extern struct SaveBuffer gSaveBuffer __attribute__((section(".bss.gSaveBuffer")));
 
 extern u8 gGfxSPTaskStack[];
 

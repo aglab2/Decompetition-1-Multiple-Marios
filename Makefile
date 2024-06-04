@@ -865,6 +865,9 @@ endif
 $(BUILD_DIR)/src/boot/%.o: src/boot/%.c
 	$(call print,Compiling Boot:,$<,$@)
 	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/boot/$*.d  -o $@ $<
+$(BUILD_DIR)/src/buffers/%.o: src/buffers/%.c
+	$(call print,Compiling Buffers:,$<,$@)
+	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/buffers/$*.d  -o $@ $<
 $(BUILD_DIR)/src/goddard/%.o: src/goddard/%.c
 	$(call print,Compiling Goddard:,$<,$@)
 	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/goddard/$*.d  -o $@ $<
@@ -876,7 +879,7 @@ $(BUILD_DIR)/src/game/texscroll.o: src/game/texscroll.c
 	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/game/texscroll.d  -o $@ $<
 $(BUILD_DIR)/src/%.o: src/%.c
 	$(call print,Compiling with sdata:,$<,$@)
-	$(V)$(CC) -c -G 128 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/$*.d  -o $@ $<
+	$(V)$(CC) -c -G 1024 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/$*.d  -o $@ $<
 
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)

@@ -397,7 +397,7 @@ extern u16 sRenderedFramebuffer;
 extern void audio_signal_game_loop_tick(void);
 extern void stop_sounds_in_continuous_banks(void);
 extern void read_controller_inputs(s32 threadID);
-extern struct SequenceQueueItem sBackgroundMusicQueue[6] __attribute__((section(".data")));
+extern struct SequenceQueueItem sBackgroundMusicQueue[6] __attribute__((section(".sbss.sBackgroundMusicQueue")));
 
 void thread2_crash_screen(UNUSED void *arg) {
     OSMesg mesg;
