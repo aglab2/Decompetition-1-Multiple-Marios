@@ -193,7 +193,7 @@ SECTIONS
       BUILD_DIR/src/boot*.o(.data*);
       BUILD_DIR/src/audio*.o(.data*);
 #ifdef S2DEX_TEXT_ENGINE
-      BUILD_DIR/src/s2d_engine*.o(data*);
+      BUILD_DIR/src/s2d_engine*.o(.data*);
 #endif
 #ifdef LIBPL
       BUILD_DIR/lib/libpl*.o(.data*);

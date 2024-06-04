@@ -81,5 +81,5 @@ void setup_dma_table_list(struct DmaHandlerList *list, void *srcAddr, void *buff
 s32 load_patchable_table(struct DmaHandlerList *list, s32 index);
 
 
-extern uintptr_t sSegmentROMTable[32];
+extern uintptr_t sSegmentROMTable[32] __attribute__((section(".bss.sSegmentROMTable")));
 #endif // MEMORY_H
