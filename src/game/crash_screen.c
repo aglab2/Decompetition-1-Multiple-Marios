@@ -4,17 +4,17 @@
 #include <string.h>
 #include "buffers/framebuffers.h"
 #include "types.h"
-#include "puppyprint.h"
+#include "game/puppyprint.h"
 #include "audio/external.h"
 #include "farcall.h"
-#include "game_init.h"
-#include "main.h"
-#include "debug.h"
-#include "rumble_init.h"
+#include "game/game_init.h"
+#include "game/main.h"
+#include "game/debug.h"
+#include "game/rumble_init.h"
 
 #include "sm64.h"
 
-#include "printf.h"
+#include "game/printf.h"
 
 enum crashPages {
     PAGE_CONTEXT,
@@ -125,10 +125,7 @@ void crash_screen_draw_glyph(s32 x, s32 y, s32 glyph) {
     }
 }
 
-static char *write_to_buf(char *buffer, const char *data, size_t size) {
-    return (char *) memcpy(buffer, data, size) + size;
-}
-
+int vsprintf( char *buffer, const char *format, __builtin_va_list args );
 void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
     char *ptr;
     u32 glyph;
@@ -137,10 +134,10 @@ void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
     char buf[0x108];
     bzero(&buf, sizeof(buf));
 
-    va_list args;
-    va_start(args, fmt);
+    __builtin_va_list args;
+    __builtin_va_start(args, fmt);
 
-    size = _Printf(write_to_buf, buf, fmt, args);
+    size = vsprintf(buf, fmt, args);
 
     if (size > 0) {
         ptr = buf;
@@ -160,7 +157,7 @@ void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
         }
     }
 
-    va_end(args);
+    __builtin_va_end(args);
 }
 
 void crash_screen_sleep(s32 ms) {
@@ -218,6 +215,7 @@ void draw_crash_context(OSThread *thread, s32 cause) {
     crash_screen_print_fpcsr(tc->fpcsr);
 
     osWritebackDCacheAll();
+#if 0
     crash_screen_print_float_reg( 30, 170,  0, &tc->fp0.f.f_even);
     crash_screen_print_float_reg(120, 170,  2, &tc->fp2.f.f_even);
     crash_screen_print_float_reg(210, 170,  4, &tc->fp4.f.f_even);
@@ -234,6 +232,7 @@ void draw_crash_context(OSThread *thread, s32 cause) {
     crash_screen_print_float_reg(120, 210, 26, &tc->fp26.f.f_even);
     crash_screen_print_float_reg(210, 210, 28, &tc->fp28.f.f_even);
     crash_screen_print_float_reg( 30, 220, 30, &tc->fp30.f.f_even);
+#endif
 }
 
 

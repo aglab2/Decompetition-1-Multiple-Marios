@@ -45,14 +45,6 @@ COMPILER ?= gcc
 $(eval $(call validate-option,COMPILER,gcc clang))
 
 
-# LIBGCCDIR - selects the libgcc configuration for checking for dividing by zero
-#   trap - GCC default behavior, uses teq instructions which some emulators don't like
-#   divbreak - this is similar to IDO behavior, and is default.
-#   nocheck - never checks for dividing by 0. Technically fastest, but also UB so not recommended
-LIBGCCDIR ?= divbreak
-$(eval $(call validate-option,LIBGCCDIR,trap divbreak nocheck))
-
-
 # SAVETYPE - selects the save type
 #   eep4k - uses EEPROM 4kbit
 #   eep16k - uses EEPROM 16kbit (There aren't any differences in syntax, but this is provided just in case)
@@ -135,7 +127,7 @@ endif
 #==============================================================================#
 
 # Default non-gcc opt flags
-DEFAULT_OPT_FLAGS = -Os -fallow-store-data-races -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division -fno-tree-loop-distribute-patterns
+DEFAULT_OPT_FLAGS = -Os -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division
 # Note: -fno-associative-math is used here to suppress warnings, ideally we would enable this as an optimization but
 # this conflicts with -ftrapping-math apparently.
 # TODO: Figure out how to allow -fassociative-math to be enabled
@@ -231,7 +223,7 @@ else ifeq ($(UNF),1)
   ULTRALIB := ultra
   DEFINES += _FINALROM=1 NDEBUG=1 OVERWRITE_OSPRINT=1
 else
-  ULTRALIB := ultra_rom
+  ULTRALIB := gultra_rom_eabi3_oddreg2
   DEFINES += _FINALROM=1 NDEBUG=1 OVERWRITE_OSPRINT=0
 endif
 
@@ -444,7 +436,7 @@ else
   $(error Unable to detect a suitable MIPS toolchain installed)
 endif
 
-LIBRARIES := nustd hvqm2 z goddard
+LIBRARIES := goddard
 
 LINK_LIBRARIES = $(foreach i,$(LIBRARIES),-l$(i))
 
@@ -496,21 +488,24 @@ endif
 
 C_DEFINES := $(foreach d,$(DEFINES),-D$(d))
 DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
+# ABI := -mabi32
+ABI := -mabi=eabi -mgp32 -mfp32 -Wdouble-promotion -fsingle-precision-constant -msingle-float -modd-spreg
 
 # C compiler options
 CFLAGS = $(OPT_FLAGS) $(TARGET_CFLAGS) $(MIPSISET) $(DEF_INC_CFLAGS) -gdwarf-4
 ifeq ($(COMPILER),gcc)
-  CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mdouble-float -mno-odd-spreg -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
+  CFLAGS += -mno-shared -march=vr4300 -mfix4300 $(ABI) -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
   CFLAGS += -Wno-missing-braces
 else ifeq ($(COMPILER),clang)
-  CFLAGS += -mfpxx -target mips -mdouble-float -mdouble-float -mno-odd-spreg -mabi=32 -mhard-float -fomit-frame-pointer -fno-stack-protector -fno-common -I include -I src/ -I $(BUILD_DIR)/include -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
+  CFLAGS += -mfpxx -target mips $(ABI) -mhard-float -fomit-frame-pointer -fno-stack-protector -fno-common -I include -I src/ -I $(BUILD_DIR)/include -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
   CFLAGS += -Wno-missing-braces
 else
   CFLAGS += -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -signed -32
 endif
-ASMFLAGS = -G 0 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mno-odd-spreg -mfix4300 -mdouble-float -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
+CFLAGS += -Wno-overflow
+ASMFLAGS = -G 3 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 $(ABI) -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
 
-ASFLAGS     := -march=vr4300 -mdouble-float -mno-odd-spreg -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
+ASFLAGS     := -march=vr4300 $(ABI) $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
 RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
 
 # C preprocessor flags
@@ -637,6 +632,7 @@ $(BUILD_DIR)/asm/ipl3.o:              $(IPL3_RAW_FILES)
 $(BUILD_DIR)/src/game/crash_screen.o: $(CRASH_TEXTURE_C_FILES)
 $(BUILD_DIR)/src/game/version.o:      $(BUILD_DIR)/src/game/version_data.h
 $(BUILD_DIR)/lib/aspMain.o:           $(BUILD_DIR)/rsp/audio.bin
+$(BUILD_DIR)/lib/rsp.o:               $(BUILD_DIR)/rsp/rspboot.bin
 $(SOUND_BIN_DIR)/sound_data.o:        $(SOUND_BIN_DIR)/sound_data.ctl $(SOUND_BIN_DIR)/sound_data.tbl $(SOUND_BIN_DIR)/sequences.bin $(SOUND_BIN_DIR)/bank_sets
 $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
 
@@ -864,19 +860,19 @@ DUMMY != $(PYTHON) $(FIXLIGHTS_PY) levels
 endif
 $(BUILD_DIR)/src/boot/%.o: src/boot/%.c
 	$(call print,Compiling Boot:,$<,$@)
-	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/boot/$*.d  -o $@ $<
+	$(V)$(CC) -gdwarf-4 -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/boot/$*.d  -o $@ $<
 $(BUILD_DIR)/src/buffers/%.o: src/buffers/%.c
 	$(call print,Compiling Buffers:,$<,$@)
-	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/buffers/$*.d  -o $@ $<
+	$(V)$(CC) -gdwarf-4 -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/buffers/$*.d  -o $@ $<
 $(BUILD_DIR)/src/goddard/%.o: src/goddard/%.c
 	$(call print,Compiling Goddard:,$<,$@)
-	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/goddard/$*.d  -o $@ $<
+	$(V)$(CC) -gdwarf-4 -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/goddard/$*.d  -o $@ $<
 $(BUILD_DIR)/src/menu/%.o: src/menu/%.c
 	$(call print,Compiling Menu:,$<,$@)
-	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/menu/$*.d  -o $@ $<
+	$(V)$(CC) -gdwarf-4 -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/menu/$*.d  -o $@ $<
 $(BUILD_DIR)/src/game/texscroll.o: src/game/texscroll.c
 	$(call print,Compiling texscroll:,$<,$@)
-	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/game/texscroll.d  -o $@ $<
+	$(V)$(CC) -gdwarf-4 -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/game/texscroll.d  -o $@ $<
 $(BUILD_DIR)/src/%.o: src/%.c
 	$(call print,Compiling with sdata:,$<,$@)
 	$(V)$(CC) -c -G 3000 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/$*.d  -o $@ $<
@@ -923,7 +919,7 @@ $(BUILD_DIR)/sm64_prelim.ld: sm64.ld $(O_FILES) $(YAY0_OBJ_FILES) $(SEG_FILES) $
 
 $(BUILD_DIR)/sm64_prelim.elf: $(BUILD_DIR)/sm64_prelim.ld
 	@$(PRINT) "$(GREEN)Linking Preliminary ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $< -Map $(BUILD_DIR)/sm64_prelim.map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB -Llib/gcclib/$(LIBGCCDIR) -lgcc
+	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $< -Map $(BUILD_DIR)/sm64_prelim.map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB
 
 $(BUILD_DIR)/goddard.txt: $(BUILD_DIR)/sm64_prelim.elf
 	$(call print,Getting Goddard size...)
@@ -937,7 +933,7 @@ $(BUILD_DIR)/asm/debug/map.o: asm/debug/map.s $(BUILD_DIR)/sm64_prelim.elf
 # Link SM64 ELF file
 $(ELF): $(BUILD_DIR)/sm64_prelim.elf $(BUILD_DIR)/asm/debug/map.o $(O_FILES) $(YAY0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(BUILD_DIR)/libz.a $(BUILD_DIR)/libgoddard.a
 	@$(PRINT) "$(GREEN)Linking ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -T goddard.txt -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB -Llib/gcclib/$(LIBGCCDIR) -lgcc
+	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -T goddard.txt -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB
 
 # Build ROM
 ifeq (n,$(findstring n,$(firstword -$(MAKEFLAGS))))

@@ -32,6 +32,8 @@
 #define LANGUAGE_FUNCTION gInGameLanguage
 #endif
 
+#include "engine/gut.h"
+
 u16 gDialogColorFadeTimer;
 s8 gLastDialogLineNum;
 s32 gDialogVariable;
@@ -171,14 +173,14 @@ void create_dl_translation_matrix(s8 pushOp, f32 x, f32 y, f32 z) {
     }
 }
 
-void create_dl_rotation_matrix(s8 pushOp, f32 a, f32 x, f32 y, f32 z) {
+static void create_dl_rotation_matrix_z(s8 pushOp, u16 a) {
     Mtx *matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
 
     if (matrix == NULL) {
         return;
     }
 
-    guRotate(matrix, a, x, y, z);
+    guRotateZ(matrix, a);
 
     if (pushOp == MENU_MTX_PUSH) {
         gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
@@ -188,6 +190,8 @@ void create_dl_rotation_matrix(s8 pushOp, f32 a, f32 x, f32 y, f32 z) {
         gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     }
 }
+
+#define create_dl_rotation_matrix(op, a, x, y, z) create_dl_rotation_matrix_z(op, (a) / 360.f * 0x10000)
 
 void create_dl_scale_matrix(s8 pushOp, f32 x, f32 y, f32 z) {
     Mtx *matrix = (Mtx *) alloc_display_list(sizeof(Mtx));

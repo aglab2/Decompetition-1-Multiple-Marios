@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "config/config_world.h"
+#include "engine/gut.h"
 
 /**
  * This file contains the code that processes the scene graph for rendering.
@@ -445,7 +446,6 @@ void geo_process_perspective(struct GraphNodePerspective *node) {
         node->fnNode.func(GEO_CONTEXT_RENDER, &node->fnNode.node, gMatStack[gMatStackIndex]);
     }
     if (node->fnNode.node.children != NULL) {
-        u16 perspNorm;
         Mtx *mtx = alloc_display_list(sizeof(*mtx));
 #ifdef WIDE
         if (gConfig.widescreen && gCurrLevelNum != 0x01){
@@ -469,7 +469,7 @@ void geo_process_perspective(struct GraphNodePerspective *node) {
 
         // With low fovs, coordinate overflow can occur more easily. This slightly reduces precision only while zoomed in.
         f32 scale = node->fov < 28.0f ? remap(MAX(node->fov, 15), 15, 28, 0.5f, 1.0f): 1.0f;
-        guPerspective(mtx, &perspNorm, node->fov, sAspectRatio, node->near / WORLD_SCALE, node->far / WORLD_SCALE, scale);
+        u16 perspNorm = guPerspectiveA(mtx, node->fov / 360.f * 0x10000, sAspectRatio, node->near / WORLD_SCALE, node->far / WORLD_SCALE, scale);
 
         gSPPerspNormalize(gDisplayListHead++, perspNorm);
 

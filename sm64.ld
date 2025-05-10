@@ -177,11 +177,7 @@ SECTIONS
       BUILD_DIR/lib/libpl*.o(.text*);
 #endif
       *ULTRALIB.a:*.o(.text*);
-      */libnustd.a:*.o(.text*);
-      *libgcc.a:*.o(.text*);
-      */libz.a:*.o(.text*);
-      */libhvqm2.a:*.o(.text*);
-      lib/rspboot.o(.text*);
+      BUILD_DIR/lib/rsp*.o(.text*);
 #include "rsptext.inc.ld"
       BUILD_DIR/lib/aspMain.o(.text*);
       lib/PR/audio/n_aspMain.o(.text*);

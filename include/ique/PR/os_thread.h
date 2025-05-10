@@ -23,8 +23,8 @@
         Copyright (C) 1998 Nintendo. (Originated by SGI)
         
         $RCSfile: os_thread.h,v $
-        $Revision: 1.4 $
-        $Date: 2004/02/06 02:16:48 $
+        $Revision: 1.3 $
+        $Date: 1999/06/15 12:39:40 $
  *---------------------------------------------------------------------*/
 
 #ifndef _OS_THREAD_H_
@@ -44,20 +44,32 @@ extern "C" {
  *
  */
 
+#define ODDREG
+#define SOFTFP
+
 typedef s32	OSPri;
 typedef s32	OSId;
 typedef union	{ struct { f32 f_odd; f32 f_even; } f; f64 d; }	__OSfp;
 
 typedef struct {
-	u64	at, v0, v1, a0, a1, a2, a3;
-	u64	t0, t1, t2, t3, t4, t5, t6, t7;
-	u64	s0, s1, s2, s3, s4, s5, s6, s7;
-	u64	t8, t9,         gp, sp, s8, ra;
-	u64	lo, hi;
-	u32	sr, pc, cause, badvaddr, rcp;
-	u32	fpcsr;
-	__OSfp	 fp0,  fp2,  fp4,  fp6,  fp8, fp10, fp12, fp14;
-	__OSfp	fp16, fp18, fp20, fp22, fp24, fp26, fp28, fp30;
+    u64 at, v0, v1, a0, a1, a2, a3;
+    u64 t0, t1, t2, t3, t4, t5, t6, t7;
+    u64 s0, s1, s2, s3, s4, s5, s6, s7;
+    u64 t8, t9;
+    u64 gp, sp, s8, ra;
+    u64 lo, hi;
+    u32 sr, pc, cause, badvaddr, rcp;
+    u32 fpcsr;
+#ifdef SOFTFP
+    f32  fpr[32];
+#else
+    __OSfp  fp0,  fp2,  fp4,  fp6,  fp8, fp10, fp12, fp14;
+    __OSfp fp16, fp18, fp20, fp22, fp24, fp26, fp28, fp30;
+#ifdef ODDREG
+    __OSfp  fp1,  fp3,  fp5,  fp7,  fp9, fp11, fp13, fp15;
+    __OSfp fp17, fp19, fp21, fp23, fp25, fp27, fp29, fp31;
+#endif
+#endif
 } __OSThreadContext;
 
 typedef struct {
@@ -67,16 +79,16 @@ typedef struct {
 } __OSThreadprofile_s;
 
 typedef struct OSThread_s {
-	struct OSThread_s	*next;		/* run/mesg queue link */
-	OSPri			priority;	/* run/mesg queue priority */
-	struct OSThread_s	**queue;	/* queue thread is on */
-	struct OSThread_s	*tlnext;	/* all threads queue link */
-	u16			state;		/* OS_STATE_* */
-	u16			flags;		/* flags for rmon */
-	OSId			id;		/* id for debugging */
-	int			fp;		/* thread has used fp unit */
-	__OSThreadprofile_s     *thprof;        /* workarea for thread profiler */
-	__OSThreadContext	context;	/* register/interrupt mask */
+    struct OSThread_s    *next;       /* run/mesg queue link */
+    OSPri                 priority;   /* run/mesg queue priority */
+    struct OSThread_s   **queue;      /* queue thread is on */
+    struct OSThread_s    *tlnext;     /* all threads queue link */
+    u16                   state;      /* OS_STATE_* */
+    u16                   flags;      /* flags for rmon */
+    OSId                  id;         /* id for debugging */
+    int                   fp;         /* thread has used fp unit */
+    __OSThreadprofile_s  *thprof;     /* workarea for thread profiler */
+    __OSThreadContext     context;    /* register/interrupt mask */
 } OSThread;
 
 
@@ -90,43 +102,23 @@ typedef struct OSThread_s {
 
 /* Thread states */
 
-#define OS_STATE_STOPPED	1
-#define OS_STATE_RUNNABLE	2
-#define OS_STATE_RUNNING	4
-#define OS_STATE_WAITING	8
+#define OS_STATE_STOPPED    (1 << 0)
+#define OS_STATE_RUNNABLE   (1 << 1)
+#define OS_STATE_RUNNING    (1 << 2)
+#define OS_STATE_WAITING    (1 << 3)
 
 /* Recommended thread priorities for the system threads */
 
-#define OS_PRIORITY_MAX		255
-#define OS_PRIORITY_VIMGR	254
-#define OS_PRIORITY_RMON	250
-#define OS_PRIORITY_RMONSPIN	200
-#define OS_PRIORITY_PIMGR	150
-#define OS_PRIORITY_SIMGR	140
-#define	OS_PRIORITY_APPMAX	127
-#define OS_PRIORITY_IDLE	  0	/* Must be 0 */
+#define OS_PRIORITY_MAX         255
+#define OS_PRIORITY_VIMGR       254
+#define OS_PRIORITY_RMON        250
+#define OS_PRIORITY_RMONSPIN    200
+#define OS_PRIORITY_PIMGR       150
+#define OS_PRIORITY_SIMGR       140
+#define OS_PRIORITY_APPMAX      127
+#define OS_PRIORITY_IDLE          0 /* Must be 0 */
 
-#ifdef BBPLAYER
-/* BB Player thread IDs */
-#define OS_TID_RMONMAIN     3201
-#define OS_TID_RMONIO       3202
-#define OS_TID_PROFILEIO    3251
-#define OS_TID_PIMGR        3301
-#define OS_TID_RAMROM       3302
-#define OS_TID_VIMGR        3401
-
-/* We also have two USB threads (see osint_usb.h) */
-#define	OS_TID_USB0		    (OS_USB_TID_BASE)   /* 3141 */
-#define	OS_TID_USB1		    (OS_USB_TID_BASE+1) /* 3142 */
-
-/* Also define constants for GDB */
-#define OS_PRIORITY_GDB   OS_PRIORITY_RMON
-#define OS_TID_GDBMAIN    OS_TID_RMONMAIN
-#define OS_TID_GDBIO      OS_TID_RMONIO
-
-#endif
-
-/* for thread profiler */
+/* For thread profiler */
 #define THPROF_IDMAX            64
 #define THPROF_STACKSIZE        256
 
@@ -154,15 +146,14 @@ typedef struct OSThread_s {
 
 /* Thread operations */
 
-extern void		osCreateThread( OSThread *t, OSId id, void (*entry)(void *),
-				       void *arg, void *sp, OSPri pri);
-extern void		osDestroyThread(OSThread *t);
-extern void		osYieldThread(void);
-extern void		osStartThread(  OSThread *t);
-extern void		osStopThread(   OSThread *t);
-extern OSId		osGetThreadId(  OSThread *t);
-extern void		osSetThreadPri( OSThread *t, OSPri pri);
-extern OSPri	osGetThreadPri( OSThread *t);
+extern void     osCreateThread(OSThread *, OSId, void (*)(void *), void *, void *, OSPri);
+extern void     osDestroyThread(OSThread *);
+extern void     osYieldThread(void);
+extern void     osStartThread(OSThread *);
+extern void     osStopThread(OSThread *);
+extern OSId     osGetThreadId(OSThread *);
+extern void     osSetThreadPri(OSThread *, OSPri);
+extern OSPri    osGetThreadPri(OSThread *);
 
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */

@@ -47,7 +47,7 @@ struct Controller gControllers[MAXCONTROLLERS];
 OSContStatus gControllerStatuses[MAXCONTROLLERS];
 OSContPadEx gControllerPads[MAXCONTROLLERS];
 u8 gControllerBits = 0b0000;
-u8 gBorderHeight;
+u8 gBorderHeight = 0;
 #ifdef VANILLA_STYLE_CUSTOM_DEBUG
 u8 gCustomDebugMode;
 #endif

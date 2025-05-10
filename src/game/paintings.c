@@ -1216,6 +1216,7 @@ void floor_painting_update(struct Painting *painting, struct Painting *paintingG
  * Use PAINTING_ID(id, group) to set the right parameter in a level's geo layout.
  */
 Gfx *geo_painting_draw(s32 callContext, struct GraphNode *node, UNUSED void *context) {
+    return;
     struct GraphNodeGenerated *gen = (struct GraphNodeGenerated *) node;
     s32 group = (gen->parameter >> 8) & 0xFF;
     s32 id = gen->parameter & 0xFF;
