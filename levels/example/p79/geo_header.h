@@ -1,0 +1,18 @@
+extern const GeoLayout p79_geo[];
+extern u8 p79_cart256_6_ci4[];
+extern u8 p79_cart256_6_pal_rgba16[];
+extern u8 p79_cart256_1_ci4[];
+extern u8 p79_cart256_1_pal_rgba16[];
+extern u8 p79_shcity128_2_ci4[];
+extern u8 p79_shcity128_2_pal_rgba16[];
+extern u8 p79_shcity32_2_ci4[];
+extern u8 p79_shcity32_2_pal_rgba16[];
+extern u8 p79_shcity128_14_ci4[];
+extern u8 p79_shcity128_14_pal_rgba16[];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_cull[8];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_0[18];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_1[15];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_2[12];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_3[12];
+extern Vtx p79_object_0055C918_mesh_layer_1_vtx_4[12];
+extern Gfx p79_object_0055C918_mesh_layer_1[];
