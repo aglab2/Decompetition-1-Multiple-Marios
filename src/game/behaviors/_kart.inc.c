@@ -329,6 +329,8 @@ static const u8 sBeginnerTrack[] = {
 };
 
 #define oPartIndex oF4
+#define oPartNext oObjF8
+#define oPartPrev oObjFC
 
 struct SpawnerState
 {
@@ -338,6 +340,8 @@ struct SpawnerState
 
 #define SCALE 0.5f
 
+extern s16 sSourceWarpNodeId;
+
 void bhv_ctl_init()
 {
     gMarioStates->faceAngle[1] = 0x8000;
@@ -345,7 +349,23 @@ void bhv_ctl_init()
     struct SpawnerState spawner = {};
     const u8* track = uExpertTrack;
     int trackSize = sizeof(uExpertTrack);
+    switch (sSourceWarpNodeId)
+    {
+        case 0x20: 
+            track = sBeginnerTrack;
+            trackSize = sizeof(sBeginnerTrack);
+            break;
+        case 0x21: 
+            track = uStandardTrack;
+            trackSize = sizeof(uStandardTrack);
+            break;
+        case 0x22: 
+            track = uExpertTrack;
+            trackSize = sizeof(uExpertTrack);
+            break;
+    }
 
+    // spawn the track
     for (int i = 0; i < trackSize; i++)
     {
         int entry = track[i];
@@ -489,4 +509,27 @@ void coop_npc_behavior(struct MarioState * m)
 s16 kart_angle(int kartId)
 {
     return sPartConfigs[kartId].turn;
+}
+
+void bhv_kart_show_loop()
+{
+    random_u16();
+    if (o->oDistanceToMario < 300.f)
+    {
+        switch (o->oBehParams2ndByte)
+        {
+            case 0x20:
+                print_text_centered(160, 20, "BEGINNER");
+                break;
+            case 0x21:
+                print_text_centered(160, 20, "ADVANCED");
+                break;
+            case 0x22:
+                print_text_centered(160, 20, "EXPERT");
+                break;
+            case 0x30:
+                print_text_centered(160, 20, "PERSONALIZED");
+                break;
+        }
+    }
 }

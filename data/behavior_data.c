@@ -879,9 +879,10 @@ const BehaviorScript bhvWarp[] = {
     END_LOOP(),
 };
 
+extern void bhv_kart_show_loop();
 const BehaviorScript bhvWarpPipe[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags, (OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    OR_INT(oFlags, (OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE | OBJ_FLAG_COMPUTE_DIST_TO_MARIO)),
     SET_INT(oInteractType, INTERACT_WARP),
     LOAD_COLLISION_DATA(warp_pipe_seg3_collision_03009AC8),
     SET_FLOAT(oDrawingDistance, 16000),
@@ -890,6 +891,7 @@ const BehaviorScript bhvWarpPipe[] = {
     CALL_NATIVE(load_object_static_model),
     BEGIN_LOOP(),
         CALL_NATIVE(bhv_warp_loop),
+        CALL_NATIVE(bhv_kart_show_loop),
     END_LOOP(),
 };
 
