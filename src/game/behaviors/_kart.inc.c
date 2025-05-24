@@ -366,6 +366,8 @@ void bhv_ctl_init()
     }
 
     // spawn the track
+    struct Object* firstPart = NULL;
+    struct Object* prevPart = NULL;
     for (int i = 0; i < trackSize; i++)
     {
         int entry = track[i];
@@ -385,6 +387,16 @@ void bhv_ctl_init()
             part->oPartIndex = entry;
             
             obj_scale(part, SCALE);
+    
+            if (i == 0)
+                firstPart = part;
+            
+            if (prevPart)
+            {
+                prevPart->oPartNext = part;
+                part->oPartPrev = prevPart;
+            }
+            prevPart = part;
         }
 
         const struct PartConfig* partConfig = &sPartConfigs[entry];
@@ -400,6 +412,9 @@ void bhv_ctl_init()
         spawner.pos[2] += shiftZRotated * SCALE;
         spawner.angle += partConfig->turn;
     }
+
+    firstPart->oPartPrev = prevPart;
+    prevPart->oPartNext = firstPart;
 
     for (int i = 0; i < 34; i++)
     {
@@ -503,7 +518,23 @@ void bhv_part_loop()
 
 void coop_npc_behavior(struct MarioState * m)
 {
+    m->input |= INPUT_NONZERO_ANALOG;
+    m->intendedMag = 60.0f;
+    if (m->floor && m->floor->object)
+    {
+        struct Object* nextPart = m->floor->object->oPartNext;
+        struct Object* nextPart2 = nextPart->oPartNext;
 
+        Vec3f nextLoc;
+        nextLoc[0] = (nextPart->oPosX + nextPart2->oPosX) / 2.f;
+        nextLoc[1] = (nextPart->oPosY + nextPart2->oPosY) / 2.f;
+        nextLoc[2] = (nextPart->oPosZ + nextPart2->oPosZ) / 2.f;
+
+        Vec3f diff;
+        vec3_diff(diff, nextLoc, m->pos);
+
+        m->intendedYaw = atan2s(diff[2], diff[0]);
+    }
 }
 
 s16 kart_angle(int kartId)
