@@ -461,6 +461,10 @@ struct MarioState {
              s16 wallYaw;
              u8 controlMode;
     // -- HackerSM64 MarioState fields end --
+    Vec3f kartSafePos;
+    s16 kartSafeAngle;
+    u8 kartId;
+    Vec3f kartHome;
 };
 
 #endif // TYPES_H

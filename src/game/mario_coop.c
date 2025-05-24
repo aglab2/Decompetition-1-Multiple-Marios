@@ -41,6 +41,7 @@ struct MarioState * coop_spawn_mario_with_id(Vec3f pos, int marioID, int control
     init_mario(&gMarioStates[marioID]);
     gMarioStates[marioID].controlMode = control_mode;
     vec3f_copy(gMarioStates[marioID].pos, pos);
+    vec3f_copy(gMarioStates[marioID].kartHome, pos);
     return &gMarioStates[marioID];
 }
 
@@ -82,56 +83,25 @@ void coop_give_control_to_next(void) {
 /*
 Deletes the Mario
 */
+extern s16 kart_angle(int kartId);
 int coop_delete_mario(struct MarioState * m) {
-    if (m->marioObj == NULL || m->isDead) {return TRUE;} // Already deleted
-
-    if (m != gMarioState) {
-        // marioObj is safely unplugged from MarioState when object is unloaded in unload_deactivated_objects_in_list() in object_list_processor.c
-        obj_mark_for_deletion(m->marioObj);
-        gCoopActiveMarios--;
-        if (IS_CONTROLLABLE(m->controlMode)) {
-            gCoopActiveControllableMarios --;
-        }
-    }
-    if (gCoopActiveMarios == 0) {
-        return FALSE; // Returns FALSE (Game Over) when every Mario is dead.
-    }
-    #ifdef COOP_MAIN_MARIO_MUST_LIVE
-    if (m==gMarioState) {
-        m->isDead = TRUE;
-        return FALSE; // Returns FALSE (Game Over) when primary Mario has died.
-    }
-    #else 
-    if (m == gMarioState) {
-        m->isDead = TRUE;
-        coop_give_control_to_next();
+    m->pos[0] = m->kartSafePos[0];
+    m->pos[1] = m->kartSafePos[1] + 300.f;
+    m->pos[2] = m->kartSafePos[2];
+    m->vel[0] = 0.f;
+    m->vel[1] = 0.f;
+    m->vel[2] = 0.f;
+    m->forwardVel = 0.f;
+    m->faceAngle[0] = 0;
+    m->faceAngle[1] = m->kartSafeAngle + 0x8000 + kart_angle(m->kartId) / 2;
+    m->faceAngle[2] = 0;
+    if (m == gMarioState)
         reset_camera(gCurrentArea->camera);
-    }
-    #endif
 
     return TRUE;
 }
 
-void coop_npc_behavior(struct MarioState * m) {
-    // Sample NPC function that makes Mario jump around like an idiot.
-
-    m->input |= INPUT_NONZERO_ANALOG; // Allows him to move
-
-    m->intendedMag = 32.0f; // Always holding
-
-    if (gGlobalTimer % 15 == 0) {
-        m->intendedYaw = random_u16(); // Random direction every half second
-    }
-    if (random_u16()%20==0) {
-        m->input |= (INPUT_A_DOWN|INPUT_A_PRESSED); // 1/20 chance every frame to press A
-    }
-    if (random_u16()%50==0) {
-        m->input |= (INPUT_B_DOWN|INPUT_B_PRESSED); // 1/50 chance every frame to press B
-    }
-    if (random_u16()%100==0) {
-        m->input |= (INPUT_Z_DOWN|INPUT_Z_PRESSED); // 1/100 chance every frame to press Z
-    }
-}
+extern void coop_npc_behavior(struct MarioState * m);
 
 // Don't call this function yourself, used for level transitions
 void coop_reset_state(void) {
@@ -164,5 +134,13 @@ void coop_mario_collision(struct MarioState * m) {
             vec3_scale_dest(diff,diff,-1.0f);
             vec3f_sum(gMarioStates[i].pos,gMarioStates[i].pos,diff);
         }
+    }
+}
+
+void coop_mario_pin()
+{
+    for (int i = 0; i < COOP_MARIO_STATES_MAX; i ++) {
+        if (&gMarioStates[i] == gMarioState || &gMarioStates[i].marioObj == NULL) {continue;}
+        vec3_copy(gMarioStates[i].pos, gMarioStates[i].kartHome);
     }
 }

@@ -15,7 +15,7 @@ enum {
     COOP_CM_CUSTOM // For custom programmed behavior, does nothing by default
 };
 
-#define COOP_DEBUG_MARIO_CONTROL_MODE COOP_CM_TAKE_TURNS // Default mode for debug Marios spawned with D-Down
+#define COOP_DEBUG_MARIO_CONTROL_MODE COOP_CM_NPC // Default mode for debug Marios spawned with D-Down
 #define COOP_MARIO_HITBOX_SIZE 80.0f // For Mario vs. Mario collision, is a sphere at the origin point
 
 #define COOP_MARIO_STATES_MAX 35 // Maximum amount of Marios allowed to be spawned at once
@@ -26,7 +26,7 @@ If the game freezes with music still playing from spawning too many Marios, try 
 
 // Comment out to disable
 #define COOP_MAIN_MARIO_MUST_LIVE // If defined, game over when your initial Mario dies
-#define COOP_DEBUG_SPAWN_MARIO_WITH_DDOWN // If defined, spawn Mario when pressing D-Pad down
+// #define COOP_DEBUG_SPAWN_MARIO_WITH_DDOWN // If defined, spawn Mario when pressing D-Pad down
 #define COOP_SNAPPY_SWAP_CAMERA // If defined, camera will swap instantly instead of gradually
 
 #define IS_CONTROLLABLE(controlMode) (controlMode == COOP_CM_TAKE_TURNS || controlMode == COOP_CM_ALL_ACTIVE)

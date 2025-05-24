@@ -1,3 +1,5 @@
+#include "game/mario_coop.h"
+
 extern const Collision p1_collision[];
 extern const Collision p2_collision[];
 extern const Collision p3_collision[];
@@ -378,7 +380,75 @@ void bhv_ctl_init()
         spawner.pos[2] += shiftZRotated * SCALE;
         spawner.angle += partConfig->turn;
     }
+
+    for (int i = 0; i < 34; i++)
+    {
+        // I want an arragemnt that looks like this:        
+        /*
+        <3     X X X
+        <9  X X X X X X
+        <14  X X X X X
+        <20 X X X X X X
+        <25  X X X X X
+        <30 X X X X X X
+             X X M X X
+        */
+        // The X's are the spawners and the M is the player
+        f32 x;
+        f32 y;
+        if (i < 3)
+        {
+            x = 6;
+            y = i*2 - 2;
+        }
+        else if (i < 9)
+        {
+            int iRelative = i - 3;
+            x = 5;
+            y = iRelative*2 - 1 - 2*2;
+        }
+        else if (i < 14)
+        {
+            int iRelative = i - 9;
+            x = 4;
+            y = iRelative*2 - 2*2;
+        }
+        else if (i < 20)
+        {
+            int iRelative = i - 14;
+            x = 3;
+            y = iRelative*2 - 1 - 2*2;
+        }
+        else if (i < 25)
+        {
+            int iRelative = i - 20;
+            x = 2;
+            y = iRelative*2 - 2*2;
+        }
+        else if (i < 31)
+        {
+            int iRelative = i - 25;
+            x = 1;
+            y = iRelative*2 - 1 - 2*2;
+        }
+        else
+        {
+            int iRelative = i - 31;
+            x = 0;
+            y = iRelative*2 - 2*2;
+            if (y >= 0) y += 2;
+        }
+
+        Vec3f pos;
+        pos[0] = o->oPosX + y * 80;
+        pos[1] = o->oPosY;
+        pos[2] = o->oPosZ - x * 250;
+        struct MarioState* racer = coop_spawn_mario(pos, COOP_CM_NPC);
+        racer->faceAngle[1] = 0x8000;
+    }
 }
+
+extern void coop_mario_pin();
 
 #define oCtlLastSafe oObjF4
 #define oCtlLastPart oF8
@@ -394,6 +464,7 @@ void bhv_ctl_loop()
         gMarioStates->pos[0] = o->oPosX;
         gMarioStates->pos[1] = o->oPosY;
         gMarioStates->pos[2] = o->oPosZ;
+        coop_mario_pin();
     }
 
     gMarioStates->health = 0x880;
@@ -408,4 +479,14 @@ void bhv_ctl_loop()
 void bhv_part_loop()
 {
     o->oDrawingDistance = 30000.0f;
+}
+
+void coop_npc_behavior(struct MarioState * m)
+{
+
+}
+
+s16 kart_angle(int kartId)
+{
+    return sPartConfigs[kartId].turn;
 }

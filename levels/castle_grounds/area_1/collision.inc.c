@@ -13,7 +13,7 @@ const Collision castle_grounds_area_1_collision[] = {
 	COL_VERTEX(-10855, -436, 1368),
 	COL_VERTEX(-10855, -436, -1347),
 	COL_VERTEX(-9961, -436, -1347),
-	COL_TRI_INIT(SURFACE_DEATH_PLANE, 4),
+	COL_TRI_INIT(SURFACE_DEFAULT, 4),
 	COL_TRI(0, 1, 2),
 	COL_TRI(0, 2, 3),
 	COL_TRI(2, 1, 4),

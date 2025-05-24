@@ -676,6 +676,14 @@ Bool32 set_mario_ceil(struct MarioState *m, struct Surface *ceil, f32 ceilHeight
 Bool32 set_mario_floor(struct MarioState *m, struct Surface *floor, f32 floorHeight) {
     if (m->floor != floor) {
         m->floor = floor;
+        if (floor->object)
+        {
+            m->kartSafePos[0] = floor->object->oPosX;
+            m->kartSafePos[1] = floor->object->oPosY;
+            m->kartSafePos[2] = floor->object->oPosZ;
+            m->kartSafeAngle = floor->object->oFaceAngleYaw;
+            m->kartId = floor->object->oBehParams2ndByte;
+        }
         if (m->floor != NULL) m->floorYaw = SURFACE_YAW(floor);
     }
     m->floorHeight = floorHeight;
