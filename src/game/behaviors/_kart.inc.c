@@ -326,6 +326,8 @@ static const u8 sBeginnerTrack[] = {
 , 10, 17, 3, 40, 7, 82, 28, 
 };
 
+#define oPartIndex oF4
+
 struct SpawnerState
 {
     Vec3f pos;
@@ -358,6 +360,7 @@ void bhv_ctl_init()
             part->oPosX = spawner.pos[0];
             part->oPosY = spawner.pos[1];
             part->oPosZ = spawner.pos[2];
+            part->oPartIndex = entry;
             
             obj_scale(part, SCALE);
         }
@@ -377,31 +380,29 @@ void bhv_ctl_init()
     }
 }
 
+#define oCtlLastSafe oObjF4
+#define oCtlLastPart oF8
 void bhv_ctl_loop()
 {
+    if (o->oTimer == 30)
+    {
+        play_sound(SOUND_PEACH_POWER_OF_THE_STARS, gMarioStates->marioObj->header.gfx.cameraToObject);
+    }
+
+    if (o->oTimer < 130)
+    {
+        gMarioStates->pos[0] = o->oPosX;
+        gMarioStates->pos[1] = o->oPosY;
+        gMarioStates->pos[2] = o->oPosZ;
+    }
+
+    gMarioStates->health = 0x880;
+
     if (gMarioStates->floor && gMarioStates->floor->object)
     {
         struct Object* part = gMarioStates->floor->object;
-        print_text_fmt_int(120, 20, "T %d", part->oBehParams2ndByte);
-        print_text_fmt_int(120, 40, "A %d", part->oFaceAngleYaw);
+        o->oCtlLastSafe = part;
     }
-
-    print_text_fmt_int(20, 180, "X %d", (int) gMarioStates->pos[0]);
-    print_text_fmt_int(20, 160, "Y %d", (int) gMarioStates->pos[1]);
-    print_text_fmt_int(20, 140, "Z %d", (int) gMarioStates->pos[2]);
-#if 0
-    if (gPlayer1Controller->buttonPressed & L_JPAD)
-    {
-        o->oBehParams2ndByte++;
-    }
-    if (gPlayer1Controller->buttonPressed & R_JPAD)
-    {
-        o->oBehParams2ndByte--;
-    }
-
-    obj_set_model(o, o->oBehParams2ndByte);
-    print_text_fmt_int(20, 20, "%d", o->oBehParams2ndByte - 0x20);
-#endif
 }
 
 void bhv_part_loop()

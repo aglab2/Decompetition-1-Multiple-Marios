@@ -2066,7 +2066,6 @@
 "sound/samples/sfx_mario_peach/0D_mario_thank_you_playing_my_game.aiff": [0,{"jp":["@sound",119],"us":["@sound",131],"eu":["@sound",131],"sh":["@sound",131]}],
 "sound/samples/sfx_mario_peach/0E_peach_dear_mario.aiff": [0,{"us":["@sound",132],"eu":["@sound",132],"sh":["@sound",132]}],
 "sound/samples/sfx_mario_peach/0F_peach_mario.aiff": [0,{"us":["@sound",133],"eu":["@sound",133],"sh":["@sound",133]}],
-"sound/samples/sfx_mario_peach/10_peach_power_of_the_stars.aiff": [0,{"us":["@sound",134],"eu":["@sound",134],"sh":["@sound",134]}],
 "sound/samples/sfx_mario_peach/11_peach_thanks_to_you.aiff": [0,{"us":["@sound",135],"eu":["@sound",135],"sh":["@sound",135]}],
 "sound/samples/sfx_mario_peach/12_peach_thank_you_mario.aiff": [0,{"us":["@sound",136],"eu":["@sound",136],"sh":["@sound",136]}],
 "sound/samples/sfx_mario_peach/13_peach_something_special.aiff": [0,{"us":["@sound",137],"eu":["@sound",137],"sh":["@sound",137]}],
