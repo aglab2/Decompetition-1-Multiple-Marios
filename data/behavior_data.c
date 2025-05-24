@@ -6130,3 +6130,25 @@ const BehaviorScript bhvDoubleCherry[] = {
         CALL_NATIVE(bhv_coop_double_cherry),
     END_LOOP(),
 };
+
+extern void bhv_ctl_init();
+extern void bhv_ctl_loop();
+const BehaviorScript bhvCtl[] = {
+    BEGIN(OBJ_LIST_SPAWNER),
+    CALL_NATIVE(bhv_ctl_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_ctl_loop),
+    END_LOOP(),
+};
+
+extern void bhv_part_init();
+extern void bhv_part_loop();
+const BehaviorScript bhvPart[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    CALL_NATIVE(bhv_part_init),
+    CALL_NATIVE(load_object_static_model),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_part_loop),
+    END_LOOP(),
+};

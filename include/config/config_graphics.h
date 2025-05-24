@@ -138,7 +138,7 @@
  * If the first command of an object´s geolayout is not GEO_CULLING_RADIUS, DEFAULT_CULLING_RADIUS
  * will be used instead.
  */
-#define DEFAULT_CULLING_RADIUS 300
+#define DEFAULT_CULLING_RADIUS 10000
 
 /**
  * Eases the textured screen transitions to make them look smoother. 
