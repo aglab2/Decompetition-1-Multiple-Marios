@@ -144,3 +144,13 @@ void coop_mario_pin()
         vec3_copy(gMarioStates[i].pos, gMarioStates[i].kartHome);
     }
 }
+
+void coop_randomize()
+{
+    for (int i = 0; i < COOP_MARIO_STATES_MAX; i ++) {
+        if (&gMarioStates[i] == gMarioState || &gMarioStates[i].marioObj == NULL) {continue;}
+        gMarioStates[i].kartRNGTime = random_u16() % 300;
+        gMarioStates[i].kartVelFuzz = random_f32_around_zero(15.0f);
+        gMarioStates[i].kartLocFuzz = random_f32_around_zero(900.0f);
+    }
+}

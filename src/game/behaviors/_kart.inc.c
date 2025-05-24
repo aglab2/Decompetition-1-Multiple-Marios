@@ -516,19 +516,36 @@ void bhv_part_loop()
     o->oDrawingDistance = 30000.0f;
 }
 
+static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
+{
+    pos[0] = part->oPosX + fuzz * coss(part->oFaceAngleYaw);
+    pos[1] = part->oPosY;
+    pos[2] = part->oPosZ + fuzz * sins(part->oFaceAngleYaw);
+}
+
 void coop_npc_behavior(struct MarioState * m)
 {
+    if (m->kartRNGTime == (gGlobalTimer % 300))
+    {
+        m->kartLocFuzz = random_f32_around_zero(900.0f);
+    }
+
     m->input |= INPUT_NONZERO_ANALOG;
-    m->intendedMag = 60.0f;
+    m->intendedMag = 25.0f + m->kartVelFuzz;
     if (m->floor && m->floor->object)
     {
         struct Object* nextPart = m->floor->object->oPartNext;
+        Vec3f loc1;
+        get_loc_fuzzed(loc1, nextPart, m->kartLocFuzz);
+
         struct Object* nextPart2 = nextPart->oPartNext;
+        Vec3f loc2;
+        get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
 
         Vec3f nextLoc;
-        nextLoc[0] = (nextPart->oPosX + nextPart2->oPosX) / 2.f;
-        nextLoc[1] = (nextPart->oPosY + nextPart2->oPosY) / 2.f;
-        nextLoc[2] = (nextPart->oPosZ + nextPart2->oPosZ) / 2.f;
+        nextLoc[0] = (loc1[0] + loc2[0]) / 2.f;
+        nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
+        nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
 
         Vec3f diff;
         vec3_diff(diff, nextLoc, m->pos);
@@ -544,7 +561,7 @@ s16 kart_angle(int kartId)
 
 void bhv_kart_show_loop()
 {
-    random_u16();
+    coop_randomize();
     if (o->oDistanceToMario < 300.f)
     {
         switch (o->oBehParams2ndByte)
