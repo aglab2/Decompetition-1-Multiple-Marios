@@ -213,9 +213,9 @@ static const struct PartConfig sPartConfigs[] = {
     /* 22 */ { { 0, 500, -2000 } },
     /* 23 */ { { 0, -500, -2000 } },
     /* 24 */ { { 0, -500, -2000 } },
-    /* 25 */ {},
-    /* 26 */ {},
-    /* 27 */ {},
+    /* 25 */ { { 0, -500, 0 } }, // raw shifts
+    /* 26 */ { { 0, 0, -2000 } },
+    /* 27 */ { { 500, 0, 0 } },
     /* 28 */ { { 0, 0, -250 } },
     /* 29 */ { { 0, 0, -250 } },
     /* 30 */ { { 0, 0, -250 } },
@@ -336,18 +336,31 @@ struct SpawnerState
 
 void bhv_ctl_init()
 {
+    gMarioStates->faceAngle[1] = 0x8000;
+
     struct SpawnerState spawner = {};
+    const u8* track = uStandardTrack;
+    int trackSize = sizeof(uStandardTrack);
 
-    for (int i = 0; i < sizeof(sBeginnerTrack); i++)
+    for (int i = 0; i < trackSize; i++)
     {
-        int entry = sBeginnerTrack[i];
-        struct Object* part = spawn_object(o, 0x20 + entry, bhvPart);
-        part->oBehParams2ndByte = entry;
+        int entry = track[i];
 
-        part->oFaceAngleYaw = spawner.angle;
-        part->oPosX = spawner.pos[0];
-        part->oPosY = spawner.pos[1];
-        part->oPosZ = spawner.pos[2];
+        Collision* partCollision;
+        if (partCollision = sCollisionHeaders[entry])
+        {
+            struct Object* part = spawn_object(o, 0x20 + entry, bhvPart);
+            part->oBehParams2ndByte = entry;
+
+            obj_set_collision_data(part, partCollision);
+
+            part->oFaceAngleYaw = spawner.angle;
+            part->oPosX = spawner.pos[0];
+            part->oPosY = spawner.pos[1];
+            part->oPosZ = spawner.pos[2];
+            
+            obj_scale(part, SCALE);
+        }
 
         const struct PartConfig* partConfig = &sPartConfigs[entry];
 
@@ -361,7 +374,6 @@ void bhv_ctl_init()
         spawner.pos[1] += partConfig->shift[1] * SCALE;
         spawner.pos[2] += shiftZRotated * SCALE;
         spawner.angle += partConfig->turn;
-        obj_scale(part, SCALE);
     }
 }
 
@@ -390,11 +402,6 @@ void bhv_ctl_loop()
     obj_set_model(o, o->oBehParams2ndByte);
     print_text_fmt_int(20, 20, "%d", o->oBehParams2ndByte - 0x20);
 #endif
-}
-
-void bhv_part_init()
-{
-    obj_set_collision_data(o, sCollisionHeaders[o->oBehParams2ndByte]);
 }
 
 void bhv_part_loop()

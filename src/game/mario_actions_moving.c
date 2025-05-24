@@ -155,6 +155,9 @@ void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
     m->slideVelX += accel * steepness * sins(slopeAngle);
     m->slideVelZ += accel * steepness * coss(slopeAngle);
 
+    m->slideVelX += 40.f * sins(m->faceAngle[1]);
+    m->slideVelZ += 40.f * coss(m->faceAngle[1]);
+
     m->slideVelX *= lossFactor;
     m->slideVelZ *= lossFactor;
 
@@ -258,11 +261,6 @@ s32 update_sliding(struct MarioState *m, f32 stopSpeed) {
 
     update_sliding_angle(m, accel, lossFactor);
 
-    if (!mario_floor_is_slope(m) && m->forwardVel * m->forwardVel < stopSpeed * stopSpeed) {
-        mario_set_forward_vel(m, 0.0f);
-        stopped = TRUE;
-    }
-
     return stopped;
 }
 
@@ -296,10 +294,17 @@ void apply_slope_accel(struct MarioState *m) {
                 break;
         }
 
-        if (floorDYaw < 0x4000) {
-            m->forwardVel += slopeAccel * steepness;
-        } else {
-            m->forwardVel -= slopeAccel * steepness;
+        if (steepness < 0.01f)
+        {
+            m->forwardVel += slopeAccel;
+        }
+        else
+        {
+            if (floorDYaw < 0x4000) {
+                m->forwardVel += slopeAccel * steepness;
+            } else {
+                m->forwardVel -= slopeAccel * steepness;
+            }
         }
     }
 

@@ -14,6 +14,11 @@
  *                      WALLS                     *
  **************************************************/
 
+struct Surface gCeilingDeathPlane = {
+    SURFACE_DEATH_PLANE, 0,    0,    0, 0, 0, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+    { 0.0f, -1.0f, 0.0f },  0.0f, NULL,
+};
+
 static s32 check_wall_vw(f32 d00, f32 d01, f32 d11, f32 d20, f32 d21, f32 invDenom) {
     f32 v = ((d11 * d20) - (d01 * d21)) * invDenom;
     if (v < 0.0f || v > 1.0f) {
@@ -436,6 +441,8 @@ static struct Surface *find_floor_from_list(struct SurfaceNode *surfaceNode, s32
     register SurfaceType type = SURFACE_DEFAULT;
     register f32 height;
     register s32 bufferY = y + FIND_FLOOR_BUFFER;
+
+    floor = &gCeilingDeathPlane;
 
     // Iterate through the list of floors until there are no more floors.
     while (surfaceNode != NULL) {

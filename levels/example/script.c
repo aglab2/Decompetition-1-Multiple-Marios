@@ -120,7 +120,7 @@ const LevelScript level_example_entry[] = {
 		TERRAIN(example_area_1_collision),
 		MACRO_OBJECTS(example_area_1_macro_objs),
 		SET_BACKGROUND_MUSIC(0x00, SEQ_LEVEL_GRASS),
-		TERRAIN_TYPE(TERRAIN_GRASS),
+		TERRAIN_TYPE(TERRAIN_SLIDE),
 		/* Fast64 begin persistent block [area commands] */
 		/* Fast64 end persistent block [area commands] */
 	END_AREA(),

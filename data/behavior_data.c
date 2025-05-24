@@ -6141,14 +6141,12 @@ const BehaviorScript bhvCtl[] = {
     END_LOOP(),
 };
 
-extern void bhv_part_init();
 extern void bhv_part_loop();
 const BehaviorScript bhvPart[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
-    CALL_NATIVE(bhv_part_init),
     CALL_NATIVE(load_object_static_model),
+    CALL_NATIVE(bhv_part_loop),
     BEGIN_LOOP(),
-        CALL_NATIVE(bhv_part_loop),
     END_LOOP(),
 };
