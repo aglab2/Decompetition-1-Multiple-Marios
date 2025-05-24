@@ -416,44 +416,44 @@ void bhv_ctl_init()
         // The X's are the spawners and the M is the player
         f32 x;
         f32 y;
-        if (i < 3)
+        if (i < 2)
         {
             x = 6;
-            y = i*2 - 2;
+            y = i*4 - 2;
         }
-        else if (i < 9)
+        else if (i < 8)
         {
-            int iRelative = i - 3;
+            int iRelative = i - 2;
             x = 5;
             y = iRelative*2 - 1 - 2*2;
         }
-        else if (i < 14)
+        else if (i < 13)
         {
-            int iRelative = i - 9;
+            int iRelative = i - 8;
             x = 4;
             y = iRelative*2 - 2*2;
         }
-        else if (i < 20)
+        else if (i < 19)
         {
-            int iRelative = i - 14;
+            int iRelative = i - 13;
             x = 3;
             y = iRelative*2 - 1 - 2*2;
         }
-        else if (i < 25)
+        else if (i < 24)
         {
-            int iRelative = i - 20;
+            int iRelative = i - 19;
             x = 2;
             y = iRelative*2 - 2*2;
         }
-        else if (i < 31)
+        else if (i < 30)
         {
-            int iRelative = i - 25;
+            int iRelative = i - 24;
             x = 1;
             y = iRelative*2 - 1 - 2*2;
         }
         else
         {
-            int iRelative = i - 31;
+            int iRelative = i - 30;
             x = 0;
             y = iRelative*2 - 2*2;
             if (y >= 0) y += 2;
