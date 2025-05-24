@@ -21,22 +21,22 @@
 const LevelScript level_example_entry[] = {
 	INIT_LEVEL(),
 	LOAD_MIO0(0x7, _example_segment_7SegmentRomStart, _example_segment_7SegmentRomEnd), 
+	LOAD_YAY0(0x7, _example_segment_7SegmentRomStart, _example_segment_7SegmentRomEnd), 
 	ALLOC_LEVEL_POOL(),
 	MARIO(MODEL_MARIO, 0x00000001, bhvMario), 
 	/* Fast64 begin persistent block [level commands] */
 	/* Fast64 end persistent block [level commands] */
 
 	AREA(1, example_area_1),
-		MARIO_POS(0x01, 0, 3355, -592, -837),
 		TERRAIN(example_area_1_collision),
 		MACRO_OBJECTS(example_area_1_macro_objs),
-		STOP_MUSIC(0),
+		SET_BACKGROUND_MUSIC(0x00, SEQ_LEVEL_GRASS),
 		TERRAIN_TYPE(TERRAIN_GRASS),
 		/* Fast64 begin persistent block [area commands] */
 		/* Fast64 end persistent block [area commands] */
 	END_AREA(),
 	FREE_LEVEL_POOL(),
-	MARIO_POS(0x01, 0, 3355, -592, -837),
+	MARIO_POS(1, 0, 0, 0, 0),
 	CALL(0, lvl_init_or_update),
 	CALL_LOOP(1, lvl_init_or_update),
 	CLEAR_LEVEL(),

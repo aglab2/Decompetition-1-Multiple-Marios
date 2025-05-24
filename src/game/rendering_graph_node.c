@@ -1285,3 +1285,24 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
         main_pool_free(gDisplayListHeap);
     }
 }
+
+extern Gfx ma_bg_object_00AF785C_mesh[];
+extern void geo_append_display_list(void *displayList, s32 layer);
+extern s16 gMatStackIndex;
+extern Mat4 gMatStack[32];
+extern Mtx *gMatStackFixed[32];
+Gfx *geo_render_backdrop(s32 callContext, struct GraphNode *node, UNUSED f32 b[4][4]) {
+    Mat4 mat;
+    if (callContext == GEO_CONTEXT_RENDER) {
+        Mtx *mtx = alloc_display_list(sizeof(*mtx));
+        mtxf_translate(mat, gCurGraphNodeCamera->pos);
+        mtxf_mul(gMatStack[gMatStackIndex + 1], mat, gMatStack[gMatStackIndex]);
+        gMatStackIndex++;
+        mtxf_to_mtx(mtx, gMatStack[gMatStackIndex]);
+        gMatStackFixed[gMatStackIndex] = mtx;
+        geo_append_display_list(ma_bg_object_00AF785C_mesh, 0); // DL pointer
+        
+        gMatStackIndex--;
+    }
+    return 0;
+}
