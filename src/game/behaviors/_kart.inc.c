@@ -567,6 +567,21 @@ static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
     pos[2] = part->oPosZ + fuzz * sins(part->oFaceAngleYaw);
 }
 
+#ifdef DEBUG_LOC_TEST_PARTICLES
+static void spawn_test_particle(struct Object* part, f32 x, f32 y, f32 z)
+{
+    struct Object* p = spawn_object(part, MODEL_STAR, bhvTest);
+    p->oPosX = x;
+    p->oPosY = y + 10.f;
+    p->oPosZ = z;
+}
+#else
+static void spawn_test_particle(struct Object* part, f32 x, f32 y, f32 z)
+{
+    // -- 
+}
+#endif
+
 void coop_npc_behavior(struct MarioState * m)
 {
     if (m->kartRNGTime == (gGlobalTimer % 300))
@@ -583,7 +598,7 @@ void coop_npc_behavior(struct MarioState * m)
         // print_text_fmt_int(200, 160, "P %d", currPart->oPartIndex);
         if (currPartConfig->turn)
         {
-            f32 x = currPartConfig->shift[0];
+            f32 x = currPartConfig->shift[0] > 0 ? (5000.f * SCALE) : (-5000.f * SCALE);
             f32 z = 0;
 
             f32 xRot = x * coss(currPart->oFaceAngleYaw) 
@@ -600,21 +615,20 @@ void coop_npc_behavior(struct MarioState * m)
 
             Vec3f diff;
             vec3_diff(diff, m->pos, center);
-#ifdef DEBUG_LOC_TEST_PARTICLES
-            struct Object* p1 = spawn_object(o, MODEL_MARIO, bhvTest);
-            p1->oPosX = center[0];
-            p1->oPosY = center[1] + 10.f;
-            p1->oPosZ = center[2];
-#endif
+            spawn_test_particle(currPart, center[0], center[1], center[2]);
 
-            s32 length = (diff[0] * diff[0]) + (diff[2] * diff[2]);
-            s32 lengthStrengthener = CLAMP(length - 2000, 0, 3000) * 4;
+            s32 length = sqrtf((diff[0] * diff[0]) + (diff[2] * diff[2]));
+            s32 lengthStrengthener = CLAMP(length - 2000, 0, 3000) * 3;
+            // print_text_fmt_int(20, 140, "LL %d", length);
             // print_text_fmt_int(20, 120, "LS %d", lengthStrengthener);
 
+            spawn_test_particle(currPart, m->pos[0] + sins(atan2s(diff[2], diff[0])) * 300.f, 0.f, m->pos[2] + coss(atan2s(diff[2], diff[0])) * 300.f);
+
             int turnSign = currPartConfig->turn > 0 ? 1 : -1;
-            m->intendedYaw = atan2s(diff[2], diff[0]) + currPartConfig->turn + lengthStrengthener * turnSign;
+            m->intendedYaw = atan2s(diff[2], diff[0]) + (0x8000) * turnSign;
 
             // print_text_fmt_int(20, 20, "TT %d", m->intendedYaw);
+            // print_text_fmt_int(20, 40, "Y %d", m->slideYaw);
         }
         else if ((currPartConfig->twistLeft || currPartConfig->twistRight || currPartConfig->twistRightChanging || currPartConfig->twistLeftChanging))
         {
@@ -671,22 +685,9 @@ void coop_npc_behavior(struct MarioState * m)
                 nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
                 nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
 
-#ifdef DEBUG_LOC_TEST_PARTICLES
-                struct Object* p1 = spawn_object(o, MODEL_MARIO, bhvTest);
-                p1->oPosX = loc1[0];
-                p1->oPosY = loc1[1] + 10.f;
-                p1->oPosZ = loc1[2];
-
-                struct Object* p2 = spawn_object(o, MODEL_MARIO, bhvTest);
-                p2->oPosX = loc2[0];
-                p2->oPosY = loc2[1] + 10.f;
-                p2->oPosZ = loc2[2];
-                
-                struct Object* p3 = spawn_object(o, MODEL_MARIO, bhvTest);
-                p3->oPosX = nextLoc[0];
-                p3->oPosY = nextLoc[1] + 10.f;
-                p3->oPosZ = nextLoc[2];
-#endif
+                spawn_test_particle(currPart, loc1[0], loc1[1], loc1[2]);
+                spawn_test_particle(currPart, loc2[0], loc2[1], loc2[2]);
+                spawn_test_particle(currPart, nextLoc[0], nextLoc[1], nextLoc[2]);
             }
 
             s16 forceAngle = 0;
@@ -706,6 +707,8 @@ void coop_npc_behavior(struct MarioState * m)
             // print_text_fmt_int(20, 160, "1 %d", (int) m->pos[1]);
             // print_text_fmt_int(20, 180, "2 %d", (int) m->pos[2]);
         }
+        
+        spawn_test_particle(m->marioObj, m->pos[0] + sins(m->intendedYaw) * 300.f, m->pos[1], m->pos[2] + coss(m->intendedYaw) * 300.f);
     }
 }
 
