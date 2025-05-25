@@ -184,6 +184,7 @@ struct PartConfig
     u8 twistRightChanging;
     u8 twistLeft;
     u8 twistLeftChanging;
+    s16 forceAngle;
 };
 
 #define TURN_LEFT 0x4000
@@ -201,7 +202,7 @@ static const struct PartConfig sPartConfigs[] = {
     /* 8 */ { { 0, 0, -20000 } },
     /* 9 */ { { 0, 0, -16500 } },
     /* 10 */ { { 0, 0, -1000 } },
-    /* 11 */ { { 0, 0, -20000 } },
+    /* 11 */ { { 0, 0, -20000 }, }, // scary?
     /* 12 */ { { 0, -500, -2000 } },
     /* 13 */ { { 0, 500, -2000 } },
     /* 14 */ { { 0, -1000, -2000 } },
@@ -236,8 +237,8 @@ static const struct PartConfig sPartConfigs[] = {
     /* 43 */ { {  1172, -500, -2828 }, .turn = TURN_RIGHT / 2, },
     /* 44 */ { { -2000, 0, -2000 }, .turn = TURN_LEFT, },
     /* 45 */ { {  2000, 0, -2000 }, .turn = TURN_RIGHT, },
-    /* 46 */ { { -2000, 0, -2000 }, .turn = TURN_LEFT, },
-    /* 47 */ { {  2000, 0, -2000 }, .turn = TURN_RIGHT, },
+    /* 46 */ { { -2000, 0, -2000 }, .turn = TURN_LEFT, .forceAngle = TURN_LEFT, },
+    /* 47 */ { {  2000, 0, -2000 }, .turn = TURN_RIGHT, .forceAngle = TURN_RIGHT, },
     /* 48 */ { { -3000, 0, -3000 }, .turn = TURN_LEFT, },
     /* 49 */ { {  3000, 0, -3000 }, .turn = TURN_RIGHT, },
     /* 50 */ { { 0, 0, -3000 }, .tunnelChanging = 1, },
@@ -308,7 +309,11 @@ static const u8 uRoute280Track[] = {
 };
 
 static const u8 uExpertTrack[] = {
-   1, 3, 3, 17, 3, 38, 3, 17, 34, 18, 3, 3, 3, 46, 35, 18, 3, 28, 26, 29, 18, 3, 36, 34, 3, 3, 3, 38, 39
+   1, 
+   
+   // 35, 72, 73, 79, 79, 79, 74, 35, 9, 80,
+
+   3, 3, 17, 3, 38, 3, 17, 34, 18, 3, 3, 3, 46, 35, 18, 3, 28, 26, 29, 18, 3, 36, 34, 3, 3, 3, 38, 39
 , 3, 9, 80, 18, 3, 35, 17, 3, 3, 15, 17, 49, 50, 52, 52, 63, 65, 54, 53, 52, 52, 53, 53, 52, 55, 57, 57
 , 59, 66, 68, 56, 52, 54, 52, 60, 62, 54, 51, 18, 50, 63, 65, 51, 35, 3, 42, 17, 11, 18, 35, 72, 73, 79
 , 79, 79, 74, 35, 9, 80, 3, 48, 3, 48, 3, 9, 80, 39, 3, 17, 37, 3, 28, 25, 25, 26, 29, 10, 3, 49, 3, 17
@@ -420,7 +425,7 @@ void bhv_ctl_init()
     {
         // I want an arragemnt that looks like this:        
         /*
-        <3     X X X
+        <3     X   X
         <9  X X X X X X
         <14  X X X X X
         <20 X X X X X X
@@ -509,6 +514,8 @@ void bhv_ctl_loop()
         struct Object* part = gMarioStates->floor->object;
         o->oCtlLastSafe = part;
     }
+    // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
+    // print_text_fmt_int(120, 40, "%d", (int) (1000 * gMarioStates->floor->normal.y));
 }
 
 void bhv_part_loop()
@@ -518,6 +525,16 @@ void bhv_part_loop()
 
 static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
 {
+    struct PartConfig* partConfig = &sPartConfigs[part->oPartIndex];
+    if (partConfig->thin)
+    {
+        fuzz *= 0.5f;
+    }
+    if (partConfig->twistLeft || partConfig->twistRight)
+    {
+        fuzz *= 0.05f;
+    }
+
     pos[0] = part->oPosX + fuzz * coss(part->oFaceAngleYaw);
     pos[1] = part->oPosY;
     pos[2] = part->oPosZ + fuzz * sins(part->oFaceAngleYaw);
@@ -534,23 +551,112 @@ void coop_npc_behavior(struct MarioState * m)
     m->intendedMag = 25.0f + m->kartVelFuzz;
     if (m->floor && m->floor->object)
     {
-        struct Object* nextPart = m->floor->object->oPartNext;
-        Vec3f loc1;
-        get_loc_fuzzed(loc1, nextPart, m->kartLocFuzz);
+        struct Object* currPart = m->floor->object;
+        struct PartConfig* currPartConfig = &sPartConfigs[currPart->oPartIndex];
+        // print_text_fmt_int(200, 160, "P %d", currPart->oPartIndex);
+        if (currPartConfig->turn)
+        {
+            f32 x = currPartConfig->shift[0];
+            f32 z = 0;
 
-        struct Object* nextPart2 = nextPart->oPartNext;
-        Vec3f loc2;
-        get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
+            f32 xRot = x * coss(currPart->oFaceAngleYaw) 
+                     + z * sins(currPart->oFaceAngleYaw);
+            f32 zRot = -x * sins(currPart->oFaceAngleYaw)
+                      + z * coss(currPart->oFaceAngleYaw);
 
-        Vec3f nextLoc;
-        nextLoc[0] = (loc1[0] + loc2[0]) / 2.f;
-        nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
-        nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
+            Vec3f xyzRot;
+            xyzRot[0] = xRot;
+            xyzRot[1] = 0;
+            xyzRot[2] = zRot;
+            Vec3f center;
+            vec3_sum(center, &currPart->oPosVec, xyzRot);
 
-        Vec3f diff;
-        vec3_diff(diff, nextLoc, m->pos);
+            Vec3f diff;
+            vec3_diff(diff, m->pos, center);
 
-        m->intendedYaw = atan2s(diff[2], diff[0]);
+            s32 length = (diff[0] * diff[0]) + (diff[2] * diff[2]);
+            s32 lengthStrengthener = CLAMP(length - 2000, 0, 3000) * 2;
+            // print_text_fmt_int(20, 120, "LS %d", lengthStrengthener);            
+
+            int turnSign = currPartConfig->turn > 0 ? 1 : -1;
+            m->intendedYaw = atan2s(diff[2], diff[0]) + currPartConfig->turn + lengthStrengthener * turnSign;
+
+            // print_text_fmt_int(20, 20, "TT %d", m->intendedYaw);
+        }
+        else if ((currPartConfig->twistLeft || currPartConfig->twistRight || currPartConfig->twistRightChanging || currPartConfig->twistLeftChanging))
+        {
+            m->intendedYaw = currPart->oFaceAngleYaw + 0x8000;
+            // print_text_fmt_int(20, 120, "TA %x", (u16) m->intendedYaw);
+
+            s16 angleDiff16 = m->intendedYaw - m->slideYaw;
+            s32 angleDiff = angleDiff16;
+            if (currPartConfig->twistRight)
+            {
+                if (angleDiff < 0)
+                    angleDiff = 0;
+            }
+            if (currPartConfig->twistLeft)
+            {
+                if (angleDiff > 0)
+                    angleDiff = 0;
+            }
+            // print_text_fmt_int(20, 140, "DA %d", angleDiff); 
+            // print_text_fmt_int(20, 160, "SY %x", (u16) m->slideYaw);
+
+            angleDiff *= 10;
+            angleDiff = CLAMP(angleDiff, -0x4000, 0x4000);
+            m->intendedYaw += angleDiff;
+            
+            // print_text_fmt_int(20, 20, "TF %x", (u16) m->intendedYaw);
+        }
+        else
+        {
+            struct Object* nextPart1 = currPart->oPartNext;
+            Vec3f loc1;
+            get_loc_fuzzed(loc1, nextPart1, m->kartLocFuzz);
+
+            struct Object* nextPart2 = nextPart1->oPartNext;
+            Vec3f loc2;
+            get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
+
+            Vec3f nextLoc;
+            if (currPartConfig->twistLeft || currPartConfig->twistRight)
+            {
+                nextLoc[0] = loc1[0] + 1000.f * coss(currPart->oFaceAngleYaw);
+                nextLoc[1] = loc1[1];
+                nextLoc[2] = loc1[2] + 1000.f * sins(currPart->oFaceAngleYaw);
+
+                // print_text_fmt_int(20, 40, "A %d", 0);
+
+                // print_text_fmt_int(120, 140, "N0 %d", (int) nextLoc[0]);
+                // print_text_fmt_int(120, 160, "N1 %d", (int) nextLoc[1]);
+                // print_text_fmt_int(120, 180, "N2 %d", (int) nextLoc[2]);
+            }
+            else
+            {
+                nextLoc[0] = (loc1[0] + loc2[0]) / 2.f;
+                nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
+                nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
+
+                // print_text_fmt_int(20, 40, "A %d", 1);
+            }
+
+            s16 forceAngle = 0;
+            forceAngle = forceAngle ?: sPartConfigs[currPart ->oPartIndex].forceAngle;
+            forceAngle = forceAngle ?: sPartConfigs[nextPart1->oPartIndex].forceAngle;
+
+            Vec3f diff;
+            vec3_diff(diff, nextLoc, m->pos);
+            m->intendedYaw = forceAngle ? forceAngle + currPart->oFaceAngleYaw + 0x8000 : atan2s(diff[2], diff[0]);
+            
+            // print_text_fmt_int(20, 20, "R %d", m->intendedYaw);
+
+            // print_text_fmt_int(20, 100, "X %d", (int) m->slideVelX);
+            // print_text_fmt_int(20, 120, "Z %d", (int) m->slideVelZ);
+            // print_text_fmt_int(20, 140, "0 %d", (int) m->pos[0]);
+            // print_text_fmt_int(20, 160, "1 %d", (int) m->pos[1]);
+            // print_text_fmt_int(20, 180, "2 %d", (int) m->pos[2]);
+        }
     }
 }
 
