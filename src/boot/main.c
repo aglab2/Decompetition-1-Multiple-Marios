@@ -342,7 +342,7 @@ void check_stack_validity(void) {
 }
 #endif
 
-
+extern void rng_init();
 extern void crash_screen_init(void);
 extern OSViMode VI;
 void thread3_main(UNUSED void *arg) {
@@ -393,6 +393,8 @@ void thread3_main(UNUSED void *arg) {
     gThread6Stack[THREAD6_STACK - 1] = 0;
 #endif
 #endif
+
+    rng_init();
 
     create_thread(&gSoundThread, THREAD_4_SOUND, thread4_sound, NULL, gThread4Stack + THREAD4_STACK, 20);
     osStartThread(&gSoundThread);
