@@ -273,6 +273,17 @@ s32 stationary_ground_step(struct MarioState *m) {
     return stepResult;
 }
 
+extern s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf);
+static f32 find_floor_cache(f32 x, f32 y, f32 z, struct Surface* cache, struct Surface **floor)
+{
+    if (check_within_floor_triangle_bounds(x, z, cache)) {
+        *floor = cache;
+        return get_surface_height_at_location(x, z, cache);
+    }
+
+    return find_floor(x, y, z, floor);
+}
+
 static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     struct WallCollisionData lowerWall, upperWall;
     struct Surface *ceil, *floor;
@@ -284,7 +295,7 @@ static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     resolve_and_return_wall_collisions(nextPos, 30.0f, 24.0f, &lowerWall);
     resolve_and_return_wall_collisions(nextPos, 60.0f, 50.0f, &upperWall);
 
-    f32 floorHeight = find_floor(nextPos[0], nextPos[1], nextPos[2], &floor);
+    f32 floorHeight = find_floor_cache(nextPos[0], nextPos[1], nextPos[2], m->floor, &floor);
     f32 ceilHeight = find_mario_ceil(nextPos, floorHeight, &ceil);
 
     f32 waterLevel = find_water_level(nextPos[0], nextPos[2]);

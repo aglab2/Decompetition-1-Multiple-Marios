@@ -416,7 +416,7 @@ f32 find_ceil(f32 posX, f32 posY, f32 posZ, struct Surface **pceil) {
  *                     FLOORS                     *
  **************************************************/
 
-static s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf) {
+s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf) {
     Vec3i vx, vz;
     vx[0] = surf->vertex1[0];
     vz[0] = surf->vertex1[2];
