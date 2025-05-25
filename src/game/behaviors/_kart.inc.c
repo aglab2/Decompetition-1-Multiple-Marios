@@ -4,6 +4,8 @@
 // #define DEBUG_DISABLE_FUZZ
 // #define DEBUG_LOC_TEST_PARTICLES
 
+void print_defer(s16 x, s16, const char* line, u8 ttl, u8 centered);
+
 extern const Collision p1_collision[];
 extern const Collision p2_collision[];
 extern const Collision p3_collision[];
@@ -337,17 +339,6 @@ static const u8 sBeginnerTrack[] = {
 , 10, 17, 3, 40, 7, 82, 28, 
 };
 
-struct DeferredText
-{
-    u8 ttl;
-    u8 centered;
-    u16 x;
-    u16 y;
-    const char* line;
-};
-
-static struct DeferredText sDeferredTexts[10] = {};
-
 #define oPartIndex oF4
 #define oPartNext oObjF8
 #define oPartPrev oObjFC
@@ -505,6 +496,9 @@ void bhv_ctl_init()
 
 extern void coop_mario_pin();
 
+char timerLine[20];
+char placeLine[30];
+
 #define oCtlLastSafe oObjF4
 #define oCtlLastPart oF8
 void bhv_ctl_loop()
@@ -521,6 +515,16 @@ void bhv_ctl_loop()
         gMarioStates->pos[2] = o->oPosZ;
         coop_mario_pin();
     }
+    else
+    {
+        int time = o->oTimer - 130;
+        sprintf(timerLine, "%d:%02d.%02d", time / 60 / 30, time / 30, (int) (3.33333f * (time % 30)));
+        print_defer(20, 220, timerLine, 255, 0);
+    }
+
+    int placement = 24;
+    sprintf(placeLine, "Place %d out of 35", placement);
+    print_defer(20, 200, placeLine, 255, 0);
 
     gMarioStates->health = 0x880;
 
@@ -529,6 +533,7 @@ void bhv_ctl_loop()
         struct Object* part = gMarioStates->floor->object;
         o->oCtlLastSafe = part;
     }
+
     // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
     // print_text_fmt_int(120, 40, "%d", (int) (1000 * gMarioStates->floor->normal.y));
 
@@ -709,7 +714,6 @@ s16 kart_angle(int kartId)
     return sPartConfigs[kartId].turn;
 }
 
-static void print_defer(s16 x, s16, const char* line, u8 ttl, u8 centered);
 void bhv_kart_show_loop()
 {
     coop_randomize();
@@ -739,91 +743,4 @@ void bhv_test_loop()
     {
         o->activeFlags = 0;
     }
-}
-
-static void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered)
-{
-    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
-    {
-        struct DeferredText* deferredText = &sDeferredTexts[i];
-        if (deferredText->ttl != 0 || deferredText->line == line)
-        {
-            deferredText->ttl = ttl;
-            deferredText->x = x;
-            deferredText->y = y;
-            deferredText->line = line;
-            deferredText->centered = centered;
-            return;
-        }
-    }
-
-    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
-    {
-        struct DeferredText* deferredText = &sDeferredTexts[i];
-        if (deferredText->ttl == 0)
-        {
-            deferredText->ttl = ttl;
-            deferredText->x = x;
-            deferredText->y = y;
-            deferredText->line = line;
-            deferredText->centered = centered;
-            return;
-        }
-    }
-}
-
-static void conv(u8* dst, const char* src)
-{
-    while (*src)
-    {
-        char c = *src++;
-        if ('0' <= c && c <= '9')
-        {
-            *dst++ = c - '0';
-        }
-        else if ('A' <= c && c <= 'Z')
-        {
-            *dst++ = c - 'A' + 10;
-        }
-        else if ('a' <= c && c <= 'z')
-        {
-            *dst++ = c - 'a' + 10 + 26;
-        }
-        else if (c == ' ')
-        {
-            *dst++ = DIALOG_CHAR_SPACE;
-        }
-        else if (c == '.')
-        {
-            *dst++ = DIALOG_CHAR_PERIOD;
-        }
-        else if (c == ',')
-        {
-            *dst++ = DIALOG_CHAR_COMMA;
-        }
-    }
-    *dst = 0xff;
-}
-
-void render_kartboxes()
-{
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
-    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
-    {
-        struct DeferredText* deferredText = &sDeferredTexts[i];
-        if (deferredText->ttl > 0)
-        {
-            u8 line[30];
-            conv(line, deferredText->line);
-            s16 x = deferredText->centered ? get_str_x_pos_from_center(deferredText->x, line, 0.f) : deferredText->x;
-
-            gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, deferredText->ttl);
-            print_generic_string(x-2, deferredText->y-2, line);
-            gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, deferredText->ttl);
-            print_generic_string(x, deferredText->y, line);
-
-            deferredText->ttl = CLAMP((int) deferredText->ttl - 20, 0, 255);
-        }
-    }
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
 }

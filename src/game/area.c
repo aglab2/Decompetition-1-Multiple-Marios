@@ -391,7 +391,108 @@ void play_transition_after_delay(s16 transType, s16 time, u8 red, u8 green, u8 b
     play_transition(transType, time, red, green, blue);
 }
 
-extern void render_kartboxes(void);
+struct DeferredText
+{
+    u8 ttl;
+    u8 centered;
+    u16 x;
+    u16 y;
+    const char* line;
+};
+
+static struct DeferredText sDeferredTexts[10] = {};
+
+void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered)
+{
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl != 0 && deferredText->line == line)
+        {
+            deferredText->ttl = ttl;
+            deferredText->x = x;
+            deferredText->y = y;
+            deferredText->line = line;
+            deferredText->centered = centered;
+            return;
+        }
+    }
+
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl == 0)
+        {
+            deferredText->ttl = ttl;
+            deferredText->x = x;
+            deferredText->y = y;
+            deferredText->line = line;
+            deferredText->centered = centered;
+            return;
+        }
+    }
+}
+
+static void conv(u8* dst, const char* src)
+{
+    while (*src)
+    {
+        char c = *src++;
+        if ('0' <= c && c <= '9')
+        {
+            *dst++ = c - '0';
+        }
+        else if ('A' <= c && c <= 'Z')
+        {
+            *dst++ = c - 'A' + 10;
+        }
+        else if ('a' <= c && c <= 'z')
+        {
+            *dst++ = c - 'a' + 10 + 26;
+        }
+        else if (c == ' ')
+        {
+            *dst++ = DIALOG_CHAR_SPACE;
+        }
+        else if (c == '.')
+        {
+            *dst++ = 59+4;
+        }
+        else if (c == ',')
+        {
+            *dst++ = DIALOG_CHAR_COMMA;
+        }
+        else if (c == ':')
+        {
+            *dst++ = 59+4;
+        }
+    }
+    *dst = 0xff;
+}
+
+void render_kartboxes()
+{
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl > 0)
+        {
+            u8 line[30];
+            conv(line, deferredText->line);
+            s16 x = deferredText->centered ? get_str_x_pos_from_center(deferredText->x, line, 0.f) : deferredText->x;
+
+            gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, deferredText->ttl);
+            print_generic_string(x-2, deferredText->y-2, line);
+            gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, deferredText->ttl);
+            print_generic_string(x, deferredText->y, line);
+
+            deferredText->ttl = CLAMP((int) deferredText->ttl - 20, 0, 255);
+        }
+    }
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
+}
+
 void render_game(void) {
     if (((gMarioState->action & ACT_GROUP_MASK) != ACT_GROUP_CUTSCENE) && (gPlayer1Controller->buttonPressed & L_TRIG)) {
         coop_give_control_to_next();

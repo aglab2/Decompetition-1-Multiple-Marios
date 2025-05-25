@@ -1545,10 +1545,6 @@ ALIGNED8 static const Texture texture_font_char_eu_double_quote_close[] = {
 #include "textures/segment2/font_graphics.06400.ia1.inc.c"
 };
 
-ALIGNED8 static const Texture texture_font_char_eu_colon[] = {
-#include "textures/segment2/font_graphics.06410.ia1.inc.c"
-};
-
 ALIGNED8 static const Texture texture_font_char_EU_slash[] = {
 #include "textures/segment2/font_graphics.06420.ia1.inc.c"
 };
@@ -2031,6 +2027,10 @@ const Texture *const main_hud_lut[] = {
     texture_hud_char_apostrophe, texture_hud_char_double_quote, texture_hud_char_umlaut,
 };
 
+ALIGNED8 static const Texture texture_font_char_eu_colon[] = {
+#include "textures/segment2/font_graphics.06410.ia1.inc.c"
+};
+
 // Main small font print table 0x02008338-0x02008737
 const Texture *const main_font_lut[] = {
 #ifdef VERSION_EU // EU Font Table
@@ -2117,7 +2117,7 @@ const Texture *const main_font_lut[] = {
     texture_font_char_us_q, texture_font_char_us_r, texture_font_char_us_s, texture_font_char_us_t,
     texture_font_char_us_u, texture_font_char_us_v, texture_font_char_us_w, texture_font_char_us_x,
     texture_font_char_us_y, texture_font_char_us_z, texture_font_char_us_apostrophe, texture_font_char_us_period,
-                  0x0,               0x0,               0x0,               0x0,
+    texture_font_char_eu_colon,               0x0,               0x0,               0x0,
                   0x0,               0x0,               0x0,               0x0,
                   0x0,               0x0,               0x0,               0x0,
                   0x0,               0x0,               0x0,               0x0,
