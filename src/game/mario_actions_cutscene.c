@@ -37,6 +37,9 @@ static s16 sEndPeachAnimation;
 static s16 sEndToadAnims[2];
 ModelID32 gStarModelLastCollected = MODEL_STAR;
 
+extern void play_sound_m(s32 soundBits, f32 *pos);
+#define play_sound(bits, pos) do{ if (m == gMarioStates) play_sound_m(bits, pos); }while(0)
+
 Vp sEndCutsceneVp = {
     {
         { (SCREEN_WIDTH  * 2), (SCREEN_HEIGHT * 2), 511, 0 },

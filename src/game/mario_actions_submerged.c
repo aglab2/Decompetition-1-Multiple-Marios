@@ -22,6 +22,9 @@
 #define MIN_SWIM_STRENGTH 160
 #define MIN_SWIM_SPEED 16.0f
 
+extern void play_sound_m(s32 soundBits, f32 *pos);
+#define play_sound(bits, pos) do{ if (m == gMarioStates) play_sound_m(bits, pos); }while(0)
+
 static s16 sWasAtSurface = FALSE;
 static s16 sSwimStrength = MIN_SWIM_STRENGTH;
 static s16 sWaterCurrentSpeeds[] = { 28, 12, 8, 4 };

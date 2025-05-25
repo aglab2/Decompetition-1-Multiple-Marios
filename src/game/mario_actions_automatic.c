@@ -21,6 +21,10 @@
 
 #define HANG_DISTANCE 144.0f
 
+extern void play_sound_m(s32 soundBits, f32 *pos);
+extern struct MarioState gMarioStates[];
+#define play_sound(bits, pos) do{ if (m == gMarioStates) play_sound_m(bits, pos); }while(0)
+
 void add_tree_leaf_particles(struct MarioState *m) {
     if (m->usedObj->behavior == segmented_to_virtual(bhvTree)) {
         // make leaf effect spawn higher on the Shifting Sand Land palm tree

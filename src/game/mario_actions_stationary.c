@@ -17,6 +17,9 @@
 #include "surface_terrains.h"
 #include "rumble_init.h"
 
+extern void play_sound_m(s32 soundBits, f32 *pos);
+#define play_sound(bits, pos) do{ if (m == gMarioStates) play_sound_m(bits, pos); }while(0)
+
 s32 check_common_idle_cancels(struct MarioState *m) {
     mario_drop_held_object(m);
     if (m->floor->normal.y < COS73) {

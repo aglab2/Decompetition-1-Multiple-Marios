@@ -1386,8 +1386,68 @@ s32 lvl_init_from_save_file(UNUSED s16 initOrUpdate, s32 levelNum) {
 
     return levelNum;
 }
+#define VI_CTRL_ANTIALIAS_MODE_0    0x00000 /* Bit [9:8] anti-alias mode: AA enabled, resampling enabled, always fetch extra lines */
+#define VI_CTRL_ANTIALIAS_MODE_1    0x00100 /* Bit [9:8] anti-alias mode: AA enabled, resampling enabled, fetch extra lines as-needed */
+#define VI_CTRL_ANTIALIAS_MODE_2    0x00200 /* Bit [9:8] anti-alias mode: AA disabled, resampling enabled, operate as if everything is covered */
+#define VI_CTRL_ANTIALIAS_MODE_3    0x00300 /* Bit [9:8] anti-alias mode: AA disabled, resampling disabled, replicate pixels */
+
+typedef struct
+{
+    /* 0x0 */ f32 factor;
+    /* 0x4 */ u16 offset;
+    /* 0x8 */ u32 scale;
+} __OSViScale;
+
+typedef struct
+{
+    /* 0x0 */ u16 state;
+    /* 0x2 */ u16 retraceCount;
+    /* 0x4 */ void *framep;
+    /* 0x8 */ OSViMode *modep;
+    /* 0xC */ u32 control;
+    /* 0x10 */ OSMesgQueue *msgq;
+    /* 0x14 */ OSMesg msg;
+    /* 0x18 */ __OSViScale x;
+    /* 0x24 */ __OSViScale y;
+} __OSViContext; // 0x30 bytes
+
+extern __OSViContext *__osViNext __attribute__((section(".data")));
+void set_vi_mode(void)
+{
+    const int enabled = 6;
+    register u32 saveMask = __osDisableInt();
+    if (enabled & 1)
+    {
+        __osViNext->control |= VI_CTRL_ANTIALIAS_MODE_1;
+    }
+    else
+    {
+        __osViNext->control &= ~VI_CTRL_ANTIALIAS_MODE_1;
+    }
+
+    if (enabled & 2)
+    {
+        __osViNext->control |= VI_CTRL_ANTIALIAS_MODE_2;
+    }
+    else
+    {
+        __osViNext->control &= ~VI_CTRL_ANTIALIAS_MODE_2;
+    }
+
+    if (enabled & 4)
+    {
+        __osViNext->control &= ~VI_CTRL_DITHER_FILTER_ON;
+    }
+    else
+    {
+        __osViNext->control |= VI_CTRL_DITHER_FILTER_ON;
+    }
+
+    __osRestoreInt(saveMask);
+}
 
 s32 lvl_set_current_level(UNUSED s16 initOrUpdate, s32 levelNum) {
+    set_vi_mode();
     s32 warpCheckpointActive = sWarpCheckpointActive;
 
     sWarpCheckpointActive = FALSE;

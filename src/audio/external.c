@@ -702,6 +702,10 @@ void play_sound(s32 soundBits, f32 *pos) {
     sSoundRequestCount++;
 }
 
+void play_sound_m(s32 soundBits, f32 *pos) {
+    play_sound(soundBits, pos);
+}
+
 /**
  * Called from threads: thread4_sound, thread5_game_loop (EU only)
  */

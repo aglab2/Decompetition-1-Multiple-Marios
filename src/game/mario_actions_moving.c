@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+extern void play_sound_m(s32 soundBits, f32 *pos);
+extern struct MarioState gMarioStates[];
+#define play_sound(bits, pos) do{ if (m == gMarioStates) play_sound_m(bits, pos); }while(0)
+
 struct LandingAction {
     s16 numFrames;
     s16 doubleJumpTimer;
