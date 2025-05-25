@@ -1929,8 +1929,8 @@ s32 render_pause_courses_and_castle(void) {
         case DIALOG_STATE_HORIZONTAL:
             shade_screen();
             print_hud_pause_colorful_str();
-            render_pause_castle_menu_box(160, 143);
-            render_pause_castle_main_strings(104, 60);
+            // render_pause_castle_menu_box(160, 143);
+            // render_pause_castle_main_strings(104, 60);
 
             if (gPlayer1Controller->buttonPressed & (A_BUTTON | START_BUTTON)) {
                 level_set_transition(0, NULL);
@@ -1992,17 +1992,6 @@ void print_hud_course_complete_coins(s16 x, s16 y) {
     u8 hudTextSymCoin[] = { GLYPH_COIN, GLYPH_SPACE };
     u8 hudTextSymX[] = { GLYPH_MULTIPLY, GLYPH_SPACE };
 
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 255);
-
-    print_hud_lut_string(HUD_LUT_GLOBAL, x +  0, y, hudTextSymCoin);
-    print_hud_lut_string(HUD_LUT_GLOBAL, x + 16, y, hudTextSymX);
-
-    int_to_str(gCourseCompleteCoins, courseCompleteCoinsStr);
-    print_hud_lut_string(HUD_LUT_GLOBAL, x + 32, y, courseCompleteCoinsStr);
-
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_end);
-
     if (gCourseCompleteCoins >= gHudDisplay.coins) {
         gCourseCompleteCoinsEqual = TRUE;
         gCourseCompleteCoins = gHudDisplay.coins;
@@ -2023,9 +2012,7 @@ void print_hud_course_complete_coins(s16 x, s16 y) {
 #endif
         }
 
-        if ((gHudDisplay.coins == gCourseCompleteCoins) && gGotFileCoinHiScore) {
-            play_sound(SOUND_MENU_HIGH_SCORE, gGlobalSoundSource);
-        }
+        play_sound(SOUND_MENU_HIGH_SCORE, gGlobalSoundSource);
     }
 }
 
@@ -2055,54 +2042,13 @@ void render_course_complete_lvl_info_and_hud_str(void) {
     void **actNameTbl    = segmented_to_virtual(languageTable[gInGameLanguage][2]);
     void **courseNameTbl = segmented_to_virtual(languageTable[gInGameLanguage][1]);
 
-    if (gLastCompletedCourseNum <= COURSE_STAGES_MAX) { // Main courses
-        print_hud_course_complete_coins(118, 103);
-        play_star_fanfare_and_flash_hud(HUD_FLASH_STARS, (1 << (gLastCompletedStarNum - 1)));
-
-        if (gLastCompletedStarNum == 7) {
-            name = segmented_to_virtual(actNameTbl[COURSE_STAGES_MAX * 6 + 1]);
-        } else {
-            name = segmented_to_virtual(actNameTbl[COURSE_NUM_TO_INDEX(gLastCompletedCourseNum) * 6 + gLastCompletedStarNum - 1]);
-        }
-
-        // Print course number
-        gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
-
-        int_to_str(gLastCompletedCourseNum, strCourseNum);
-
-        gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, gDialogTextAlpha);
-        print_generic_string(65, 165, LANGUAGE_ARRAY(textCourse));
-        print_generic_string(CRS_NUM_X2, 165, strCourseNum);
-
-        gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
-        print_generic_string(63, 167, LANGUAGE_ARRAY(textCourse));
-        print_generic_string(CRS_NUM_X3, 167, strCourseNum);
-
-        gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
-    } else if (gLastCompletedCourseNum == COURSE_BITDW || gLastCompletedCourseNum == COURSE_BITFS) { // Bowser courses
-        name = segmented_to_virtual(courseNameTbl[COURSE_NUM_TO_INDEX(gLastCompletedCourseNum)]);
-
         // Print course name and clear text
         gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
-
-        gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, gDialogTextAlpha);
-        print_generic_string(TXT_NAME_X1, 130, name);
-        print_generic_string(TXT_CLEAR_X1, 130, textClear);
-        gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, gDialogTextAlpha);
-        print_generic_string(TXT_NAME_X2, 132, name);
-        print_generic_string(TXT_CLEAR_X2, 132, textClear);
-        gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
 
         print_hud_course_complete_string(HUD_PRINT_CONGRATULATIONS);
         print_hud_course_complete_coins(118, 111);
         play_star_fanfare_and_flash_hud(HUD_FLASH_KEYS, 0);
         return;
-    } else { // Castle secret stars
-        name = segmented_to_virtual(actNameTbl[COURSE_STAGES_MAX * 6]);
-
-        print_hud_course_complete_coins(118, 103);
-        play_star_fanfare_and_flash_hud(HUD_FLASH_STARS, 1 << (gLastCompletedStarNum - 1));
-    }
 
     // Print star glyph
     gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);

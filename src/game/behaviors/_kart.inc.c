@@ -390,12 +390,12 @@ void bhv_ctl_init()
     {
         int entry = track[i];
 
-        Collision* partCollision;
-        if (partCollision = sCollisionHeaders[entry])
         {
-            struct Object* part = spawn_object(o, 0x20 + entry, bhvPart);
+            Collision* partCollision = sCollisionHeaders[entry];
+            struct Object* part = spawn_object(o, partCollision ? (0x20 + entry) : 0, bhvPart);
 
-            obj_set_collision_data(part, partCollision);
+            if (partCollision)
+                obj_set_collision_data(part, partCollision);
 
             part->oFaceAngleYaw = spawner.angle;
             part->oPosX = spawner.pos[0];
@@ -530,6 +530,7 @@ void bhv_ctl_loop()
                     seq_player_play_sequence(0, 0x23, 0);
                     break;
                 case 0x21: 
+                    seq_player_play_sequence(0, 0x24, 0);
                     break;
                 case 0x22: 
                     break;
@@ -560,8 +561,11 @@ void bhv_ctl_loop()
             }
         }
 
-        sprintf(placeLine, "%02d of %d", placement, RACERS_COUNT);
-        print_defer(20, 200, placeLine, 255, 0, 1 == placement);
+        if (o->oTimer > 130)
+        {
+            sprintf(placeLine, "%02d of %d", placement, RACERS_COUNT);
+            print_defer(20, 200, placeLine, 255, 0, 1 == placement);
+        }
 
         gMarioStates->health = 0x880;
         if (gMarioStates->kartProgress > 50.f && gMarioStates->floor && gMarioStates->floor->object)
@@ -573,8 +577,9 @@ void bhv_ctl_loop()
                 o->oCtlFinalTime = o->oTimer - 130;
                 o->oAction = 1;
                 gMarioStates->usedObj = o;
-                gMarioStates->usedObj->oBehParams = 0xa << 16;
-                gMarioStates->usedObj->oBehParams2ndByte = 0xa;
+                int warpId = sPlacement == 1 ? 0xa : 0xf1;
+                gMarioStates->usedObj->oBehParams = warpId << 16;
+                gMarioStates->usedObj->oBehParams2ndByte = warpId;
                 level_trigger_warp(gMarioStates, WARP_OP_TELEPORT);
 
                 set_camera_mode_fixed2(gCamera);
@@ -594,6 +599,9 @@ void bhv_ctl_loop()
 void bhv_part_loop()
 {
     o->oDrawingDistance = 30000.0f;
+    
+    if (o->collisionData)
+        load_object_static_model();
 }
 
 static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
@@ -813,9 +821,22 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
     // truncated progress is the part index
     int curProgressRounded = (int) m->kartProgress;
     int id = part->oPartIndex;
+
+    if (m != gMarioStates)
+    {
+        if (0 == id || 1 == id || 2 == id)
+        {
+            if (m->kartProgress > 50.f)
+                m->kartProgress = 1000.f;
+        }
+    }
+
     if (curProgressRounded != id
-     && curProgressRounded != id -1
-     && curProgressRounded != id - 2)
+     && curProgressRounded != id - 1
+     && curProgressRounded != id - 2
+     && curProgressRounded != id - 3
+     && curProgressRounded != id - 4
+     && curProgressRounded != id - 5)
     {
         return;
     }

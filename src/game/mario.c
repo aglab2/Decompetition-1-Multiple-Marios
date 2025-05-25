@@ -675,7 +675,7 @@ Bool32 set_mario_ceil(struct MarioState *m, struct Surface *ceil, f32 ceilHeight
 
 void kart_deduce_progress(struct MarioState *m, struct Object* part);
 Bool32 set_mario_floor(struct MarioState *m, struct Surface *floor, f32 floorHeight) {
-    if (m->floor != floor) {
+    {
         m->floor = floor;
         if (floor->object)
         {
