@@ -337,6 +337,17 @@ static const u8 sBeginnerTrack[] = {
 , 10, 17, 3, 40, 7, 82, 28, 
 };
 
+struct DeferredText
+{
+    u8 ttl;
+    u8 centered;
+    u16 x;
+    u16 y;
+    const char* line;
+};
+
+static struct DeferredText sDeferredTexts[10] = {};
+
 #define oPartIndex oF4
 #define oPartNext oObjF8
 #define oPartPrev oObjFC
@@ -698,6 +709,7 @@ s16 kart_angle(int kartId)
     return sPartConfigs[kartId].turn;
 }
 
+static void print_defer(s16 x, s16, const char* line, u8 ttl, u8 centered);
 void bhv_kart_show_loop()
 {
     coop_randomize();
@@ -706,16 +718,16 @@ void bhv_kart_show_loop()
         switch (o->oBehParams2ndByte)
         {
             case 0x20:
-                print_text_centered(160, 20, "BEGINNER");
+                print_defer(160, 20, "Beginner", 255, 1);
                 break;
             case 0x21:
-                print_text_centered(160, 20, "ADVANCED");
+                print_defer(160, 20, "Advanced", 255, 1);
                 break;
             case 0x22:
-                print_text_centered(160, 20, "EXPERT");
+                print_defer(160, 20, "Expert", 255, 1);
                 break;
             case 0x30:
-                print_text_centered(160, 20, "PERSONALIZED");
+                print_defer(160, 20, "Personalized", 255, 1);
                 break;
         }
     }
@@ -727,4 +739,91 @@ void bhv_test_loop()
     {
         o->activeFlags = 0;
     }
+}
+
+static void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered)
+{
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl != 0 || deferredText->line == line)
+        {
+            deferredText->ttl = ttl;
+            deferredText->x = x;
+            deferredText->y = y;
+            deferredText->line = line;
+            deferredText->centered = centered;
+            return;
+        }
+    }
+
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl == 0)
+        {
+            deferredText->ttl = ttl;
+            deferredText->x = x;
+            deferredText->y = y;
+            deferredText->line = line;
+            deferredText->centered = centered;
+            return;
+        }
+    }
+}
+
+static void conv(u8* dst, const char* src)
+{
+    while (*src)
+    {
+        char c = *src++;
+        if ('0' <= c && c <= '9')
+        {
+            *dst++ = c - '0';
+        }
+        else if ('A' <= c && c <= 'Z')
+        {
+            *dst++ = c - 'A' + 10;
+        }
+        else if ('a' <= c && c <= 'z')
+        {
+            *dst++ = c - 'a' + 10 + 26;
+        }
+        else if (c == ' ')
+        {
+            *dst++ = DIALOG_CHAR_SPACE;
+        }
+        else if (c == '.')
+        {
+            *dst++ = DIALOG_CHAR_PERIOD;
+        }
+        else if (c == ',')
+        {
+            *dst++ = DIALOG_CHAR_COMMA;
+        }
+    }
+    *dst = 0xff;
+}
+
+void render_kartboxes()
+{
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
+    for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
+    {
+        struct DeferredText* deferredText = &sDeferredTexts[i];
+        if (deferredText->ttl > 0)
+        {
+            u8 line[30];
+            conv(line, deferredText->line);
+            s16 x = deferredText->centered ? get_str_x_pos_from_center(deferredText->x, line, 0.f) : deferredText->x;
+
+            gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, deferredText->ttl);
+            print_generic_string(x-2, deferredText->y-2, line);
+            gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, deferredText->ttl);
+            print_generic_string(x, deferredText->y, line);
+
+            deferredText->ttl = CLAMP((int) deferredText->ttl - 20, 0, 255);
+        }
+    }
+    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
 }
