@@ -514,6 +514,15 @@ void bhv_ctl_loop()
     {
         print_defer(20, 220, timerLine, 255, 0, 0);
         print_defer(20, 200, placeLine, 255, 0, 1 == sPlacement);
+
+        if (30 == o->oTimer)
+        {
+            gMarioStates->usedObj = o;
+            int warpId = sPlacement == 1 ? 0xa : 0xf1;
+            gMarioStates->usedObj->oBehParams = warpId << 16;
+            gMarioStates->usedObj->oBehParams2ndByte = warpId;
+            level_trigger_warp(gMarioStates, WARP_OP_TELEPORT);
+        }
     }
     else
     {
@@ -532,9 +541,14 @@ void bhv_ctl_loop()
                 case 0x21: 
                     seq_player_play_sequence(0, 0x24, 0);
                     break;
-                case 0x22: 
+                case 0x22:
                     break;
             }
+        }
+        if (110 == o->oTimer)
+        {
+            if (0x22 == sSourceWarpNodeId)
+                seq_player_play_sequence(0, 0x25, 0); 
         }
 
         if (o->oTimer < 130)
@@ -570,18 +584,14 @@ void bhv_ctl_loop()
         gMarioStates->health = 0x880;
         if (gMarioStates->kartProgress > 50.f && gMarioStates->floor && gMarioStates->floor->object)
         {
-            if (0 == gMarioStates->floor->object->oPartIndex)
+            if (0 == gMarioStates->floor->object->oPartIndex
+             || 1 == gMarioStates->floor->object->oPartIndex
+             || 2 == gMarioStates->floor->object->oPartIndex)
             {
                 sEnableProgress = 0;
                 sPlacement = placement;
                 o->oCtlFinalTime = o->oTimer - 130;
                 o->oAction = 1;
-                gMarioStates->usedObj = o;
-                int warpId = sPlacement == 1 ? 0xa : 0xf1;
-                gMarioStates->usedObj->oBehParams = warpId << 16;
-                gMarioStates->usedObj->oBehParams2ndByte = warpId;
-                level_trigger_warp(gMarioStates, WARP_OP_TELEPORT);
-
                 set_camera_mode_fixed2(gCamera);
                 gCamera->cutscene = CUTSCENE_ENDING;
             }
