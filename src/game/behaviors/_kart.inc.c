@@ -372,7 +372,6 @@ void bhv_ctl_init()
         case 0x20: 
             track = sBeginnerTrack;
             trackSize = sizeof(sBeginnerTrack);
-            seq_player_play_sequence(0, 0x23, 0);
             break;
         case 0x21: 
             track = uStandardTrack;
@@ -521,6 +520,20 @@ void bhv_ctl_loop()
         if (o->oTimer == 30)
         {
             play_sound(SOUND_PEACH_POWER_OF_THE_STARS, gMarioStates->marioObj->header.gfx.cameraToObject);
+        }
+
+        if (130 == o->oTimer)
+        {            
+            switch (sSourceWarpNodeId)
+            {
+                case 0x20: 
+                    seq_player_play_sequence(0, 0x23, 0);
+                    break;
+                case 0x21: 
+                    break;
+                case 0x22: 
+                    break;
+            }
         }
 
         if (o->oTimer < 130)
