@@ -135,7 +135,7 @@ endif
 #==============================================================================#
 
 # Default non-gcc opt flags
-DEFAULT_OPT_FLAGS = -Ofast -falign-functions=32
+DEFAULT_OPT_FLAGS = -Os -fallow-store-data-races -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division -fno-tree-loop-distribute-patterns
 # Note: -fno-associative-math is used here to suppress warnings, ideally we would enable this as an optimization but
 # this conflicts with -ftrapping-math apparently.
 # TODO: Figure out how to allow -fassociative-math to be enabled
@@ -144,33 +144,30 @@ SAFETY_OPT_FLAGS = -ftrapping-math -fno-associative-math
 # Main opt flags
 GCC_MAIN_OPT_FLAGS = \
   $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=10 \
-  --param max-unrolled-insns=10 \
-  -finline-limit=1 \
-  -freorder-blocks-algorithm=simple  \
   -ffunction-sections \
-  -fdata-sections
+  -fdata-sections \
+  -freciprocal-math \
+  -fdelete-null-pointer-checks \
+  -fgcse-after-reload \
+  -fpredictive-commoning \
+  -ftree-partial-pre \
+  -fno-semantic-interposition
 
 # Surface Collision
 GCC_COLLISION_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=100 \
-  --param max-unrolled-insns=100 \
-  -finline-limit=0 \
-  -fno-inline \
-  -freorder-blocks-algorithm=simple  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
 
+AUDIO_COLLISION_OPT_FLAGS = \
+  -Os -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division $(GCC_MAIN_OPT_FLAGS) \
+  -ffunction-sections \
+  -fdata-sections
+
 # Math Util
 GCC_MATH_UTIL_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  -fno-unroll-loops \
-  -fno-peel-loops \
-  --param case-values-threshold=20  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
@@ -179,12 +176,7 @@ GCC_MATH_UTIL_OPT_FLAGS = \
 
 # Rendering graph node
 GCC_GRAPH_NODE_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=100 \
-  --param max-unrolled-insns=100 \
-  -finline-limit=0 \
-  -freorder-blocks-algorithm=simple  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math -mno-check-zero-division \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
