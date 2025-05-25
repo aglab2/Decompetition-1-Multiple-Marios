@@ -152,5 +152,6 @@ void coop_randomize()
         gMarioStates[i].kartRNGTime = random_u16() % 300;
         gMarioStates[i].kartVelFuzz = random_f32_around_zero(15.0f);
         gMarioStates[i].kartLocFuzz = random_f32_around_zero(900.0f);
+        gMarioStates[i].kartProgress = 0.0f;
     }
 }

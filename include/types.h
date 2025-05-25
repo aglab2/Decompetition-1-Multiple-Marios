@@ -468,6 +468,7 @@ struct MarioState {
     Vec3f kartHome;
     f32 kartLocFuzz;
     f32 kartVelFuzz;
+    f32 kartProgress;
 };
 
 #endif // TYPES_H

@@ -387,7 +387,6 @@ void bhv_ctl_init()
         if (partCollision = sCollisionHeaders[entry])
         {
             struct Object* part = spawn_object(o, 0x20 + entry, bhvPart);
-            part->oBehParams2ndByte = entry;
 
             obj_set_collision_data(part, partCollision);
 
@@ -395,7 +394,8 @@ void bhv_ctl_init()
             part->oPosX = spawner.pos[0];
             part->oPosY = spawner.pos[1];
             part->oPosZ = spawner.pos[2];
-            part->oPartIndex = entry;
+            part->oPartIndex = i;
+            part->oBehParams2ndByte = entry;
             
             obj_scale(part, SCALE);
     
@@ -518,12 +518,21 @@ void bhv_ctl_loop()
     else
     {
         int time = o->oTimer - 130;
-        sprintf(timerLine, "%d:%02d.%02d", time / 60 / 30, time / 30, (int) (3.33333f * (time % 30)));
+        sprintf(timerLine, "%d:%02d.%02d", time / 60 / 30, (time / 30) % 60, (int) (3.33333f * (time % 30)));
         print_defer(20, 220, timerLine, 255, 0);
     }
 
-    int placement = 24;
-    sprintf(placeLine, "Place %d out of 35", placement);
+    print_text_fmt_int(20, 20, "%d", (int) (gMarioStates[0].kartProgress * 1000));
+    int placement = 1;
+    for (int i = 1; i < RACERS_COUNT; i++)
+    {
+        if (gMarioStates[i].kartProgress >= gMarioStates[0].kartProgress)
+        {
+            placement++;
+        }
+    }
+
+    sprintf(placeLine, "%02d of %d", placement, RACERS_COUNT);
     print_defer(20, 200, placeLine, 255, 0);
 
     gMarioStates->health = 0x880;
@@ -549,7 +558,7 @@ void bhv_part_loop()
 
 static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
 {
-    struct PartConfig* partConfig = &sPartConfigs[part->oPartIndex];
+    struct PartConfig* partConfig = &sPartConfigs[part->oBehParams2ndByte];
     if (partConfig->thin)
     {
         fuzz *= 0.5f;
@@ -594,8 +603,8 @@ void coop_npc_behavior(struct MarioState * m)
     if (m->floor && m->floor->object)
     {
         struct Object* currPart = m->floor->object;
-        struct PartConfig* currPartConfig = &sPartConfigs[currPart->oPartIndex];
-        // print_text_fmt_int(200, 160, "P %d", currPart->oPartIndex);
+        struct PartConfig* currPartConfig = &sPartConfigs[currPart->oBehParams2ndByte];
+        // print_text_fmt_int(200, 160, "P %d", currPart->oBehParams2ndByte);
         if (currPartConfig->turn)
         {
             f32 x = currPartConfig->shift[0] > 0 ? (5000.f * SCALE) : (-5000.f * SCALE);
@@ -691,8 +700,8 @@ void coop_npc_behavior(struct MarioState * m)
             }
 
             s16 forceAngle = 0;
-            forceAngle = forceAngle ?: sPartConfigs[currPart ->oPartIndex].forceAngle;
-            forceAngle = forceAngle ?: sPartConfigs[nextPart1->oPartIndex].forceAngle;
+            forceAngle = forceAngle ?: sPartConfigs[currPart ->oBehParams2ndByte].forceAngle;
+            forceAngle = forceAngle ?: sPartConfigs[nextPart1->oBehParams2ndByte].forceAngle;
 
             Vec3f diff;
             vec3_diff(diff, nextLoc, m->pos);
@@ -717,6 +726,7 @@ s16 kart_angle(int kartId)
     return sPartConfigs[kartId].turn;
 }
 
+extern void coop_randomize();
 void bhv_kart_show_loop()
 {
     coop_randomize();
@@ -746,4 +756,42 @@ void bhv_test_loop()
     {
         o->activeFlags = 0;
     }
+}
+
+void kart_deduce_progress(struct MarioState *m, struct Object* part)
+{
+    if (gCurrCourseNum != COURSE_EXAMPLE)
+    {
+        return;
+    }
+
+    // truncated progress is the part index
+    int curProgressRounded = (int) m->kartProgress;
+    int id = part->oPartIndex;
+    if (curProgressRounded != id
+     && curProgressRounded != id -1
+     && curProgressRounded != id - 2)
+    {
+        return;
+    }
+
+    const struct PartConfig* partConfig = &sPartConfigs[part->oBehParams2ndByte];
+    f32 progress = 0.0f;
+    // if (0 == partConfig->turn)
+    // technically this will work for turns too, but it will be less accurate
+    {
+        Vec3f diff;
+        vec3_diff(diff, m->pos, &part->oPosVec);
+        f32 diffUnrotZ = diff[0] * sins(part->oFaceAngleYaw)
+                       + diff[2] * coss(part->oFaceAngleYaw);
+
+        f32 divided = diffUnrotZ / (partConfig->shift[2] * SCALE);
+        if (m == gMarioStates)
+        {
+            print_text_fmt_int(20, 40, "D %d", (int) (divided * 1000));
+        }
+        progress = CLAMP(divided, 0.f, 0.9999f);
+    }
+
+    m->kartProgress = progress + (f32) id;
 }

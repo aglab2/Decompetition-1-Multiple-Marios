@@ -673,6 +673,7 @@ Bool32 set_mario_ceil(struct MarioState *m, struct Surface *ceil, f32 ceilHeight
     return (m->ceil != NULL);
 }
 
+void kart_deduce_progress(struct MarioState *m, struct Object* part);
 Bool32 set_mario_floor(struct MarioState *m, struct Surface *floor, f32 floorHeight) {
     if (m->floor != floor) {
         m->floor = floor;
@@ -683,6 +684,7 @@ Bool32 set_mario_floor(struct MarioState *m, struct Surface *floor, f32 floorHei
             m->kartSafePos[2] = floor->object->oPosZ;
             m->kartSafeAngle = floor->object->oFaceAngleYaw;
             m->kartId = floor->object->oBehParams2ndByte;
+            kart_deduce_progress(m, floor->object);
         }
         if (m->floor != NULL) m->floorYaw = SURFACE_YAW(floor);
     }
