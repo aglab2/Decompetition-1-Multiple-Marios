@@ -6152,3 +6152,12 @@ const BehaviorScript bhvPart[] = {
     BEGIN_LOOP(),
     END_LOOP(),
 };
+
+extern void bhv_test_loop();
+const BehaviorScript bhvTest[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_test_loop),
+    END_LOOP(),
+};

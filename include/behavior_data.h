@@ -548,5 +548,6 @@ extern const BehaviorScript bhvRaisePlatform[];
 extern const BehaviorScript bhvDoubleCherry[];
 extern const BehaviorScript bhvCtl[];
 extern const BehaviorScript bhvPart[];
+extern const BehaviorScript bhvTest[];
 
 #endif // BEHAVIOR_DATA_H

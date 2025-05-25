@@ -1,5 +1,9 @@
 #include "game/mario_coop.h"
 
+#define RACERS_COUNT 35
+// #define DEBUG_DISABLE_FUZZ
+// #define DEBUG_LOC_TEST_PARTICLES
+
 extern const Collision p1_collision[];
 extern const Collision p2_collision[];
 extern const Collision p3_collision[];
@@ -421,7 +425,7 @@ void bhv_ctl_init()
     firstPart->oPartPrev = prevPart;
     prevPart->oPartNext = firstPart;
 
-    for (int i = 0; i < 34; i++)
+    for (int i = 0; i < RACERS_COUNT - 1; i++)
     {
         // I want an arragemnt that looks like this:        
         /*
@@ -516,6 +520,10 @@ void bhv_ctl_loop()
     }
     // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
     // print_text_fmt_int(120, 40, "%d", (int) (1000 * gMarioStates->floor->normal.y));
+
+    // print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
+    // print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
+    // print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
 }
 
 void bhv_part_loop()
@@ -534,6 +542,9 @@ static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
     {
         fuzz *= 0.05f;
     }
+#ifdef DEBUG_DISABLE_FUZZ
+    fuzz = 0.0f;
+#endif
 
     pos[0] = part->oPosX + fuzz * coss(part->oFaceAngleYaw);
     pos[1] = part->oPosY;
@@ -573,10 +584,16 @@ void coop_npc_behavior(struct MarioState * m)
 
             Vec3f diff;
             vec3_diff(diff, m->pos, center);
+#ifdef DEBUG_LOC_TEST_PARTICLES
+            struct Object* p1 = spawn_object(o, MODEL_MARIO, bhvTest);
+            p1->oPosX = center[0];
+            p1->oPosY = center[1] + 10.f;
+            p1->oPosZ = center[2];
+#endif
 
             s32 length = (diff[0] * diff[0]) + (diff[2] * diff[2]);
-            s32 lengthStrengthener = CLAMP(length - 2000, 0, 3000) * 2;
-            // print_text_fmt_int(20, 120, "LS %d", lengthStrengthener);            
+            s32 lengthStrengthener = CLAMP(length - 2000, 0, 3000) * 4;
+            // print_text_fmt_int(20, 120, "LS %d", lengthStrengthener);
 
             int turnSign = currPartConfig->turn > 0 ? 1 : -1;
             m->intendedYaw = atan2s(diff[2], diff[0]) + currPartConfig->turn + lengthStrengthener * turnSign;
@@ -638,7 +655,22 @@ void coop_npc_behavior(struct MarioState * m)
                 nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
                 nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
 
-                // print_text_fmt_int(20, 40, "A %d", 1);
+#ifdef DEBUG_LOC_TEST_PARTICLES
+                struct Object* p1 = spawn_object(o, MODEL_MARIO, bhvTest);
+                p1->oPosX = loc1[0];
+                p1->oPosY = loc1[1] + 10.f;
+                p1->oPosZ = loc1[2];
+
+                struct Object* p2 = spawn_object(o, MODEL_MARIO, bhvTest);
+                p2->oPosX = loc2[0];
+                p2->oPosY = loc2[1] + 10.f;
+                p2->oPosZ = loc2[2];
+                
+                struct Object* p3 = spawn_object(o, MODEL_MARIO, bhvTest);
+                p3->oPosX = nextLoc[0];
+                p3->oPosY = nextLoc[1] + 10.f;
+                p3->oPosZ = nextLoc[2];
+#endif
             }
 
             s16 forceAngle = 0;
@@ -650,6 +682,7 @@ void coop_npc_behavior(struct MarioState * m)
             m->intendedYaw = forceAngle ? forceAngle + currPart->oFaceAngleYaw + 0x8000 : atan2s(diff[2], diff[0]);
             
             // print_text_fmt_int(20, 20, "R %d", m->intendedYaw);
+            // print_text_fmt_int(20, 40, "F %x", forceAngle);
 
             // print_text_fmt_int(20, 100, "X %d", (int) m->slideVelX);
             // print_text_fmt_int(20, 120, "Z %d", (int) m->slideVelZ);
@@ -685,5 +718,13 @@ void bhv_kart_show_loop()
                 print_text_centered(160, 20, "PERSONALIZED");
                 break;
         }
+    }
+}
+
+void bhv_test_loop()
+{
+    if (o->oTimer)
+    {
+        o->activeFlags = 0;
     }
 }
