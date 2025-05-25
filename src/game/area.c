@@ -395,6 +395,7 @@ struct DeferredText
 {
     u8 ttl;
     u8 centered;
+    u8 colored;
     u16 x;
     u16 y;
     const char* line;
@@ -402,19 +403,23 @@ struct DeferredText
 
 static struct DeferredText sDeferredTexts[10] = {};
 
-void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered)
+static void attach_print(s16 x, s16 y, const char* line, u8 ttl, u8 centered, u8 colored, struct DeferredText* deferredText)
+{
+    deferredText->ttl = ttl;
+    deferredText->x = x;
+    deferredText->y = y;
+    deferredText->line = line;
+    deferredText->centered = centered;
+}
+
+void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered, u8 colored)
 {
     for (int i = 0; i < sizeof(sDeferredTexts) / sizeof(*sDeferredTexts); i++)
     {
         struct DeferredText* deferredText = &sDeferredTexts[i];
         if (deferredText->ttl != 0 && deferredText->line == line)
         {
-            deferredText->ttl = ttl;
-            deferredText->x = x;
-            deferredText->y = y;
-            deferredText->line = line;
-            deferredText->centered = centered;
-            return;
+            return attach_print(x, y, line, ttl, centered, colored, deferredText);
         }
     }
 
@@ -423,12 +428,7 @@ void print_defer(s16 x, s16 y, const char* line, u8 ttl, u8 centered)
         struct DeferredText* deferredText = &sDeferredTexts[i];
         if (deferredText->ttl == 0)
         {
-            deferredText->ttl = ttl;
-            deferredText->x = x;
-            deferredText->y = y;
-            deferredText->line = line;
-            deferredText->centered = centered;
-            return;
+            return attach_print(x, y, line, ttl, centered, colored, deferredText);
         }
     }
 }

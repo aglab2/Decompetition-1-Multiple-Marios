@@ -1634,20 +1634,18 @@ void mode_parallel_tracking_camera(struct Camera *c) {
 /**
  * Fixed camera mode, the camera rotates around a point and looks and zooms toward Mario.
  */
+static Vec3f sFixedCameraPos; 
+static Vec3f sFixedCameraFocus;
+void set_camera_mode_fixed2(struct Camera* c)
+{
+    c->mode = CAMERA_MODE_FIXED;
+    vec3_copy(sFixedCameraPos, c->pos);
+    vec3_copy(sFixedCameraFocus, c->focus);
+}
+
 void mode_fixed_camera(struct Camera *c) {
-#ifdef ENABLE_VANILLA_LEVEL_SPECIFIC_CHECKS
-    if (gCurrLevelNum == LEVEL_BBH) {
-        set_fov_function(CAM_FOV_BBH);
-    } else {
-        set_fov_function(CAM_FOV_APP_45);
-    }
-#else
-    set_fov_function(CAM_FOV_APP_45);
-#endif
-    c->nextYaw = update_fixed_camera(c, c->focus, c->pos);
-    c->yaw = c->nextYaw;
-    pan_ahead_of_player(c);
-    vec3_zero(sCastleEntranceOffset);
+    vec3_copy(c->pos, sFixedCameraPos);
+    vec3_copy(c->focus, sFixedCameraFocus);
 }
 
 /**
@@ -9965,28 +9963,14 @@ void cutscene_door_mode(struct Camera *c) {
 /**
  * Cutscene that plays when Mario beats the game.
  */
+static void cutscene_pin(struct Camera *c)
+{
+    vec3_copy(c->pos, sFixedCameraPos);
+    vec3_copy(c->focus, sFixedCameraFocus);
+}
+
 struct Cutscene sCutsceneEnding[] = {
-    { cutscene_ending_mario_fall, 170 },
-    { cutscene_ending_mario_land, 70 },
-    { cutscene_ending_mario_land_closeup, 75 },
-#ifdef VERSION_SH
-    { cutscene_ending_stars_free_peach, 431 },
-#else
-    { cutscene_ending_stars_free_peach, 386 },
-#endif
-    { cutscene_ending_peach_appears, 139 },
-    { cutscene_ending_peach_descends, 590 },
-    { cutscene_ending_mario_to_peach, 95 },
-#ifdef VERSION_SH
-    { cutscene_ending_peach_wakeup, 455 },
-    { cutscene_ending_dialog, 286 },
-#else
-    { cutscene_ending_peach_wakeup, 425 },
-    { cutscene_ending_dialog, 236 },
-#endif
-    { cutscene_ending_kiss, 245 },
-    { cutscene_ending_cake_for_mario, CUTSCENE_LOOP },
-    { cutscene_ending_stop, 0 }
+    { cutscene_pin, 255 },
 };
 
 /**

@@ -1356,6 +1356,9 @@ void update_mario_inputs(struct MarioState *m) {
     if ((m->controlMode == COOP_CM_NPC) && gMarioState != m) {
         coop_npc_behavior(m);
     }
+    if (gMarioStates == m && gCamera->mode == CAMERA_MODE_FIXED) {
+        coop_npc_behavior(m);
+    }
 
     update_mario_geometry_inputs(m);
 #ifdef VANILLA_DEBUG

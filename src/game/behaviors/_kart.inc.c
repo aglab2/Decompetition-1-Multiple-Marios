@@ -4,7 +4,7 @@
 // #define DEBUG_DISABLE_FUZZ
 // #define DEBUG_LOC_TEST_PARTICLES
 
-void print_defer(s16 x, s16, const char* line, u8 ttl, u8 centered);
+void print_defer(s16 x, s16, const char* line, u8 ttl, u8 centered, u8 colored);
 
 extern const Collision p1_collision[];
 extern const Collision p2_collision[];
@@ -352,9 +352,16 @@ struct SpawnerState
 #define SCALE 0.5f
 
 extern s16 sSourceWarpNodeId;
+static u8 sEnableProgress = 1;
+
+#define oCtlFinalTime oF4
+
+extern void seq_player_play_sequence(u8 player, u8 seqId, u16 arg2);
 
 void bhv_ctl_init()
 {
+    o->oCtlFinalTime = 0;
+    sEnableProgress = 1;
     gMarioStates->faceAngle[1] = 0x8000;
 
     struct SpawnerState spawner = {};
@@ -365,6 +372,7 @@ void bhv_ctl_init()
         case 0x20: 
             track = sBeginnerTrack;
             trackSize = sizeof(sBeginnerTrack);
+            seq_player_play_sequence(0, 0x23, 0);
             break;
         case 0x21: 
             track = uStandardTrack;
@@ -498,49 +506,68 @@ extern void coop_mario_pin();
 
 char timerLine[20];
 char placeLine[30];
+u8 sPlacement;
 
-#define oCtlLastSafe oObjF4
-#define oCtlLastPart oF8
+extern void set_camera_mode_fixed2(struct Camera* c);
 void bhv_ctl_loop()
 {
-    if (o->oTimer == 30)
+    if (o->oAction)
     {
-        play_sound(SOUND_PEACH_POWER_OF_THE_STARS, gMarioStates->marioObj->header.gfx.cameraToObject);
-    }
-
-    if (o->oTimer < 130)
-    {
-        gMarioStates->pos[0] = o->oPosX;
-        gMarioStates->pos[1] = o->oPosY;
-        gMarioStates->pos[2] = o->oPosZ;
-        coop_mario_pin();
+        print_defer(20, 220, timerLine, 255, 0, 0);
+        print_defer(20, 200, placeLine, 255, 0, 1 == sPlacement);
     }
     else
     {
-        int time = o->oTimer - 130;
-        sprintf(timerLine, "%d:%02d.%02d", time / 60 / 30, (time / 30) % 60, (int) (3.33333f * (time % 30)));
-        print_defer(20, 220, timerLine, 255, 0);
-    }
-
-    print_text_fmt_int(20, 20, "%d", (int) (gMarioStates[0].kartProgress * 1000));
-    int placement = 1;
-    for (int i = 1; i < RACERS_COUNT; i++)
-    {
-        if (gMarioStates[i].kartProgress >= gMarioStates[0].kartProgress)
+        if (o->oTimer == 30)
         {
-            placement++;
+            play_sound(SOUND_PEACH_POWER_OF_THE_STARS, gMarioStates->marioObj->header.gfx.cameraToObject);
         }
-    }
 
-    sprintf(placeLine, "%02d of %d", placement, RACERS_COUNT);
-    print_defer(20, 200, placeLine, 255, 0);
+        if (o->oTimer < 130)
+        {
+            gMarioStates->pos[0] = o->oPosX;
+            gMarioStates->pos[1] = o->oPosY;
+            gMarioStates->pos[2] = o->oPosZ;
+            coop_mario_pin();
+        }
+        else
+        {
+            int time = o->oCtlFinalTime ?: o->oTimer - 130;
+            sprintf(timerLine, "%d:%02d.%02d", time / 60 / 30, (time / 30) % 60, (int) (3.33333f * (time % 30)));
+            print_defer(20, 220, timerLine, 255, 0, 0);
+        }
 
-    gMarioStates->health = 0x880;
+        print_text_fmt_int(20, 20, "%d", (int) (gMarioStates[0].kartProgress * 1000), 0);
+        int placement = 1;
+        for (int i = 1; i < RACERS_COUNT; i++)
+        {
+            if (gMarioStates[i].kartProgress >= gMarioStates[0].kartProgress)
+            {
+                placement++;
+            }
+        }
 
-    if (gMarioStates->floor && gMarioStates->floor->object)
-    {
-        struct Object* part = gMarioStates->floor->object;
-        o->oCtlLastSafe = part;
+        sprintf(placeLine, "%02d of %d", placement, RACERS_COUNT);
+        print_defer(20, 200, placeLine, 255, 0, 1 == placement);
+
+        gMarioStates->health = 0x880;
+        if (gMarioStates->kartProgress > 50.f && gMarioStates->floor && gMarioStates->floor->object)
+        {
+            if (0 == gMarioStates->floor->object->oPartIndex)
+            {
+                sEnableProgress = 0;
+                sPlacement = placement;
+                o->oCtlFinalTime = o->oTimer - 130;
+                o->oAction = 1;
+                gMarioStates->usedObj = o;
+                gMarioStates->usedObj->oBehParams = 0xa << 16;
+                gMarioStates->usedObj->oBehParams2ndByte = 0xa;
+                level_trigger_warp(gMarioStates, WARP_OP_TELEPORT);
+
+                set_camera_mode_fixed2(gCamera);
+                gCamera->cutscene = CUTSCENE_ENDING;
+            }
+        }
     }
 
     // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
@@ -735,16 +762,16 @@ void bhv_kart_show_loop()
         switch (o->oBehParams2ndByte)
         {
             case 0x20:
-                print_defer(160, 20, "Beginner", 255, 1);
+                print_defer(160, 20, "Beginner", 255, 1, 0);
                 break;
             case 0x21:
-                print_defer(160, 20, "Advanced", 255, 1);
+                print_defer(160, 20, "Advanced", 255, 1, 0);
                 break;
             case 0x22:
-                print_defer(160, 20, "Expert", 255, 1);
+                print_defer(160, 20, "Expert", 255, 1, 0);
                 break;
             case 0x30:
-                print_defer(160, 20, "Personalized", 255, 1);
+                print_defer(160, 20, "Personalized", 255, 1, 0);
                 break;
         }
     }
@@ -760,6 +787,11 @@ void bhv_test_loop()
 
 void kart_deduce_progress(struct MarioState *m, struct Object* part)
 {
+    if (!sEnableProgress)
+    {
+        return;
+    }
+
     if (gCurrCourseNum != COURSE_EXAMPLE)
     {
         return;
