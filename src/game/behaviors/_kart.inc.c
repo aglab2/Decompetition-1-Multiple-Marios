@@ -657,6 +657,11 @@ void bhv_ctl_loop()
                     break;
             }
         }
+        if (10 == o->oTimer)
+        {
+            if (0x30 == sSourceWarpNodeId)
+                seq_player_play_sequence(0, 0x26, 0);
+        }
         if (110 == o->oTimer)
         {
             if (0x22 == sSourceWarpNodeId)
