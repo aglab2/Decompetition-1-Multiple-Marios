@@ -339,6 +339,10 @@ static const u8 sBeginnerTrack[] = {
 , 10, 17, 3, 40, 7, 82, 28, 
 };
 
+static const u8 sBPETrack[] = {
+    1, 3,
+};
+
 #define oPartIndex oF4
 #define oPartNext oObjF8
 #define oPartPrev oObjFC
@@ -365,7 +369,7 @@ struct SpawnResult
     struct Object* lastPart;
 };
 
-static struct SpawnResult spawn_track(const u8* track, int trackSize)
+static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackSize)
 {
     // spawn the track
     struct Object* firstPart = NULL;
@@ -385,7 +389,7 @@ static struct SpawnResult spawn_track(const u8* track, int trackSize)
             part->oPosX = sSpawnerState.pos[0];
             part->oPosY = sSpawnerState.pos[1];
             part->oPosZ = sSpawnerState.pos[2];
-            part->oPartIndex = i;
+            part->oPartIndex = idx_shift + i;
             part->oBehParams2ndByte = entry;
             
             obj_scale(part, SCALE);
@@ -421,6 +425,13 @@ static struct SpawnResult spawn_track(const u8* track, int trackSize)
     };
 }
 
+static int sAmountGenerated = 0;
+static u8 sLastGenerated = 0;
+static struct Object* sLastPart = NULL;
+static u8 sWantBPE = 0;
+
+static void bpe_gen(void);
+
 void bhv_ctl_init()
 {
     o->oCtlFinalTime = 0;
@@ -449,13 +460,25 @@ void bhv_ctl_init()
             trackSize = sizeof(uExpertTrack);
             break;
     }
-    
-    struct SpawnResult result = spawn_track(track, trackSize);
-    struct Object* firstPart = result.firstPart;
-    struct Object* lastPart = result.lastPart;
 
-    firstPart->oPartPrev = lastPart;
-    lastPart->oPartNext = firstPart;
+    if (track)
+    {
+        struct SpawnResult result = spawn_track(0, track, trackSize);
+        struct Object* firstPart = result.firstPart;
+        struct Object* lastPart = result.lastPart;
+        sWantBPE = 0;
+        firstPart->oPartPrev = lastPart;
+        lastPart->oPartNext = firstPart;
+    }
+    else
+    {
+        sAmountGenerated = 2;
+        sLastGenerated = 3;
+        sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
+        gMarioStates->kartProgress = 0.0f;
+        bpe_gen();
+        sWantBPE = 1;
+    }
 
     for (int i = 0; i < RACERS_COUNT - 1; i++)
     {
@@ -533,6 +556,9 @@ u8 sPlacement;
 extern void set_camera_mode_fixed2(struct Camera* c);
 void bhv_ctl_loop()
 {
+    if (sWantBPE)
+        bpe_gen();
+
     if (o->oAction)
     {
         print_defer(20, 220, timerLine, 255, 0, 0);
@@ -1520,3 +1546,49 @@ static const u8* bpe_relations[] = {
     NULL,
     NULL,
 };
+
+static int bpe_arrlen(const u8* arr)
+{
+    int len = 0;
+    while (arr[len])
+    {
+        len++;
+    }
+    return len;
+}
+
+static u8 bpe_pick(const u8* arr)
+{
+    int arrSize = bpe_arrlen(arr);
+    if (1 == arrSize)
+    {
+        return arr[0];
+    }
+
+    return arr[random_u32() % arrSize];
+}
+
+static void bpe_gen(void)
+{
+    while (gMarioStates->kartProgress + 10 > sAmountGenerated)
+    {
+        u8 next = bpe_pick(bpe_relations[sLastGenerated]);
+        sLastGenerated = next;
+        struct SpawnResult result;
+        if (sLastGenerated < 100)
+        {
+            result = spawn_track(sAmountGenerated, &sLastGenerated, 1);
+            sAmountGenerated++;
+        }
+        else
+        {
+            const u8* desc = bpe_pairs[sLastGenerated - 100];
+            result = spawn_track(sAmountGenerated, desc, bpe_arrlen(desc));
+            sAmountGenerated += bpe_arrlen(desc);
+        }
+
+        sLastPart->oPartNext = result.firstPart;
+        result.firstPart->oPartPrev = sLastPart;
+        sLastPart = result.lastPart;
+    }
+}

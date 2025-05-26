@@ -155,6 +155,10 @@ u16 random_u16(void) {
     return tinymt32_generate_u32(&gGlobalRandomState) & 0xFFFF;
 }
 
+u32 random_u32(void) {
+    return tinymt32_generate_u32(&gGlobalRandomState);
+}
+
 // Generate a pseudorandom float in the range [0, 1).
 f32 random_float(void) {
     return tinymt32_generate_float(&gGlobalRandomState);
