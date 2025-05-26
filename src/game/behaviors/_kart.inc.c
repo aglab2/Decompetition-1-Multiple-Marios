@@ -694,11 +694,21 @@ void bhv_ctl_loop()
         }
 
         gMarioStates->health = 0x880;
-        if (gMarioStates->kartProgress > 50.f && gMarioStates->floor && gMarioStates->floor->object)
+        if (gMarioStates->kartProgress > (sWantBPE ? 1.f : 50.f) && gMarioStates->floor && gMarioStates->floor->object)
         {
-            if (0 == gMarioStates->floor->object->oPartIndex
-             || 1 == gMarioStates->floor->object->oPartIndex
-             || 2 == gMarioStates->floor->object->oPartIndex)
+            int clear = 0;
+            if (sWantBPE)
+            {
+                clear = gMarioStates->kartProgress > (sWalkLimit - 2);
+            }
+            else
+            {
+                clear = 0 == gMarioStates->floor->object->oPartIndex
+                     || 1 == gMarioStates->floor->object->oPartIndex
+                     || 2 == gMarioStates->floor->object->oPartIndex;
+            }
+
+            if (clear)
             {
                 sEnableProgress = 0;
                 sPlacement = placement;
@@ -1658,7 +1668,16 @@ static void bpe_gen(void)
 
 static void bpe_feed(void)
 {
-    while (gMarioStates->kartProgress + 7 > sAmountGenerated)
+    f32 maxProgress = gMarioStates->kartProgress;
+    for (int i = 1; i < RACERS_COUNT; i++)
+    {
+        if (gMarioStates[i].kartProgress >= maxProgress)
+        {
+            maxProgress = gMarioStates[i].kartProgress;
+        }
+    }
+
+    while (maxProgress + 7 > sAmountGenerated)
     {
         struct SpawnResult result = spawn_track(sAmountGenerated, uRNGScratch + sAmountGenerated, 1);
         sAmountGenerated++;
