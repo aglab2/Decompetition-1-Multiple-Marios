@@ -102,10 +102,11 @@ while id < 255:
     id += 1
     routes = [ pair.tokenize(route) for route in routes ]
 
+#for pair in pairs:
+#    print(f"{pair.pair[0]} -> {pair.pair[1]}")
 for pair in pairs:
-    print(f"{pair.pair[0]} -> {pair.pair[1]}")
-for pair in pairs:
-    print(f"{pair.id} = {pair.unpacked}")
+    print("static u8 bpe_pair_" + str(pair.id) + "[] = { " + ','.join([str(x) for x in pair.unpacked]) + " ,0 };")
+    #print(f"{pair.id} = {pair.unpacked}")
 for route in routes:
     print(route)
 
@@ -138,7 +139,14 @@ for route in routes:
 
 for i in range(0, 255):
     if i in relations:
-        print(f"{i} -> {relations[i]}")
+        #print(f"{i} -> {relations[i]}")
+        print("static u8 bpe_relations_" + str(i) + "[] = { " + ','.join([str(x) for x in sorted(relations[i])]) + " ,0 };")
+
+for i in range(0, 255):
+    if i in relations:
+        print("bpe_relations_" + str(i) + ",")
+    else:
+        print("NULL,")
 
 start = 3
 while True:
