@@ -314,6 +314,8 @@ static const u8 uRoute280Track[] = {
 , 20, 21, 22, 23, 24, 19, 20, 21, 22, 23, 24, 33, 3, 3
 };
 
+static u8 uRNGScratch[250];
+
 static const u8 uExpertTrack[] = {
    1, 
    
@@ -425,12 +427,40 @@ static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackS
     };
 }
 
+struct WalkLimits
+{
+    f32 minX;
+    f32 maxX;
+    f32 minZ;
+    f32 maxZ;
+};
+
+static int walk_track(struct WalkLimits* limits, const u8* track, int trackSize)
+{
+    for (int i = 0; i < trackSize; i++)
+    {
+        int entry = track[i];
+        const struct PartConfig* partConfig = &sPartConfigs[entry];
+
+        // We need to rotate the shift around spawner.angle around (0, 0)
+        f32 shiftXRotated = partConfig->shift[0] * coss(sSpawnerState.angle) 
+                          + partConfig->shift[2] * sins(sSpawnerState.angle);
+        f32 shiftZRotated = -partConfig->shift[0] * sins(sSpawnerState.angle)
+                          + partConfig->shift[2] * coss(sSpawnerState.angle);
+
+        sSpawnerState.pos[0] += shiftXRotated * SCALE;
+        sSpawnerState.pos[1] += partConfig->shift[1] * SCALE;
+        sSpawnerState.pos[2] += shiftZRotated * SCALE;
+        sSpawnerState.angle += partConfig->turn;
+    }
+}
+
 static int sAmountGenerated = 0;
-static u8 sLastGenerated = 0;
 static struct Object* sLastPart = NULL;
 static u8 sWantBPE = 0;
 
 static void bpe_gen(void);
+static void bpe_feed(void);
 
 void bhv_ctl_init()
 {
@@ -466,14 +496,13 @@ void bhv_ctl_init()
         struct SpawnResult result = spawn_track(0, track, trackSize);
         struct Object* firstPart = result.firstPart;
         struct Object* lastPart = result.lastPart;
-        sWantBPE = 0;
         firstPart->oPartPrev = lastPart;
         lastPart->oPartNext = firstPart;
+        sWantBPE = 0;
     }
     else
     {
-        sAmountGenerated = 2;
-        sLastGenerated = 3;
+        sAmountGenerated = 0;
         sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
         gMarioStates->kartProgress = 0.0f;
         bpe_gen();
@@ -557,7 +586,7 @@ extern void set_camera_mode_fixed2(struct Camera* c);
 void bhv_ctl_loop()
 {
     if (sWantBPE)
-        bpe_gen();
+        bpe_feed();
 
     if (o->oAction)
     {
@@ -1570,23 +1599,33 @@ static u8 bpe_pick(const u8* arr)
 
 static void bpe_gen(void)
 {
-    while (gMarioStates->kartProgress + 10 > sAmountGenerated)
+    int amountGenerated = 0;
+    u8 lastGenerated = 3;
+    while (amountGenerated < 230)
     {
-        u8 next = bpe_pick(bpe_relations[sLastGenerated]);
-        sLastGenerated = next;
-        struct SpawnResult result;
-        if (sLastGenerated < 100)
+        u8 next = bpe_pick(bpe_relations[lastGenerated]);
+        lastGenerated = next;
+        if (lastGenerated < 100)
         {
-            result = spawn_track(sAmountGenerated, &sLastGenerated, 1);
-            sAmountGenerated++;
+            uRNGScratch[amountGenerated] = lastGenerated;
+            amountGenerated++;
         }
         else
         {
-            const u8* desc = bpe_pairs[sLastGenerated - 100];
-            result = spawn_track(sAmountGenerated, desc, bpe_arrlen(desc));
-            sAmountGenerated += bpe_arrlen(desc);
+            const u8* desc = bpe_pairs[lastGenerated - 100];
+            int arrlen = bpe_arrlen(desc);
+            memcpy(uRNGScratch + amountGenerated, desc, arrlen);
+            amountGenerated += arrlen;
         }
+    }
+}
 
+static void bpe_feed(void)
+{
+    while (gMarioStates->kartProgress + 7 > sAmountGenerated)
+    {
+        struct SpawnResult result = spawn_track(sAmountGenerated, uRNGScratch + sAmountGenerated, 1);
+        sAmountGenerated++;
         sLastPart->oPartNext = result.firstPart;
         result.firstPart->oPartPrev = sLastPart;
         sLastPart = result.lastPart;
