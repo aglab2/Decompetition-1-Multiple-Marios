@@ -360,6 +360,7 @@ static struct SpawnerState sSpawnerState;
 
 extern s16 sSourceWarpNodeId;
 static u8 sEnableProgress = 1;
+static u8 sWalkLimit = 0;
 
 #define oCtlFinalTime oF4
 
@@ -427,16 +428,24 @@ static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackS
     };
 }
 
-struct WalkLimits
+struct WalkResult
 {
-    f32 minX;
-    f32 maxX;
-    f32 minZ;
-    f32 maxZ;
+    f32 x;
+    f32 z;
+    int walked;
 };
 
-static int walk_track(struct WalkLimits* limits, const u8* track, int trackSize)
+static struct WalkResult walk_track(const u8* track, int trackSize)
 {
+    f32 minX = 0.f, maxX = 0.f;
+    f32 minZ = 0.f, maxZ = 0.f;
+
+    // Account for walk before entering the track
+    if (sSpawnerState.pos[0] < minX) minX = sSpawnerState.pos[0];
+    if (sSpawnerState.pos[0] > maxX) maxX = sSpawnerState.pos[0];
+    if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
+    if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
+
     for (int i = 0; i < trackSize; i++)
     {
         int entry = track[i];
@@ -452,7 +461,19 @@ static int walk_track(struct WalkLimits* limits, const u8* track, int trackSize)
         sSpawnerState.pos[1] += partConfig->shift[1] * SCALE;
         sSpawnerState.pos[2] += shiftZRotated * SCALE;
         sSpawnerState.angle += partConfig->turn;
+
+        if (sSpawnerState.pos[0] < minX) minX = sSpawnerState.pos[0];
+        if (sSpawnerState.pos[0] > maxX) maxX = sSpawnerState.pos[0];
+        if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
+        if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
+
+        if ((maxX - minX > 63000.f) || (maxZ - minZ > 63000.f))
+        {
+            return (struct WalkResult){ -(maxX + minX) / 2.f, -(maxZ + minZ) / 2.f, i };
+        }
     }
+
+    return (struct WalkResult){ 0, 0, trackSize };
 }
 
 static int sAmountGenerated = 0;
@@ -502,10 +523,23 @@ void bhv_ctl_init()
     }
     else
     {
-        sAmountGenerated = 0;
-        sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
-        gMarioStates->kartProgress = 0.0f;
         bpe_gen();
+
+        // This will help the walk so initial platform in sBPETrack is not too far away
+        sSpawnerState.pos[2] = -4000.f;
+        struct WalkResult walk = walk_track(uRNGScratch, sizeof(uRNGScratch));
+
+        sSpawnerState.pos[0] = gMarioStates->pos[0] = o->oPosX = walk.x;
+        sSpawnerState.pos[1] = 0;
+        sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.z;
+        sSpawnerState.angle = 0;
+        sWalkLimit = walk.walked;
+
+        sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
+
+        gMarioStates->kartProgress = 0.0f;
+
+        sAmountGenerated = 0;
         sWantBPE = 1;
     }
 
@@ -682,6 +716,8 @@ void bhv_ctl_loop()
     // print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
     // print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
     // print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
+
+    print_text_fmt_int(20, 180, "P %d", sWalkLimit);
 }
 
 void bhv_part_loop()
