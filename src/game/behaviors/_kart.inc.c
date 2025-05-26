@@ -462,6 +462,9 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
         sSpawnerState.pos[2] += shiftZRotated * SCALE;
         sSpawnerState.angle += partConfig->turn;
 
+        f32 prevMinX = minX, prevMaxX = maxX;
+        f32 prevMinZ = minZ, prevMaxZ = maxZ;
+
         if (sSpawnerState.pos[0] < minX) minX = sSpawnerState.pos[0];
         if (sSpawnerState.pos[0] > maxX) maxX = sSpawnerState.pos[0];
         if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
@@ -469,7 +472,7 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
 
         if ((maxX - minX > 63000.f) || (maxZ - minZ > 63000.f))
         {
-            return (struct WalkResult){ -(maxX + minX) / 2.f, -(maxZ + minZ) / 2.f, i };
+            return (struct WalkResult){ -(prevMaxX + prevMinX) / 2.f, -(prevMaxZ + prevMinZ) / 2.f, i };
         }
     }
 
