@@ -358,6 +358,8 @@ static struct SpawnerState sSpawnerState;
 
 #define SCALE 0.5f
 
+#define WALK_LIMIT_SAFEGAP 10
+
 extern s16 sSourceWarpNodeId;
 static u8 sEnableProgress = 1;
 static u8 sWalkLimit = 0;
@@ -470,13 +472,13 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
         if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
         if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
 
-        if ((maxX - minX > 100000.f) || (maxZ - minZ > 100000.f))
+        if ((maxX - minX > 120000.f) || (maxZ - minZ > 120000.f))
         {
             return (struct WalkResult){ -(prevMaxX + prevMinX) / 2.f, -(prevMaxZ + prevMinZ) / 2.f, i };
         }
     }
 
-    return (struct WalkResult){ 0, 0, trackSize };
+    return (struct WalkResult){  -(maxX + minX) / 2.f, -(maxZ + minZ) / 2.f, trackSize };
 }
 
 static int sAmountGenerated = 0;
@@ -536,7 +538,7 @@ void bhv_ctl_init()
         sSpawnerState.pos[1] = 0;
         sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.z;
         sSpawnerState.angle = 0;
-        sWalkLimit = walk.walked;
+        sWalkLimit = walk.walked - WALK_LIMIT_SAFEGAP;
 
         sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
 
@@ -731,9 +733,9 @@ void bhv_ctl_loop()
     // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
     // print_text_fmt_int(120, 40, "%d", (int) (1000 * gMarioStates->floor->normal.y));
 
-    // print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
-    // print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
-    // print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
+    print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
+    print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
+    print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
 
     print_text_fmt_int(20, 180, "P %d", sWalkLimit);
 }
@@ -1690,6 +1692,11 @@ static void bpe_feed(void)
 
     while (maxProgress + 7 > sAmountGenerated)
     {
+        if (sAmountGenerated >= sWalkLimit + WALK_LIMIT_SAFEGAP)
+        {
+            return;
+        }
+
         struct SpawnResult result = spawn_track(sAmountGenerated, uRNGScratch + sAmountGenerated, 1);
         sAmountGenerated++;
         sLastPart->oPartNext = result.firstPart;

@@ -347,8 +347,8 @@ struct Surface {
     /*0x02*/ TerrainData force;
     /*0x04*/ s8 flags;
     /*0x05*/ RoomData room;
-    /*0x06*/ s16 lowerY;
-    /*0x08*/ s16 upperY;
+    /*0x06*/ Collision lowerY;
+    /*0x08*/ Collision upperY;
     /*0x0A*/ Vec3t vertex1;
     /*0x10*/ Vec3t vertex2;
     /*0x16*/ Vec3t vertex3;

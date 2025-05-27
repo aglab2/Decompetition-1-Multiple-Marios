@@ -39,7 +39,7 @@
  * Don't touch the stuff past this point unless you know what you're doing!
  **************************************************************************/
 
-#define LEVEL_BOUNDARY_MAX 0x10000L // 32768
+#define LEVEL_BOUNDARY_MAX 0x10000 // 32768
 #define CELL_SIZE          0x200   //  1024, NUM_CELLS = 64
 #ifndef WORLD_SCALE
     #define WORLD_SCALE 4

@@ -238,7 +238,7 @@ static struct Surface *read_surface_data(TerrainData *vertexData, TerrainData **
     Vec3t v[3];
     Vec3f n;
     Vec3t offset;
-    s16 min, max;
+    s32 min, max;
 
     vec3_scale_dest(offset, (*vertexIndices), 3);
 
@@ -271,7 +271,7 @@ static struct Surface *read_surface_data(TerrainData *vertexData, TerrainData **
 
     surface->originOffset = -vec3_dot(n, v[0]);
 
-    min_max_3s(v[0][1], v[1][1], v[2][1], &min, &max);
+    min_max_3i(v[0][1], v[1][1], v[2][1], &min, &max);
     surface->lowerY = (min - SURFACE_VERTICAL_BUFFER);
     surface->upperY = (max + SURFACE_VERTICAL_BUFFER);
 

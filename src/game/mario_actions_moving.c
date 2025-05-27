@@ -163,8 +163,11 @@ void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
     if (m->kartVelFuzz)
         additiveVel = 2.f *(absf(m->kartVelFuzz) - 7.f);
 
-    m->slideVelX += (40.f + additiveVel) * sins(m->faceAngle[1]);
-    m->slideVelZ += (40.f + additiveVel) * coss(m->faceAngle[1]);
+    if (gCurrLevelNum == LEVEL_EXAMPLE)
+    {
+        m->slideVelX += (40.f + additiveVel) * sins(m->faceAngle[1]);
+        m->slideVelZ += (40.f + additiveVel) * coss(m->faceAngle[1]);
+    }
 
     m->slideVelX *= lossFactor;
     m->slideVelZ *= lossFactor;
