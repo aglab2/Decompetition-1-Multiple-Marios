@@ -83,6 +83,7 @@ void coop_give_control_to_next(void) {
 /*
 Deletes the Mario
 */
+extern s16 s8DirModeYawOffset;
 extern s16 kart_angle(int kartId);
 int coop_delete_mario(struct MarioState * m) {
     m->pos[0] = m->kartSafePos[0];
@@ -96,7 +97,10 @@ int coop_delete_mario(struct MarioState * m) {
     m->faceAngle[1] = m->kartSafeAngle + 0x8000 + kart_angle(m->kartId) / 2;
     m->faceAngle[2] = 0;
     if (m == gMarioState)
+    {
         reset_camera(gCurrentArea->camera);
+        s8DirModeYawOffset = (m->faceAngle[1] + 0x9000) & (0xC000);
+    }
 
     return TRUE;
 }

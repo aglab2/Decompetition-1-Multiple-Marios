@@ -432,14 +432,14 @@ static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackS
 
 struct WalkResult
 {
-    f32 x;
-    f32 z;
+    Vec3f center;
     int walked;
 };
 
 static struct WalkResult walk_track(const u8* track, int trackSize)
 {
     f32 minX = 0.f, maxX = 0.f;
+    f32 minY = 0.f, maxY = 0.f;
     f32 minZ = 0.f, maxZ = 0.f;
 
     // Account for walk before entering the track
@@ -465,20 +465,27 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
         sSpawnerState.angle += partConfig->turn;
 
         f32 prevMinX = minX, prevMaxX = maxX;
+        f32 prevMinY = minY, prevMaxY = maxY;
         f32 prevMinZ = minZ, prevMaxZ = maxZ;
 
         if (sSpawnerState.pos[0] < minX) minX = sSpawnerState.pos[0];
         if (sSpawnerState.pos[0] > maxX) maxX = sSpawnerState.pos[0];
+        if (sSpawnerState.pos[1] < minY) minY = sSpawnerState.pos[1];
+        if (sSpawnerState.pos[2] > maxY) maxY = sSpawnerState.pos[1];
         if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
         if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
 
         if ((maxX - minX > 120000.f) || (maxZ - minZ > 120000.f))
         {
-            return (struct WalkResult){ -(prevMaxX + prevMinX) / 2.f, -(prevMaxZ + prevMinZ) / 2.f, i };
+            return (struct WalkResult){ { -(prevMaxX + prevMinX) / 2.f
+                                        , -(prevMaxY + prevMinY) / 2.f
+                                        , -(prevMaxZ + prevMinZ) / 2.f }, i };
         }
     }
 
-    return (struct WalkResult){  -(maxX + minX) / 2.f, -(maxZ + minZ) / 2.f, trackSize };
+    return (struct WalkResult){ { -(maxX + minX) / 2.f
+                                , -(maxY + minY) / 2.f
+                                , -(maxZ + minZ) / 2.f }, trackSize };
 }
 
 static int sAmountGenerated = 0;
@@ -534,9 +541,9 @@ void bhv_ctl_init()
         sSpawnerState.pos[2] = -4000.f;
         struct WalkResult walk = walk_track(uRNGScratch, sizeof(uRNGScratch));
 
-        sSpawnerState.pos[0] = gMarioStates->pos[0] = o->oPosX = walk.x;
-        sSpawnerState.pos[1] = 0;
-        sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.z;
+        sSpawnerState.pos[0] = gMarioStates->pos[0] = o->oPosX = walk.center[0];
+        sSpawnerState.pos[1] = gMarioStates->pos[1] = o->oPosY = walk.center[1];
+        sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.center[2];
         sSpawnerState.angle = 0;
         sWalkLimit = walk.walked - WALK_LIMIT_SAFEGAP;
 
