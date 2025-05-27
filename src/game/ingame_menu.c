@@ -2113,9 +2113,9 @@ s32 render_course_complete_screen(void) {
             break;
 
         case DIALOG_STATE_VERTICAL:
-            shade_screen();
-            render_course_complete_lvl_info_and_hud_str();
-            render_save_confirmation(100, 86, &gDialogLineNum, 20);
+            // shade_screen();
+            // render_course_complete_lvl_info_and_hud_str();
+            // render_save_confirmation(100, 86, &gDialogLineNum, 20);
             gDialogLineNum = 1;
 
             if (gCourseDoneMenuTimer > 97) {
