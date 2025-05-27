@@ -743,7 +743,10 @@ void bhv_part_loop()
     o->oDrawingDistance = 30000.0f;
     
     if (o->collisionData)
-        load_object_static_model();
+    {
+        load_object_static_model();        
+        obj_update_gfx_pos_and_angle(o);
+    }
 }
 
 static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
