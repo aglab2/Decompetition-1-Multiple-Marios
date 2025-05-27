@@ -223,12 +223,6 @@ s32 find_wall_collisions(struct WallCollisionData *colData) {
 
     for (s32 cellX = minCellX; cellX <= maxCellX; cellX++) {
         for (s32 cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
-            if (!(gCollisionFlags & COLLISION_FLAG_EXCLUDE_DYNAMIC)) {
-                // Check for surfaces belonging to objects.
-                node = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS];
-                numCollisions += find_wall_collisions_from_list(node, colData);
-            }
-
             // Check for surfaces that are a part of level geometry.
             node = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS];
             numCollisions += find_wall_collisions_from_list(node, colData);
@@ -364,26 +358,9 @@ f32 find_ceil(f32 posX, f32 posY, f32 posZ, struct Surface **pceil) {
     struct Surface *ceil = NULL;
     struct Surface *dynamicCeil = NULL;
 
-    s32 includeDynamic = !(gCollisionFlags & COLLISION_FLAG_EXCLUDE_DYNAMIC);
-
-    if (includeDynamic) {
-        // Check for surfaces belonging to objects.
-        surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS];
-        dynamicCeil = find_ceil_from_list(surfaceList, x, y, z, &dynamicHeight);
-
-        // In the next check, only check for ceilings lower than the previous check.
-        height = dynamicHeight;
-    }
-
     // Check for surfaces that are a part of level geometry.
     surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS];
     ceil = find_ceil_from_list(surfaceList, x, y, z, &height);
-
-    // Use the lower ceiling.
-    if (includeDynamic && height >= dynamicHeight) {
-        ceil   = dynamicCeil;
-        height = dynamicHeight;
-    }
 
     // To prevent accidentally leaving the floor tangible, stop checking for it.
     gCollisionFlags &= ~(COLLISION_FLAG_RETURN_FIRST | COLLISION_FLAG_EXCLUDE_DYNAMIC | COLLISION_FLAG_INCLUDE_INTANGIBLE);
@@ -552,29 +529,6 @@ f32 find_floor_height(f32 x, f32 y, f32 z) {
 }
 
 /**
- * Find the highest dynamic floor under a given position. Perhaps originally static
- * and dynamic floors were checked separately.
- */
-f32 unused_find_dynamic_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
-    f32 floorHeight = FLOOR_LOWER_LIMIT;
-
-    // Would normally cause PUs, but dynamic floors unload at that range.
-    s32 x = xPos;
-    s32 y = yPos;
-    s32 z = zPos;
-
-    // Each level is split into cells to limit load, find the appropriate cell.
-    s32 cellX = GET_CELL_COORD(x);
-    s32 cellZ = GET_CELL_COORD(z);
-
-    struct SurfaceNode *surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
-
-    *pfloor = find_floor_from_list(surfaceList, x, y, z, &floorHeight);
-
-    return floorHeight;
-}
-
-/**
  * Find the highest floor under a given position and return the height.
  */
 f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
@@ -608,26 +562,9 @@ f32 find_floor(f32 xPos, f32 yPos, f32 zPos, struct Surface **pfloor) {
     struct Surface *floor = NULL;
     struct Surface *dynamicFloor = NULL;
 
-    s32 includeDynamic = !(gCollisionFlags & COLLISION_FLAG_EXCLUDE_DYNAMIC);
-
-    if (includeDynamic) {
-        // Check for surfaces belonging to objects.
-        surfaceList = gDynamicSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
-        dynamicFloor = find_floor_from_list(surfaceList, x, y, z, &dynamicHeight);
-
-        // In the next check, only check for floors higher than the previous check.
-        height = dynamicHeight;
-    }
-
     // Check for surfaces that are a part of level geometry.
     surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
     floor = find_floor_from_list(surfaceList, x, y, z, &height);
-
-    // Use the higher floor.
-    if (includeDynamic && height <= dynamicHeight) {
-        floor  = dynamicFloor;
-        height = dynamicHeight;
-    }
 
     // To prevent accidentally leaving the floor tangible, stop checking for it.
     gCollisionFlags &= ~(COLLISION_FLAG_RETURN_FIRST | COLLISION_FLAG_EXCLUDE_DYNAMIC | COLLISION_FLAG_INCLUDE_INTANGIBLE);

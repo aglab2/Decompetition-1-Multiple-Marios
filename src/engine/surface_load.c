@@ -25,7 +25,6 @@
  * the 16x16 cells that each level is split into.
  */
 SpatialPartitionCell gStaticSurfacePartition[NUM_CELLS][NUM_CELLS];
-SpatialPartitionCell gDynamicSurfacePartition[NUM_CELLS][NUM_CELLS];
 struct CellCoords {
     u8 z;
     u8 x;
@@ -120,7 +119,7 @@ static void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surfac
     newNode->surface = surface;
 
     if (dynamic) {
-        list = &gDynamicSurfacePartition[cellZ][cellX][listIndex];
+        list = NULL;
         if (sNumCellsUsed >= sizeof(sCellsUsed) / sizeof(struct CellCoords)) {
             sClearAllCells = TRUE;
         } else {
@@ -554,13 +553,6 @@ void clear_dynamic_surfaces(void) {
         gSurfacesAllocated = gNumStaticSurfaces;
         gSurfaceNodesAllocated = gNumStaticSurfaceNodes;
         gDynamicSurfacePoolEnd = gDynamicSurfacePool;
-        if (sClearAllCells) {
-            bzero(gDynamicSurfacePartition, sizeof(gDynamicSurfacePartition));
-        } else {
-            for (u32 i = 0; i < sNumCellsUsed; i++) {
-                gDynamicSurfacePartition[sCellsUsed[i].z][sCellsUsed[i].x][sCellsUsed[i].partition] = NULL;
-            }
-        }
         sNumCellsUsed = 0;
         sClearAllCells = FALSE;
     }
