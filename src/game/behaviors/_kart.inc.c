@@ -470,7 +470,7 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
         if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
         if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
 
-        if ((maxX - minX > 63000.f) || (maxZ - minZ > 63000.f))
+        if ((maxX - minX > 100000.f) || (maxZ - minZ > 100000.f))
         {
             return (struct WalkResult){ -(prevMaxX + prevMinX) / 2.f, -(prevMaxZ + prevMinZ) / 2.f, i };
         }
@@ -860,11 +860,11 @@ void coop_npc_behavior(struct MarioState * m)
         }
         else
         {
-            struct Object* nextPart1 = currPart->oPartNext;
+            struct Object* nextPart1 = currPart->oPartNext ?: currPart;
             Vec3f loc1;
             get_loc_fuzzed(loc1, nextPart1, m->kartLocFuzz);
 
-            struct Object* nextPart2 = nextPart1->oPartNext;
+            struct Object* nextPart2 = nextPart1->oPartNext ?: nextPart1;
             Vec3f loc2;
             get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
 
