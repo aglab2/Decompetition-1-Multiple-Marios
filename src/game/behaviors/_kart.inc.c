@@ -28,8 +28,8 @@ static struct SpawnerState sSpawnerState;
 #define WALK_LIMIT_SAFEGAP 10
 
 extern s16 sSourceWarpNodeId;
+static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
-static u8 sWalkLimit = 0;
 
 #define oCtlFinalTime oF4
 
@@ -166,15 +166,9 @@ static void bpe_feed(void);
 
 void bhv_ctl_init()
 {
-retry:
     o->oCtlFinalTime = 0;
     sEnableProgress = 1;
     gMarioStates->faceAngle[1] = 0x8000;
-
-    sSpawnerState.pos[0] = 0;
-    sSpawnerState.pos[1] = 0;
-    sSpawnerState.pos[2] = 0;
-    sSpawnerState.angle = 0;
 
     const u8* track = NULL;
     int trackSize = 10;
@@ -194,6 +188,12 @@ retry:
             break;
     }
 
+retry:
+    sSpawnerState.pos[0] = 0;
+    sSpawnerState.pos[1] = 0;
+    sSpawnerState.pos[2] = 0;
+    sSpawnerState.angle = 0;
+
     if (track)
     {
         struct SpawnResult result = spawn_track(0, track, trackSize);
@@ -209,7 +209,8 @@ retry:
 
         // This will help the walk so initial platform in sBPETrack is not too far away
         sSpawnerState.pos[2] = -4000.f;
-        struct WalkResult walk = walk_track(uRNGScratch, sizeof(uRNGScratch));
+        // reduce walk to 250 because there might be some garbage in the end
+        struct WalkResult walk = walk_track(uRNGScratch, 250);
 
         sSpawnerState.pos[0] = gMarioStates->pos[0] = o->oPosX = walk.center[0];
         sSpawnerState.pos[1] = gMarioStates->pos[1] = o->oPosY = walk.center[1];
