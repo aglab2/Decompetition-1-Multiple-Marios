@@ -301,7 +301,7 @@ SECTIONS
       . = ALIGN(0x40);
    }
    END_NOLOAD(sbss)
-   . = _engineSegmentBssEnd;
+
    BEGIN_NOLOAD(framebuffers)
    {
       BUILD_DIR/src/buffers/framebuffers.o(.bss*);

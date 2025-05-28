@@ -41,6 +41,8 @@ struct SpawnResult
     struct Object* lastPart;
 };
 
+static u8 uRNGScratch[270];
+
 static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackSize)
 {
     // spawn the track
@@ -164,6 +166,7 @@ static void bpe_feed(void);
 
 void bhv_ctl_init()
 {
+retry:
     o->oCtlFinalTime = 0;
     sEnableProgress = 1;
     gMarioStates->faceAngle[1] = 0x8000;
@@ -212,6 +215,10 @@ void bhv_ctl_init()
         sSpawnerState.pos[1] = gMarioStates->pos[1] = o->oPosY = walk.center[1];
         sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.center[2];
         sSpawnerState.angle = 0;
+        // this is extremely unlikely to happen
+        if (walk.walked < 100)
+            goto retry;
+
         sWalkLimit = walk.walked - WALK_LIMIT_SAFEGAP;
 
         sLastPart = spawn_track(0, sBPETrack, sizeof(sBPETrack)).lastPart;
@@ -383,7 +390,7 @@ void bhv_ctl_loop()
             int clear = 0;
             if (sWantBPE)
             {
-                clear = gMarioStates->kartProgress > (sWalkLimit - 2);
+                clear = gMarioStates->kartProgress > (sWalkLimit - 2*WALK_LIMIT_SAFEGAP);
             }
             else
             {
@@ -710,7 +717,7 @@ static void bpe_gen(void)
 {
     int amountGenerated = 0;
     u8 lastGenerated = 3;
-    while (amountGenerated < 230)
+    while (amountGenerated < 250)
     {
         u8 next = bpe_pick(bpe_relations[lastGenerated]);
         lastGenerated = next;

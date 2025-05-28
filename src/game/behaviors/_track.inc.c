@@ -310,8 +310,6 @@ static const u8 uRoute280Track[] = {
 , 20, 21, 22, 23, 24, 19, 20, 21, 22, 23, 24, 33, 3, 3
 };
 
-static u8 uRNGScratch[250];
-
 static const u8 uExpertTrack[] = {
    1, 
    
