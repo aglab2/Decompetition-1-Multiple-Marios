@@ -217,7 +217,7 @@ retry:
         sSpawnerState.pos[2] = gMarioStates->pos[2] = o->oPosZ = walk.center[2];
         sSpawnerState.angle = 0;
         // this is extremely unlikely to happen
-        if (walk.walked < 100)
+        if (walk.walked < 150)
             goto retry;
 
         sWalkLimit = walk.walked - WALK_LIMIT_SAFEGAP;
@@ -369,7 +369,7 @@ void bhv_ctl_loop()
             print_defer(20, 220, timerLine, 255, 0, 0);
         }
 
-        print_text_fmt_int(20, 20, "%d", (int) (gMarioStates[0].kartProgress * 1000), 0);
+        // print_text_fmt_int(20, 20, "%d", (int) (gMarioStates[0].kartProgress * 1000), 0);
         int placement = 1;
         for (int i = 1; i < RACERS_COUNT; i++)
         {
@@ -415,11 +415,11 @@ void bhv_ctl_loop()
     // print_text_fmt_int(120, 20, "%d", gMarioStates->intendedYaw);
     // print_text_fmt_int(120, 40, "%d", (int) (1000 * gMarioStates->floor->normal.y));
 
-    print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
-    print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
-    print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
+    // print_text_fmt_int(160, 20, "X %d", (int) gMarioStates->pos[0]);
+    // print_text_fmt_int(160, 40, "Y %d", (int) gMarioStates->pos[1]);
+    // print_text_fmt_int(160, 60, "Z %d", (int) gMarioStates->pos[2]);
 
-    print_text_fmt_int(20, 180, "P %d", sWalkLimit);
+    // print_text_fmt_int(20, 180, "P %d", sWalkLimit);
 }
 
 void bhv_part_loop()
@@ -683,7 +683,7 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
         f32 divided = diffUnrotZ / (partConfig->shift[2] * SCALE);
         if (m == gMarioStates)
         {
-            print_text_fmt_int(20, 40, "D %d", (int) (divided * 1000));
+            // print_text_fmt_int(20, 40, "D %d", (int) (divided * 1000));
         }
         progress = CLAMP(divided, 0.f, 0.9999f);
     }
