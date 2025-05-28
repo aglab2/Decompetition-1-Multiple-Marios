@@ -2053,12 +2053,18 @@ const Gfx mario_face_back_hair_cap_on_dl[] = {
     gsSPEndDisplayList(),
 };
 
+#define	G_CC_AGLAB                   SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0
+
 // 0x04011960 - 0x040119A0
 const Gfx mario_face_cap_on_dl[] = {
     gsSPDisplayList(mario_face_part_cap_on_dl),
-    gsSPLightColor(LIGHT_1, 0xff0000ff),
-    gsSPLightColor(LIGHT_2, 0x7f0000ff),
+    gsSPLightColor(LIGHT_1, 0xffffffff),
+    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_AGLAB, G_CC_AGLAB),
     gsSPDisplayList(mario_face_cap_dl),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_SHADEFADEA, G_CC_SHADEFADEA),
     gsSPLightColor(LIGHT_1, 0x730600ff),
     gsSPLightColor(LIGHT_2, 0x390300ff),
     gsSPDisplayList(mario_face_back_hair_cap_on_dl),

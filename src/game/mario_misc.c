@@ -625,6 +625,39 @@ Gfx *geo_render_mirror_mario(s32 callContext, struct GraphNode *node, UNUSED Mat
     return NULL;
 }
 
+static int row(int i)
+{
+    i--;
+    if (i < 2)
+    {
+        return 6;
+    }
+    else if (i < 8)
+    {
+        return 5;
+    }
+    else if (i < 13)
+    {
+        return 4;
+    }
+    else if (i < 19)
+    {
+        return 3;
+    }
+    else if (i < 24)
+    {
+        return 2;
+    }
+    else if (i < 30)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 /**
  * Since Mirror Mario has an x scale of -1, the mesh becomes inside out.
  * This node corrects that by changing the culling mode accordingly.
@@ -633,18 +666,34 @@ Gfx *geo_mirror_mario_backface_culling(s32 callContext, struct GraphNode *node, 
     struct GraphNodeGenerated *asGenerated = (struct GraphNodeGenerated *) node;
     Gfx *gfx = NULL;
 
-    if (callContext == GEO_CONTEXT_RENDER && gCurGraphNodeObject == &gMirrorMario) {
+    struct Object *obj = (struct Object *) gCurGraphNodeObject;
+    if (callContext == GEO_CONTEXT_RENDER && obj->oPlayerID) {
         gfx = alloc_display_list(3 * sizeof(*gfx));
-
-        if (asGenerated->parameter == 0) {
-            gSPClearGeometryMode(&gfx[0], G_CULL_BACK);
-            gSPSetGeometryMode(&gfx[1], G_CULL_FRONT);
-            gSPEndDisplayList(&gfx[2]);
-        } else {
-            gSPClearGeometryMode(&gfx[0], G_CULL_FRONT);
-            gSPSetGeometryMode(&gfx[1], G_CULL_BACK);
-            gSPEndDisplayList(&gfx[2]);
+        switch (row(obj->oPlayerID))
+        {
+            case 0:
+                gDPSetPrimColor(&gfx[0], 255, 255, 135, 206, 235, 255);
+                break;
+            case 1:
+                gDPSetPrimColor(&gfx[0], 255, 255, 0, 0, 200, 255);
+                break;
+            case 2:
+                gDPSetPrimColor(&gfx[0], 255, 255, 0, 191, 255, 255);
+                break;
+            case 3:
+                gDPSetPrimColor(&gfx[0], 255, 255, 70, 130, 180, 255);
+                break;
+            case 4:
+                gDPSetPrimColor(&gfx[0], 255, 255, 65, 105, 225, 255);
+                break;
+            case 5:
+                gDPSetPrimColor(&gfx[0], 255, 255, 30, 144, 255, 255);
+                break;
+            case 6:
+                gDPSetPrimColor(&gfx[0], 255, 255, 25, 25, 112, 255);
+                break;
         }
+        gSPEndDisplayList(&gfx[1]);
         SET_GRAPH_NODE_LAYER(asGenerated->fnNode.node.flags, LAYER_OPAQUE);
     }
     return gfx;
