@@ -47,9 +47,20 @@ s32 find_wall_collisions(struct WallCollisionData *colData);
 void resolve_and_return_wall_collisions(Vec3f pos, f32 offset, f32 radius, struct WallCollisionData *collisionData);
 f32 find_ceil(f32 posX, f32 posY, f32 posZ, struct Surface **pceil);
 
+extern s32 check_within_ceil_triangle_bounds(s32 x, s32 z, struct Surface *surf);
 // Finds the ceiling from a vec3f and a minimum height (with 3 unit vertical buffer).
-ALWAYS_INLINE f32 find_mario_ceil(Vec3f pos, f32 height, struct Surface **ceil) {
-    return find_ceil(pos[0], MAX(height, pos[1]) + 3.0f, pos[2], ceil);
+ALWAYS_INLINE f32 find_mario_ceil(struct MarioState* m, Vec3f pos, f32 height, struct Surface **ceil) {
+    f32 x = pos[0];
+    f32 y = MAX(height, pos[1]) + 3.0f;
+    f32 z = pos[2];
+    struct Surface *cache = m->ceil;
+
+    if (cache && check_within_ceil_triangle_bounds(x, z, cache)) {
+        *ceil = cache;
+        return get_surface_height_at_location(x, z, cache);
+    }
+
+    return find_ceil(x, y, z, ceil);
 }
 
 f32 find_floor_height(f32 x, f32 y, f32 z);

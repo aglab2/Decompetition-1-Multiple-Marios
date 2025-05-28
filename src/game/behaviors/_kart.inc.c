@@ -196,6 +196,8 @@ struct PartConfig
 #define TURN_LEFT 0x4000
 #define TURN_RIGHT -0x4000
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 static const struct PartConfig sPartConfigs[] = {
     /* 0 */ { },
     /* 1 */ { { 0, 0, -4000 } },
@@ -283,6 +285,7 @@ static const struct PartConfig sPartConfigs[] = {
     /* 83 */ { { -828, 0, -1172 }, },
     /* 84 */ { {  828, 0, -1172 }, },
 };
+#pragma GCC diagnostic pop
 
 static const u8 uRoute101Track[] = {
 3, 1, 3, 3, 3, 35, 3, 3, 3, 3, 34, 3, 3, 19, 12, 12, 20, 3, 3, 3, 33
