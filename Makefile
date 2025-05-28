@@ -879,7 +879,7 @@ $(BUILD_DIR)/src/game/texscroll.o: src/game/texscroll.c
 	$(V)$(CC) -c -G 0 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/game/texscroll.d  -o $@ $<
 $(BUILD_DIR)/src/%.o: src/%.c
 	$(call print,Compiling with sdata:,$<,$@)
-	$(V)$(CC) -c -G 1024 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/$*.d  -o $@ $<
+	$(V)$(CC) -c -G 2000 $(CFLAGS) -MMD -MF $(BUILD_DIR)/src/$*.d  -o $@ $<
 
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
