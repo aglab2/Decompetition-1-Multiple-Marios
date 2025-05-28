@@ -101,12 +101,12 @@ extern f32 gStereoPanVolume[128];
 #endif
 extern f32 gDefaultPanVolume[128];
 
-extern f32 gVolRampingLhs136[1 << VOL_RAMPING_EXPONENT];
-extern f32 gVolRampingRhs136[1 << VOL_RAMPING_EXPONENT];
-extern f32 gVolRampingLhs144[1 << VOL_RAMPING_EXPONENT];
-extern f32 gVolRampingRhs144[1 << VOL_RAMPING_EXPONENT];
-extern f32 gVolRampingLhs128[1 << VOL_RAMPING_EXPONENT];
-extern f32 gVolRampingRhs128[1 << VOL_RAMPING_EXPONENT];
+extern f32 gVolRampingLhs136[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
+extern f32 gVolRampingRhs136[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
+extern f32 gVolRampingLhs144[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
+extern f32 gVolRampingRhs144[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
+extern f32 gVolRampingLhs128[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
+extern f32 gVolRampingRhs128[1 << VOL_RAMPING_EXPONENT] __attribute__((section(".data")));
 
 // non-constant .data
 extern s16 gTatumsPerBeat;

@@ -30,9 +30,9 @@ struct CellCoords {
     u8 x;
     u8 partition;
 };
-struct CellCoords sCellsUsed[NUM_CELLS];
-u16 sNumCellsUsed;
-u8 sClearAllCells;
+static struct CellCoords sCellsUsed[NUM_CELLS];
+static u16 sNumCellsUsed;
+static u8 sClearAllCells;
 
 /**
  * Pools of data that can contain either surface nodes or surfaces.

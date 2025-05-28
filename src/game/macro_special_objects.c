@@ -84,6 +84,7 @@ struct LoadedMacroObject {
 };
 
 void spawn_macro_objects(s32 areaIndex, MacroObject *macroObjList) {
+    return;
     s32 presetID;
     struct LoadedMacroObject macroObject;
     struct Object *newObj;
@@ -184,6 +185,8 @@ void spawn_macro_objects_hardcoded(s32 areaIndex, MacroObject *macroObjList) {
 }
 
 void spawn_special_objects(s32 areaIndex, TerrainData **specialObjList) {
+    return;
+
     s32 i;
     s32 offset;
     Vec3s pos;
