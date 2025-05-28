@@ -661,8 +661,8 @@ void apply_gravity(struct MarioState *m) {
         }
     } else {
         m->vel[1] -= 4.0f;
-        if (m->vel[1] < -75.0f) {
-            m->vel[1] = -75.0f;
+        if (m->vel[1] < -115.0f) {
+            m->vel[1] = -115.0f;
         }
     }
 }

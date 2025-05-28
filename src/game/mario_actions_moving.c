@@ -148,6 +148,7 @@ s32 set_triple_jump_action(struct MarioState *m, UNUSED u32 action, UNUSED u32 a
     return FALSE;
 }
 
+extern s16 sSourceWarpNodeId;
 void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
     s32 newFacingDYaw;
     s16 facingDYaw;
@@ -162,6 +163,17 @@ void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
     f32 additiveVel = 0;
     if (m->kartVelFuzz)
         additiveVel = 2.f *(absf(m->kartVelFuzz) - 7.f);
+
+    f32 rubberbanding = 0.f;
+    if (sSourceWarpNodeId == 0x30)
+    {
+        // rubberband a tiny bit for the final level
+        f32 diffProgress = gMarioStates->kartProgress - m->kartProgress + 0.25f;
+        if (diffProgress > 0)
+            rubberbanding = CLAMP(diffProgress * diffProgress * 0.33f, 0.f, 10.f);
+
+        additiveVel += rubberbanding;
+    }
 
     if (gCurrLevelNum == LEVEL_EXAMPLE)
     {
@@ -206,9 +218,10 @@ void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
 
     //! Speed is capped a frame late (butt slide HSG)
     m->forwardVel = sqrtf(sqr(m->slideVelX) + sqr(m->slideVelZ));
-    if (m->forwardVel > 100.0f) {
-        m->slideVelX = m->slideVelX * 100.0f / m->forwardVel;
-        m->slideVelZ = m->slideVelZ * 100.0f / m->forwardVel;
+    f32 limit = 100.0f + rubberbanding;
+    if (m->forwardVel > limit) {
+        m->slideVelX = m->slideVelX * limit / m->forwardVel;
+        m->slideVelZ = m->slideVelZ * limit / m->forwardVel;
     }
 
     if (newFacingDYaw < -0x4000 || newFacingDYaw > 0x4000) {

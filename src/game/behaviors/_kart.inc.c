@@ -748,7 +748,7 @@ static void bpe_feed(void)
         }
     }
 
-    while (maxProgress + 7 > sAmountGenerated)
+    while (maxProgress + 9 > sAmountGenerated)
     {
         if (sAmountGenerated >= sWalkLimit + WALK_LIMIT_SAFEGAP)
         {
