@@ -4828,9 +4828,13 @@ const Gfx mario_low_poly_face_back_hair_cap_on_dl[] = {
 // 0x04018420 - 0x04018460
 const Gfx mario_low_poly_face_cap_on_dl[] = {
     gsSPDisplayList(mario_low_poly_face_part_cap_on_dl),
-    gsSPLightColor(LIGHT_1, 0xff0000ff),
-    gsSPLightColor(LIGHT_2, 0x7f0000ff),
+    gsSPLightColor(LIGHT_1, 0xffffffff),
+    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_AGLAB, G_CC_AGLAB),
     gsSPDisplayList(mario_low_poly_face_cap_dl),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_SHADEFADEA, G_CC_SHADEFADEA),
     gsSPLightColor(LIGHT_1, 0x730600ff),
     gsSPLightColor(LIGHT_2, 0x390300ff),
     gsSPDisplayList(mario_low_poly_face_back_hair_cap_on_dl),

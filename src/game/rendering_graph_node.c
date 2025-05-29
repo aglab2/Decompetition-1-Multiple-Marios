@@ -495,16 +495,24 @@ static f32 get_dist_from_camera(Vec3f pos) {
  * range of this node.
  */
 void geo_process_level_of_detail(struct GraphNodeLevelOfDetail *node) {
+    if (gIsConsole)
+    {
+        if (1600 == node->minDistance)
+            geo_process_node_and_siblings(node->node.children);
+    }
+    else
+    {
 #ifdef AUTO_LOD
-    f32 distanceFromCam = (gEmulator & EMU_CONSOLE) ? get_dist_from_camera(gMatStack[gMatStackIndex][3]) : 50.0f;
+        f32 distanceFromCam = (gEmulator & EMU_CONSOLE) ? get_dist_from_camera(gMatStack[gMatStackIndex][3]) : 50.0f;
 #else
-    f32 distanceFromCam = get_dist_from_camera(gMatStack[gMatStackIndex][3]);
+        f32 distanceFromCam = get_dist_from_camera(gMatStack[gMatStackIndex][3]);
 #endif
 
-    if ((f32)node->minDistance <= distanceFromCam
-        && distanceFromCam < (f32)node->maxDistance
-        && node->node.children != 0) {
-        geo_process_node_and_siblings(node->node.children);
+        if ((f32)node->minDistance <= distanceFromCam
+            && distanceFromCam < (f32)node->maxDistance
+            && node->node.children != 0) {
+            geo_process_node_and_siblings(node->node.children);
+        }
     }
 }
 
