@@ -4569,11 +4569,9 @@ void play_sound_cbutton_down(void) {
 }
 
 void play_sound_cbutton_side(void) {
-    play_sound(SOUND_MENU_CAMERA_TURN, gGlobalSoundSource);
 }
 
 void play_sound_button_change_blocked(void) {
-    play_sound(SOUND_MENU_CAMERA_BUZZ, gGlobalSoundSource);
 }
 
 void play_sound_rbutton_changed(void) {
