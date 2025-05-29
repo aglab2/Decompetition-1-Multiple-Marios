@@ -2215,6 +2215,12 @@ s16 update_default_camera(struct Camera *c) {
         }
     }
 
+    if (gMarioStates->ceil)
+    {
+        if (c->pos[1] > gMarioStates->ceilHeight)
+            c->pos[1] = gMarioStates->ceilHeight;
+    }
+
     if (sMarioCamState->action & ACT_FLAG_HANGING || sMarioCamState->action == ACT_RIDING_HOOT) {
         camFloorHeight = sMarioCamState->pos[1] + 400.f;
         if (c->mode == CAMERA_MODE_FREE_ROAM) {
