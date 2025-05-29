@@ -1156,6 +1156,11 @@ void mode_8_directions_camera(struct Camera *c) {
     c->pos[2] = pos[2];
     sAreaYawChange = sAreaYaw - oldAreaYaw;
     set_camera_height(c, pos[1]);
+    if (gMarioStates->ceil)
+    {
+        if (c->pos[1] > gMarioStates->ceilHeight)
+            c->pos[1] = gMarioStates->ceilHeight;
+    }
 }
 
 /**
@@ -3193,6 +3198,12 @@ void init_camera(struct Camera *c) {
     gPrevLevel = gCurrLevelArea / 16;
     gCurrLevelArea = gCurrLevelNum * 16 + gCurrentArea->index;
     sSelectionFlags &= CAM_MODE_MARIO_SELECTED;
+    sSelectionFlags |= CAM_MODE_MARIO_ACTIVE;
+    if (gCameraMovementFlags & CAM_MOVE_ZOOMED_OUT) {
+        sSelectionFlags |= CAM_MODE_LAKITU_WAS_ZOOMED_OUT;
+        gCameraMovementFlags &= ~CAM_MOVE_ZOOMED_OUT;
+    }
+    sCameraSoundFlags = 0;
     sFramesPaused = 0;
     gLakituState.mode = c->mode;
     gLakituState.defMode = c->defMode;
