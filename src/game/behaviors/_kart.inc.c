@@ -544,54 +544,61 @@ void coop_npc_behavior(struct MarioState * m)
         }
         else
         {
-            struct Object* nextPart1 = currPart->oPartNext ?: currPart;
-            Vec3f loc1;
-            get_loc_fuzzed(loc1, nextPart1, m->kartLocFuzz);
-
-            struct Object* nextPart2 = nextPart1->oPartNext ?: nextPart1;
-            Vec3f loc2;
-            get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
-
-            Vec3f nextLoc;
-            if (currPartConfig->twistLeft || currPartConfig->twistRight)
+            if (m->wall)
             {
-                nextLoc[0] = loc1[0] + 1000.f * coss(currPart->oFaceAngleYaw);
-                nextLoc[1] = loc1[1];
-                nextLoc[2] = loc1[2] + 1000.f * sins(currPart->oFaceAngleYaw);
-
-                // print_text_fmt_int(20, 40, "A %d", 0);
-
-                // print_text_fmt_int(120, 140, "N0 %d", (int) nextLoc[0]);
-                // print_text_fmt_int(120, 160, "N1 %d", (int) nextLoc[1]);
-                // print_text_fmt_int(120, 180, "N2 %d", (int) nextLoc[2]);
+                m->intendedYaw = atan2s(m->wall->normal.z, m->wall->normal.x);
             }
             else
             {
-                nextLoc[0] = (loc1[0] + loc2[0]) / 2.f;
-                nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
-                nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
+                struct Object* nextPart1 = currPart->oPartNext ?: currPart;
+                Vec3f loc1;
+                get_loc_fuzzed(loc1, nextPart1, m->kartLocFuzz);
 
-                spawn_test_particle(currPart, loc1[0], loc1[1], loc1[2]);
-                spawn_test_particle(currPart, loc2[0], loc2[1], loc2[2]);
-                spawn_test_particle(currPart, nextLoc[0], nextLoc[1], nextLoc[2]);
+                struct Object* nextPart2 = nextPart1->oPartNext ?: nextPart1;
+                Vec3f loc2;
+                get_loc_fuzzed(loc2, nextPart2, m->kartLocFuzz);
+
+                Vec3f nextLoc;
+                if (currPartConfig->twistLeft || currPartConfig->twistRight)
+                {
+                    nextLoc[0] = loc1[0] + 1000.f * coss(currPart->oFaceAngleYaw);
+                    nextLoc[1] = loc1[1];
+                    nextLoc[2] = loc1[2] + 1000.f * sins(currPart->oFaceAngleYaw);
+
+                    // print_text_fmt_int(20, 40, "A %d", 0);
+
+                    // print_text_fmt_int(120, 140, "N0 %d", (int) nextLoc[0]);
+                    // print_text_fmt_int(120, 160, "N1 %d", (int) nextLoc[1]);
+                    // print_text_fmt_int(120, 180, "N2 %d", (int) nextLoc[2]);
+                }
+                else
+                {
+                    nextLoc[0] = (loc1[0] + loc2[0]) / 2.f;
+                    nextLoc[1] = (loc1[1] + loc2[1]) / 2.f;
+                    nextLoc[2] = (loc1[2] + loc2[2]) / 2.f;
+
+                    spawn_test_particle(currPart, loc1[0], loc1[1], loc1[2]);
+                    spawn_test_particle(currPart, loc2[0], loc2[1], loc2[2]);
+                    spawn_test_particle(currPart, nextLoc[0], nextLoc[1], nextLoc[2]);
+                }
+
+                s16 forceAngle = 0;
+                forceAngle = forceAngle ?: sPartConfigs[currPart ->oBehParams2ndByte].forceAngle;
+                forceAngle = forceAngle ?: sPartConfigs[nextPart1->oBehParams2ndByte].forceAngle;
+
+                Vec3f diff;
+                vec3_diff(diff, nextLoc, m->pos);
+                m->intendedYaw = forceAngle ? forceAngle + currPart->oFaceAngleYaw + 0x8000 : atan2s(diff[2], diff[0]);
+                
+                // print_text_fmt_int(20, 20, "R %d", m->intendedYaw);
+                // print_text_fmt_int(20, 40, "F %x", forceAngle);
+
+                // print_text_fmt_int(20, 100, "X %d", (int) m->slideVelX);
+                // print_text_fmt_int(20, 120, "Z %d", (int) m->slideVelZ);
+                // print_text_fmt_int(20, 140, "0 %d", (int) m->pos[0]);
+                // print_text_fmt_int(20, 160, "1 %d", (int) m->pos[1]);
+                // print_text_fmt_int(20, 180, "2 %d", (int) m->pos[2]);
             }
-
-            s16 forceAngle = 0;
-            forceAngle = forceAngle ?: sPartConfigs[currPart ->oBehParams2ndByte].forceAngle;
-            forceAngle = forceAngle ?: sPartConfigs[nextPart1->oBehParams2ndByte].forceAngle;
-
-            Vec3f diff;
-            vec3_diff(diff, nextLoc, m->pos);
-            m->intendedYaw = forceAngle ? forceAngle + currPart->oFaceAngleYaw + 0x8000 : atan2s(diff[2], diff[0]);
-            
-            // print_text_fmt_int(20, 20, "R %d", m->intendedYaw);
-            // print_text_fmt_int(20, 40, "F %x", forceAngle);
-
-            // print_text_fmt_int(20, 100, "X %d", (int) m->slideVelX);
-            // print_text_fmt_int(20, 120, "Z %d", (int) m->slideVelZ);
-            // print_text_fmt_int(20, 140, "0 %d", (int) m->pos[0]);
-            // print_text_fmt_int(20, 160, "1 %d", (int) m->pos[1]);
-            // print_text_fmt_int(20, 180, "2 %d", (int) m->pos[2]);
         }
         
         spawn_test_particle(m->marioObj, m->pos[0] + sins(m->intendedYaw) * 300.f, m->pos[1], m->pos[2] + coss(m->intendedYaw) * 300.f);
