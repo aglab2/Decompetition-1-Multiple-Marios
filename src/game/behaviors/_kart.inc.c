@@ -450,7 +450,7 @@ static void get_loc_fuzzed(Vec3f pos, struct Object* part, f32 fuzz)
 
     pos[0] = part->oPosX + fuzz * coss(part->oFaceAngleYaw);
     pos[1] = part->oPosY;
-    pos[2] = part->oPosZ + fuzz * sins(part->oFaceAngleYaw);
+    pos[2] = part->oPosZ - fuzz * sins(part->oFaceAngleYaw);
 }
 
 #ifdef DEBUG_LOC_TEST_PARTICLES
