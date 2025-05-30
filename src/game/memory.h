@@ -5,21 +5,7 @@
 
 #include "types.h"
 
-enum MemoryPoolSide {
-    MEMORY_POOL_LEFT,
-    MEMORY_POOL_RIGHT
-};
-
 #define NUM_TLB_SEGMENTS 32
-
-struct AllocOnlyPool {
-    s32 totalSpace;
-    s32 usedSpace;
-    u8 *startPtr;
-    u8 *freePtr;
-};
-
-struct MemoryPool;
 
 struct OffsetSizePair {
     u32 offset;
@@ -38,6 +24,41 @@ struct DmaHandlerList {
     void *bufTarget;
 };
 
+struct MainPoolContext {
+    u8* start;
+    u8* end;
+};
+
+extern struct MainPoolContext sMainPool;
+#define gMainPoolCurrentRegion (&sMainPool)
+
+#define MAIN_POOL_ALIGNMENT_DISABLE -1
+
+// takes the first 'size' bytes from 'region'
+static ALWAYS_INLINE void* main_pool_region_alloc_from_start(u32 size, s32 alignment) {
+    u8* ret = alignment < 0 ? gMainPoolCurrentRegion->start : (u8*) ALIGN(gMainPoolCurrentRegion->start, alignment);
+    u8* newStart = ret + size;
+    gMainPoolCurrentRegion->start = newStart;
+    if (!ret) __builtin_unreachable();
+    return ret;
+}
+
+static ALWAYS_INLINE void *main_pool_alloc(u32 size) {
+    void* buf = main_pool_region_alloc_from_start(ALIGN4(size), MAIN_POOL_ALIGNMENT_DISABLE);
+    if (!buf) __builtin_unreachable();
+    return buf;
+}
+
+static inline void *main_pool_alloc_aligned(u32 size, s32 alignment)
+{
+    if (!alignment)
+        alignment = 16;
+
+    void* buf = main_pool_region_alloc_from_start(ALIGN4(size), alignment);
+    if (!buf) __builtin_unreachable();
+    return buf;
+}
+
 #define EFFECTS_MEMORY_POOL 0x4000
 
 extern struct MemoryPool *gEffectsMemoryPool;
@@ -49,30 +70,92 @@ void *virtual_to_segmented(u32 segment, const void *addr);
 void move_segment_table_to_dmem(void);
 
 void main_pool_init(void *start, void *end);
-void *main_pool_alloc(u32 size, u32 side);
-u32 main_pool_free(void *addr);
-void *main_pool_realloc(void *addr, u32 size);
 u32 main_pool_available(void);
-u32 main_pool_push_state(void);
-u32 main_pool_pop_state(void);
+void main_pool_push_state(void);
+void main_pool_pop_state(void);
 
 #ifndef NO_SEGMENTED_MEMORY
-void *load_segment(s32 segment, u8 *srcStart, u8 *srcEnd, u32 side, u8 *bssStart, u8 *bssEnd);
+void *load_segment(s32 segment, u8 *srcStart, u8 *srcEnd, u8 *bssStart, u8 *bssEnd);
 void *load_to_fixed_pool_addr(u8 *destAddr, u8 *srcStart, u8 *srcEnd);
 #else
 #define load_segment(...)
 #define load_to_fixed_pool_addr(...)
 #endif
 
-struct AllocOnlyPool *alloc_only_pool_init(u32 size, u32 side);
-void *alloc_only_pool_alloc(struct AllocOnlyPool *pool, s32 size);
-struct AllocOnlyPool *alloc_only_pool_resize(struct AllocOnlyPool *pool, u32 size);
-
-struct MemoryPool *mem_pool_init(u32 size, u32 side);
+struct MemoryPool *mem_pool_init(u32 size);
 void *mem_pool_alloc(struct MemoryPool *pool, u32 size);
 void mem_pool_free(struct MemoryPool *pool, void *addr);
 
-void *alloc_display_list(u32 size);
+extern u8 *gGfxPoolEnd;
+#define alloc_display_list(_size) ({\
+    u32 size = ALIGN16(_size); \
+    void* ptr = gGfxPoolEnd - size; \
+    if (__builtin_constant_p(_size)) { \
+        switch (size) { \
+            case 0x0: \
+                break; \
+            case 0x10: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                break; \
+            case 0x20: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                break; \
+            case 0x30: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                break; \
+            case 0x40: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                break; \
+            case 0x50: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                break; \
+            case 0x60: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                break; \
+            case 0x70: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                __builtin_mips_cache(0xd, ptr + 0x60); \
+                break; \
+            case 0x80: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                __builtin_mips_cache(0xd, ptr + 0x60); \
+                __builtin_mips_cache(0xd, ptr + 0x70); \
+                break; \
+            default: \
+                break; \
+        } \
+    } \
+    gGfxPoolEnd = ptr; \
+    if (!ptr) __builtin_unreachable(); \
+    if (0 != (((uintptr_t) ptr) & 0xf)) __builtin_unreachable(); \
+    ptr; \
+})
+
 void setup_dma_table_list(struct DmaHandlerList *list, void *srcAddr, void *buffer);
 s32 load_patchable_table(struct DmaHandlerList *list, s32 index);
 

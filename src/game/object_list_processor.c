@@ -522,7 +522,7 @@ void clear_objects(void) {
         geo_reset_object_node(&gObjectPool[i].header.gfx);
     }
 
-    gObjectMemoryPool = mem_pool_init(OBJECT_MEMORY_POOL, MEMORY_POOL_LEFT);
+    gObjectMemoryPool = mem_pool_init(OBJECT_MEMORY_POOL);
     gObjectLists = gObjectListArray;
 
     clear_dynamic_surfaces();
@@ -541,9 +541,6 @@ void update_terrain_objects(void) {
 #endif
     gObjectCounter += update_objects_in_list(&gObjectLists[OBJ_LIST_SURFACE]);
     profiler_update(PROFILER_TIME_DYNAMIC, profiler_get_delta(PROFILER_DELTA_COLLISION) - first);
-
-    // If the dynamic surface pool has overflowed, throw an error.
-    assert((uintptr_t)gDynamicSurfacePoolEnd <= (uintptr_t)gDynamicSurfacePool + DYNAMIC_SURFACE_POOL_SIZE, "Dynamic surface pool size exceeded");
 }
 
 /**
