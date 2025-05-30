@@ -25,6 +25,7 @@ const LevelScript level_example_entry[] = {
     LOAD_YAY0(        /*seg*/ 0x08, _common0_yay0SegmentRomStart, _common0_yay0SegmentRomEnd),
     LOAD_RAW(         /*seg*/ 0x0F, _common0_geoSegmentRomStart,  _common0_geoSegmentRomEnd),
 	ALLOC_LEVEL_POOL(),
+    JUMP_LINK(script_func_global_1),
 	MARIO(MODEL_MARIO, 0x00000001, bhvMario), 
 	LOAD_MODEL_FROM_GEO(0x20 + 1, p1_geo),
 	LOAD_MODEL_FROM_GEO(0x20 + 2, p2_geo),
