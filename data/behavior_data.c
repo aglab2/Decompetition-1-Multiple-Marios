@@ -1659,3 +1659,96 @@ const BehaviorScript bhvTest[] = {
         CALL_NATIVE(bhv_test_loop),
     END_LOOP(),
 };
+
+const BehaviorScript bhvCirclingAmp[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags, (OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_MOVE_XZ_USING_FVEL | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    LOAD_ANIMATIONS(oAnimations, dAmpAnimsList),
+    ANIMATE(AMP_ANIM_DEFAULT),
+    SET_FLOAT(oGraphYOffset, 40),
+    SET_INT(oIntangibleTimer, 0),
+    CALL_NATIVE(bhv_circling_amp_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_circling_amp_loop),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvHeaveHo[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags, (OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_HOLDABLE | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    LOAD_ANIMATIONS(oAnimations, heave_ho_seg5_anims_0501534C),
+    ANIMATE(HEAVE_HO_ANIM_MOVING),
+    SET_OBJ_PHYSICS(/*Wall hitbox radius*/ 200, /*Gravity*/ -400, /*Bounciness*/ -50, /*Drag strength*/ 1000, /*Friction*/ 1000, /*Buoyancy*/ 600, /*Unused*/ 0, 0),
+    SPAWN_OBJ(/*Model*/ MODEL_NONE, /*Behavior*/ bhvHeaveHoThrowMario),
+    SET_INT(oInteractType, INTERACT_GRABBABLE),
+    SET_INT(oInteractionSubtype, (INT_SUBTYPE_NOT_GRABBABLE | INT_SUBTYPE_GRABS_MARIO)),
+    SET_HITBOX(/*Radius*/ 120, /*Height*/ 100),
+    SET_HOME(),
+    SET_INT(oIntangibleTimer, 0),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_heave_ho_loop),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvHeaveHoThrowMario[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags, (OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    BILLBOARD(),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_heave_ho_throw_mario_loop),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvBobomb[] = {
+    BEGIN(OBJ_LIST_DESTRUCTIVE),
+    OR_INT(oFlags, (OBJ_FLAG_PERSISTENT_RESPAWN | OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_HOLDABLE | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    LOAD_ANIMATIONS(oAnimations, bobomb_seg8_anims_0802396C),
+    DROP_TO_FLOOR(),
+    ANIMATE(BOBOMB_ANIM_WALKING),
+    SET_INT(oIntangibleTimer, 0),
+    SET_HOME(),
+    CALL_NATIVE(bhv_bobomb_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_bobomb_loop),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvBobombFuseSmoke[] = {
+    BEGIN(OBJ_LIST_UNIMPORTANT),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    BILLBOARD(),
+    SET_INT(oAnimState, OBJ_ANIM_STATE_INIT_ANIM),
+    CALL_NATIVE(bhv_bobomb_fuse_smoke_init),
+    DELAY(1),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_dust_smoke_loop),
+        ADD_INT(oAnimState, 1),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvMoneybag[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags, (OBJ_FLAG_COMPUTE_ANGLE_TO_MARIO | OBJ_FLAG_SET_FACE_YAW_TO_MOVE_YAW | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    LOAD_ANIMATIONS(oAnimations, moneybag_seg6_anims_06005E5C),
+    DROP_TO_FLOOR(),
+    SET_HOME(),
+    SET_INT(oIntangibleTimer, -1),
+    CALL_NATIVE(bhv_moneybag_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_moneybag_loop),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvMoneybagHidden[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    SET_FLOAT(oGraphYOffset, 27),
+    BILLBOARD(),
+    SET_HITBOX(/*Radius*/ 110, /*Height*/ 100),
+    SET_INT(oIntangibleTimer, 0),
+    SET_INT(oAnimState, OBJ_ANIM_STATE_INIT_ANIM),
+    BEGIN_LOOP(),
+        ADD_INT(oAnimState, 1),
+        CALL_NATIVE(bhv_moneybag_hidden_loop),
+    END_LOOP(),
+};

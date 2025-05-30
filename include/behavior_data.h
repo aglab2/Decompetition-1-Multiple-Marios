@@ -136,8 +136,8 @@ extern const BehaviorScript bhvBlackSmokeMario[];
 #define bhvHiddenObject bhvStaticObject
 #define bhvBreakableBox bhvStaticObject
 #define bhvPushableMetalBox bhvStaticObject
-#define bhvHeaveHo bhvStaticObject
-#define bhvHeaveHoThrowMario bhvStaticObject
+extern const BehaviorScript bhvHeaveHo[];
+extern const BehaviorScript bhvHeaveHoThrowMario[];
 #define bhvCcmTouchedStarSpawn bhvStaticObject
 #define bhvUnusedPoundablePlatform bhvStaticObject
 #define bhvBetaTrampolineTop bhvStaticObject
@@ -320,8 +320,8 @@ extern const BehaviorScript bhvRandomAnimatedTexture[];
 #define bhvBlueCoinJumping bhvStaticObject
 #define bhvSeaweed bhvStaticObject
 #define bhvSeaweedBundle bhvStaticObject
-#define bhvBobomb bhvStaticObject
-#define bhvBobombFuseSmoke bhvStaticObject
+extern const BehaviorScript bhvBobomb[];
+extern const BehaviorScript bhvBobombFuseSmoke[];
 #define bhvBobombBuddy bhvStaticObject
 #define bhvBobombBuddyOpensCannon bhvStaticObject
 #define bhvCannonClosed bhvStaticObject
@@ -330,7 +330,7 @@ extern const BehaviorScript bhvRandomAnimatedTexture[];
 #define bhvMessagePanel bhvStaticObject
 #define bhvSignOnWall bhvStaticObject
 #define bhvHomingAmp bhvStaticObject
-#define bhvCirclingAmp bhvStaticObject
+extern const BehaviorScript bhvCirclingAmp[];
 #define bhvButterfly bhvStaticObject
 #define bhvHoot bhvStaticObject
 #define bhvBetaHoldableObject bhvStaticObject
@@ -365,8 +365,8 @@ extern const BehaviorScript bhvStarKeyCollectionPuffSpawner[];
 #define bhvSmallBomp bhvStaticObject
 #define bhvLargeBomp bhvStaticObject
 #define bhvWfSlidingPlatform bhvStaticObject
-#define bhvMoneybag bhvStaticObject
-#define bhvMoneybagHidden bhvStaticObject
+extern const BehaviorScript bhvMoneybag[];
+extern const BehaviorScript bhvMoneybagHidden[];
 #define bhvPitBowlingBall bhvStaticObject
 #define bhvFreeBowlingBall bhvStaticObject
 #define bhvBowlingBall bhvStaticObject
