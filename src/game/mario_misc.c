@@ -26,6 +26,7 @@
 #include "sound_init.h"
 #include "puppycam2.h"
 #include "mario_coop.h"
+#include "color.h"
 
 #include "config.h"
 
@@ -625,37 +626,62 @@ Gfx *geo_render_mirror_mario(s32 callContext, struct GraphNode *node, UNUSED Mat
     return NULL;
 }
 
-static int row(int i)
+struct Coord
+{
+    int x;
+    int y;
+};
+
+
+static struct Coord getCoord(int i)
 {
     i--;
+    int x;
+    int y;
     if (i < 2)
     {
-        return 6;
+        x = 6;
+        y = i*4 - 2;
     }
     else if (i < 8)
     {
-        return 5;
+        int iRelative = i - 2;
+        x = 5;
+        y = iRelative*2 - 1 - 2*2;
     }
     else if (i < 13)
     {
-        return 4;
+        int iRelative = i - 8;
+        x = 4;
+        y = iRelative*2 - 2*2;
     }
     else if (i < 19)
     {
-        return 3;
+        int iRelative = i - 13;
+        x = 3;
+        y = iRelative*2 - 1 - 2*2;
     }
     else if (i < 24)
     {
-        return 2;
+        int iRelative = i - 19;
+        x = 2;
+        y = iRelative*2 - 2*2;
     }
     else if (i < 30)
     {
-        return 1;
+        int iRelative = i - 24;
+        x = 1;
+        y = iRelative*2 - 1 - 2*2;
     }
     else
     {
-        return 0;
+        int iRelative = i - 30;
+        x = 0;
+        y = iRelative*2 - 2*2;
+        if (y >= 0) y += 2;
     }
+
+    return (struct Coord) { .x = x, .y = y };
 }
 
 /**
@@ -669,30 +695,15 @@ Gfx *geo_mirror_mario_backface_culling(s32 callContext, struct GraphNode *node, 
     struct Object *obj = (struct Object *) gCurGraphNodeObject;
     if (callContext == GEO_CONTEXT_RENDER && obj->oPlayerID) {
         gfx = alloc_display_list(3 * sizeof(*gfx));
-        switch (row(obj->oPlayerID))
-        {
-            case 0:
-                gDPSetPrimColor(&gfx[0], 255, 255, 135, 206, 235, 255);
-                break;
-            case 1:
-                gDPSetPrimColor(&gfx[0], 255, 255, 0, 0, 200, 255);
-                break;
-            case 2:
-                gDPSetPrimColor(&gfx[0], 255, 255, 0, 191, 255, 255);
-                break;
-            case 3:
-                gDPSetPrimColor(&gfx[0], 255, 255, 70, 130, 180, 255);
-                break;
-            case 4:
-                gDPSetPrimColor(&gfx[0], 255, 255, 65, 105, 225, 255);
-                break;
-            case 5:
-                gDPSetPrimColor(&gfx[0], 255, 255, 30, 144, 255, 255);
-                break;
-            case 6:
-                gDPSetPrimColor(&gfx[0], 255, 255, 25, 25, 112, 255);
-                break;
-        }
+
+        struct Coord coord = getCoord(obj->oPlayerID);
+        hsv v;
+        v.h = (210 * 0x10000 / 360) + coord.y * 1024;
+        v.s = 1.f - coord.x * 0.1f;
+        v.v = 255;
+        rgb c;
+        hsv2rgb(&v, &c);
+        gDPSetPrimColor(&gfx[0], 255, 255, c.r, c.g, c.b, 255);
         gSPEndDisplayList(&gfx[1]);
         SET_GRAPH_NODE_LAYER(asGenerated->fnNode.node.flags, LAYER_OPAQUE);
     }
