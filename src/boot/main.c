@@ -158,6 +158,7 @@ static void setup_mesg_queues(void) {
     osSetEventMesg(OS_EVENT_PRENMI, &gIntrMesgQueue, (OSMesg) MESG_NMI_REQUEST);
 }
 
+extern void comp_colors();
 static void alloc_pool(void) {
     void *start = (void *) SEG_POOL_START;
     void *end = (void *) (SEG_POOL_START + POOL_SIZE);
@@ -452,6 +453,7 @@ void thread3_main(UNUSED void *arg) {
     load_sdata();
     load_engine_code_segment();
     alloc_pool();
+    comp_colors();
     detect_emulator();
 #ifndef UNF
     crash_screen_init();

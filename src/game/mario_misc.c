@@ -635,7 +635,7 @@ struct Coord
 
 static struct Coord getCoord(int i)
 {
-    i--;
+    // i--;
     int x;
     int y;
     if (i < 2)
@@ -684,6 +684,21 @@ static struct Coord getCoord(int i)
     return (struct Coord) { .x = x, .y = y };
 }
 
+static rgb sColors[35];
+void comp_colors()
+{
+    for (int i = 0; i < 35; i++)
+    {
+        struct Coord coord = getCoord(i);
+        hsv v;
+        v.h = (210 * 0x10000 / 360) + coord.y * 1024;
+        v.s = 1.f - coord.x * 0.1f;
+        v.v = 255;
+        rgb c;
+        hsv2rgb(&v, &sColors[i]);
+    }
+}
+
 /**
  * Since Mirror Mario has an x scale of -1, the mesh becomes inside out.
  * This node corrects that by changing the culling mode accordingly.
@@ -695,15 +710,7 @@ Gfx *geo_mirror_mario_backface_culling(s32 callContext, struct GraphNode *node, 
     struct Object *obj = (struct Object *) gCurGraphNodeObject;
     if (callContext == GEO_CONTEXT_RENDER && obj->oPlayerID) {
         gfx = alloc_display_list(3 * sizeof(*gfx));
-
-        struct Coord coord = getCoord(obj->oPlayerID);
-        hsv v;
-        v.h = (210 * 0x10000 / 360) + coord.y * 1024;
-        v.s = 1.f - coord.x * 0.1f;
-        v.v = 255;
-        rgb c;
-        hsv2rgb(&v, &c);
-        gDPSetPrimColor(&gfx[0], 255, 255, c.r, c.g, c.b, 255);
+        gDPSetPrimColor(&gfx[0], 255, 255, sColors[obj->oPlayerID - 1].r, sColors[obj->oPlayerID - 1].g, sColors[obj->oPlayerID - 1].b, 255);
         gSPEndDisplayList(&gfx[1]);
         SET_GRAPH_NODE_LAYER(asGenerated->fnNode.node.flags, LAYER_OPAQUE);
     }
