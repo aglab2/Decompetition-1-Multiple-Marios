@@ -1901,12 +1901,20 @@ static const Vtx mario_face_back_hair_cap_on_dl_vertex_group2[] = {
     {{{    31,    -85,     87}, 0, {     0,      0}, {0xdb, 0xfd, 0x79, 0xff}}},
 };
 
+#define	G_CC_AGLAB                   SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0
+
 // 0x040112B0 - 0x040112E8
 const Gfx mario_m_logo_dl[] = {
+    gsSPLightColor(LIGHT_1, 0xffffffff),
+    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_AGLAB, G_CC_AGLAB),
     gsSPVertex(mario_m_logo_dl_vertex, 7, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  3,  4,  5, 0x0),
     gsSP2Triangles( 2,  3,  0, 0x0,  3,  5,  0, 0x0),
     gsSP1Triangle( 4,  6,  5, 0x0),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_BLENDRGBFADEA, G_CC_BLENDRGBFADEA),
     gsSPEndDisplayList(),
 };
 
@@ -2052,8 +2060,6 @@ const Gfx mario_face_back_hair_cap_on_dl[] = {
     gsSP1Triangle( 8, 12,  9, 0x0),
     gsSPEndDisplayList(),
 };
-
-#define	G_CC_AGLAB                   SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0
 
 // 0x04011960 - 0x040119A0
 const Gfx mario_face_cap_on_dl[] = {
@@ -4769,9 +4775,15 @@ static const Vtx mario_low_poly_face_back_hair_cap_on_dl_vertex[] = {
 
 // 0x04018270 - 0x04018298
 const Gfx mario_low_poly_mario_m_logo_dl[] = {
+    gsSPLightColor(LIGHT_1, 0xffffffff),
+    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_AGLAB, G_CC_AGLAB),
     gsSPVertex(mario_low_poly_mario_m_logo_dl_vertex, 5, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  3,  4,  1, 0x0),
     gsSP1Triangle( 3,  1,  0, 0x0),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_BLENDRGBFADEA, G_CC_BLENDRGBFADEA),
     gsSPEndDisplayList(),
 };
 
@@ -5905,9 +5917,15 @@ static const Vtx mario_right_hand_cap_bottom_dl_vertex[] = {
 
 // 0x0401ABA8 - 0x0401ABD0
 const Gfx mario_right_hand_cap_m_logo_dl[] = {
+    gsSPLightColor(LIGHT_1, 0xffffffff),
+    gsSPLightColor(LIGHT_2, 0x7f7f7fff),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_AGLAB, G_CC_AGLAB),
     gsSPVertex(mario_right_hand_cap_m_logo_dl_vertex, 5, 0),
     gsSP2Triangles( 0,  1,  2, 0x0,  1,  3,  2, 0x0),
     gsSP1Triangle( 1,  4,  3, 0x0),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_BLENDRGBFADEA, G_CC_BLENDRGBFADEA),
     gsSPEndDisplayList(),
 };
 
