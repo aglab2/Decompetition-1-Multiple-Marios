@@ -83,10 +83,18 @@ static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)
             raiseY = 70.f;
             break;
     }
-        
-    enemy->oPosX = x + random_f32_around_zero(800.f);
+
+    f32 xs = random_f32_around_zero(800.f);
+    f32 zs = random_f32_around_zero(400.f) - 500.f;
+
+    f32 xRot = xs * coss(angle) 
+             + zs * sins(angle);
+    f32 zRot = -xs * sins(angle)
+              + zs * coss(angle);
+
+    enemy->oPosX = x + xRot;
     enemy->oPosY = y + raiseY;
-    enemy->oPosZ = z + random_f32_around_zero(400.f) - 400.f;
+    enemy->oPosZ = z + zRot;
     enemy->oFaceAngleYaw = angle;
 
     if (part_refreshing_silent_period(partId))

@@ -62,7 +62,7 @@ void bobomb_act_patrol(void) {
     o->oForwardVel = 5.0f;
 
     s16 collisionFlags = object_step();
-    if (obj_return_home_if_safe(o, o->oHomeX, o->oHomeY, o->oHomeZ, 150)) {
+    if (obj_return_home_if_safe(o, o->oHomeX, o->oHomeY, o->oHomeZ, 120)) {
         struct Object *explosion = spawn_object(o, MODEL_EXPLOSION, bhvExplosion);
         explosion->oGraphYOffset += 100.0f;
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
