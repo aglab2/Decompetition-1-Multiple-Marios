@@ -860,6 +860,11 @@ void geo_set_animation_globals(struct AnimInfo *node, s32 hasAnimation) {
  * the floor below it.
  */
 void geo_process_shadow(struct GraphNodeShadow *node) {
+    if (gIsConsole)
+    {
+        goto skip;
+    }
+
 #ifndef DISABLE_SHADOWS
     if (gCurGraphNodeCamera != NULL && gCurGraphNodeObject != NULL) {
         Vec3f shadowPos;
@@ -918,6 +923,8 @@ void geo_process_shadow(struct GraphNodeShadow *node) {
         }
     }
 #endif
+
+skip:
     if (node->node.children != NULL) {
         geo_process_node_and_siblings(node->node.children);
     }
