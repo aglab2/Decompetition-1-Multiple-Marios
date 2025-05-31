@@ -10776,6 +10776,7 @@ void play_cutscene(struct Camera *c) {
         CUTSCENE(CUTSCENE_STAR_SPAWN,           sCutsceneStarSpawn)
         CUTSCENE(CUTSCENE_RED_COIN_STAR_SPAWN,  sCutsceneRedCoinStarSpawn)
         CUTSCENE(CUTSCENE_ENDING,               sCutsceneEnding)
+        CUTSCENE(CUTSCENE_READ_MESSAGE,         sCutsceneReadMessage)
 #if 0
         CUTSCENE(CUTSCENE_GRAND_STAR,           sCutsceneGrandStar)
         CUTSCENE(CUTSCENE_DOOR_WARP,            sCutsceneDoorWarp)
@@ -10815,7 +10816,6 @@ void play_cutscene(struct Camera *c) {
         CUTSCENE(CUTSCENE_EXIT_FALL_WMOTR,      sCutsceneFallToCastleGrounds)
         CUTSCENE(CUTSCENE_NONPAINTING_DEATH,    sCutsceneNonPaintingDeath)
         CUTSCENE(CUTSCENE_DIALOG,               sCutsceneDialog)
-        CUTSCENE(CUTSCENE_READ_MESSAGE,         sCutsceneReadMessage)
         CUTSCENE(CUTSCENE_RACE_DIALOG,          sCutsceneDialog)
         CUTSCENE(CUTSCENE_ENTER_PYRAMID_TOP,    sCutsceneEnterPyramidTop)
         CUTSCENE(CUTSCENE_SSL_PYRAMID_EXPLODE,  sCutscenePyramidTopExplode)

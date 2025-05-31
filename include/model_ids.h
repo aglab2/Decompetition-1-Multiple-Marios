@@ -13,6 +13,7 @@
 #define MODEL_BLACK_BOBOMB                6        // black_bobomb_geo
 #define MODEL_EXPLOSION                   7        // explosion_geo
 #define MODEL_RED_FLAME                   8        // red_flame_geo
+#define MODEL_WOODEN_SIGNPOST             9        // wooden_signpost_geo
 
 /* Various static level geometry, the geo layout differs but terrain object presets treat them the same.*/
 
@@ -445,7 +446,6 @@
 #define MODEL_TRANSPARENT_STAR            0x79        // transparent_star_geo
 #define MODEL_STAR                        0x7A        // star_geo
 #define MODEL_TTM_SLIDE_EXIT_PODIUM       0x7B        // ttm_geo_000DF4
-#define MODEL_WOODEN_SIGNPOST             0x7C        // wooden_signpost_geo
 #define MODEL_UNKNOWN_7D                  0x7D        // referenced in macro presets. Unknown usage
 // find me
 #define MODEL_CANNON_BARREL               0x7F        // cannon_barrel_geo

@@ -327,7 +327,7 @@ extern const BehaviorScript bhvBobombFuseSmoke[];
 #define bhvCannonClosed bhvStaticObject
 #define bhvWhirlpool bhvStaticObject
 #define bhvJetStream bhvStaticObject
-#define bhvMessagePanel bhvStaticObject
+extern const BehaviorScript bhvMessagePanel[];
 #define bhvSignOnWall bhvStaticObject
 #define bhvHomingAmp bhvStaticObject
 extern const BehaviorScript bhvCirclingAmp[];

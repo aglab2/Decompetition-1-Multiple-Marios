@@ -383,19 +383,32 @@ Use the [C] Buttons to look\n\
 around while flying, and\n\
 press [Z] to land."))
 
-DEFINE_DIALOG(DIALOG_033, 1, 6, 30, 200, _("\
-Ciao! You've reached\n\
-Princess Toadstool's\n\
-castle via a warp pipe.\n\
-Using the controller is a\n\
-piece of cake. Press [A] to\n\
-jump and [B] to attack.\n\
-Press [B] to read signs,\n\
-too. Use the Control Stick\n\
-in the center of the\n\
-controller to move Mario\n\
-around. Now, head for\n\
-the castle."))
+DEFINE_DIALOG(DIALOG_033, 1, 5, 30, 200, _("\
+Mario Adventure 35\n\
+\n\
+\n\
+   Made by aglab2\n\
+   for Decompetition 2025\n\
+This is a short racing\n\
+game that heavily uses\n\
+Sonic Adventure 2 assets\n\
+and track data.\n\
+\n\
+Controls are simple - use\n\
+control stick to turn.\n\
+Get the first place\n\
+in all races!\n\
+\n\
+Tested by:\n\
+  Mushie64\n\
+  Crash\n\
+\n\
+Special thanks:\n\
+Rovertronic\n\
+  Competition organizer\n\
+  Multi Mario code\n\
+Tsoding\n\
+  BPE videos"))
 
 DEFINE_DIALOG(DIALOG_034, 1, 6, 30, 200, _("\
 Good afternoon. The\n\
