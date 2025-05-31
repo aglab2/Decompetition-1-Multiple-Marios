@@ -535,7 +535,21 @@ void coop_npc_behavior(struct MarioState * m)
         struct Object* currPart = m->floor->object;
         struct PartConfig* currPartConfig = &sPartConfigs[currPart->oBehParams2ndByte];
         // print_text_fmt_int(200, 160, "P %d", currPart->oBehParams2ndByte);
-        if (currPartConfig->turn)
+        if (11 == currPart->oBehParams2ndByte)
+        {
+            s16 angleDiff = ((s16) m->faceAngle[1]) - ((s16) currPart->oFaceAngleYaw);
+            s16 mult = angleDiff < 0 ? -1 : 1;
+            f32 relProgress = m->kartProgress - (int) m->kartProgress;
+            if (relProgress < 0.8f)
+            {
+                m->intendedYaw = currPart->oFaceAngleYaw + mult * 0x4000;
+            }
+            else
+            {
+                m->intendedYaw = currPart->oFaceAngleYaw - mult * 0x4000;
+            }
+        }
+        else if (currPartConfig->turn)
         {
             f32 x = currPartConfig->shift[0] > 0 ? (5000.f * SCALE) : (-5000.f * SCALE);
             f32 z = 0;
