@@ -354,10 +354,12 @@ retry:
         Vec3f pos;
         pos[0] = o->oPosX + y * 80;
         pos[1] = o->oPosY;
-        pos[2] = o->oPosZ - x * 250;
+        pos[2] = o->oPosZ - x * 250 - 50;
         struct MarioState* racer = coop_spawn_mario(pos, COOP_CM_NPC);
         racer->faceAngle[1] = 0x8000;
     }
+
+    gMarioStates->pos[1] = -50.f;
 }
 
 extern void coop_mario_pin();
@@ -435,7 +437,7 @@ void bhv_ctl_loop()
         {
             gMarioStates->pos[0] = o->oPosX;
             gMarioStates->pos[1] = o->oPosY;
-            gMarioStates->pos[2] = o->oPosZ;
+            gMarioStates->pos[2] = o->oPosZ - 50.f;
             coop_mario_pin();
         }
         else

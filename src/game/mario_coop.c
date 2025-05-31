@@ -96,6 +96,7 @@ int coop_delete_mario(struct MarioState * m) {
     m->faceAngle[0] = 0;
     m->faceAngle[1] = m->kartSafeAngle + 0x8000 + kart_angle(m->kartId) / 2;
     m->faceAngle[2] = 0;
+    m->action = ACT_BUTT_SLIDE;
     if (m == gMarioState)
     {
         reset_camera(gCurrentArea->camera);
@@ -116,13 +117,23 @@ void coop_reset_state(void) {
     for (int i = 0; i < COOP_MARIO_STATES_MAX; i ++) {
         gMarioStates[i].marioObj = NULL;
         gMarioStates[i].isDead = FALSE;
+        gMarioStates[i].wall = NULL;
+        gMarioStates[i].floor = NULL;
+        gMarioStates[i].ceil = NULL;
+        gMarioStates[i].faceAngle[0] = 0;
+        gMarioStates[i].faceAngle[1] = 0;
+        gMarioStates[i].faceAngle[2] = 0;
+        gMarioStates[i].vel[0] = 0.0f;
+        gMarioStates[i].vel[1] = 0.0f;
+        gMarioStates[i].vel[2] = 0.0f;
+        gMarioStates[i].action = ACT_IDLE;
     }
 }
 
 // Don't call this function yourself, used for Mario touching other Marios O////O 
 void coop_mario_collision(struct MarioState * m) {
     for (int i = 0; i < COOP_MARIO_STATES_MAX; i ++) {
-        if (&gMarioStates[i] == m || &gMarioStates[i].marioObj == NULL) {continue;}
+        if (&gMarioStates[i] == m || gMarioStates[i].marioObj == NULL) {continue;}
 
         Vec3f diff;
         vec3_diff(diff, gMarioStates[i].pos, m->pos);
@@ -144,7 +155,7 @@ void coop_mario_collision(struct MarioState * m) {
 void coop_mario_pin()
 {
     for (int i = 0; i < COOP_MARIO_STATES_MAX; i ++) {
-        if (&gMarioStates[i] == gMarioState || &gMarioStates[i].marioObj == NULL) {continue;}
+        if (&gMarioStates[i] == gMarioState || gMarioStates[i].marioObj == NULL) {continue;}
         vec3_copy(gMarioStates[i].pos, gMarioStates[i].kartHome);
     }
 }

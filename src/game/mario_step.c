@@ -276,7 +276,7 @@ s32 stationary_ground_step(struct MarioState *m) {
 extern s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf);
 static f32 find_floor_cache(f32 x, f32 y, f32 z, struct Surface* cache, struct Surface **floor)
 {
-    if (check_within_floor_triangle_bounds(x, z, cache)) {
+    if (cache && check_within_floor_triangle_bounds(x, z, cache)) {
         *floor = cache;
         return get_surface_height_at_location(x, z, cache);
     }
