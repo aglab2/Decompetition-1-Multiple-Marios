@@ -481,6 +481,7 @@ void spawn_objects_from_info(UNUSED s32 unused, struct SpawnInfo *spawnInfo) {
                 gMarioObject = object;
                 gMarioObject->oFlags |= OBJ_FLAG_IS_A_MARIO;
                 gMarioState->marioObj = object;
+                gMarioState->marioObj->oMarioState = gMarioState;
                 geo_make_first_child(&object->header.gfx.node);
             }
 

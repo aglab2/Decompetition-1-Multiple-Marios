@@ -199,14 +199,15 @@ Gfx *create_shadow_below_xyz(Vec3f pos, s16 shadowScale, u8 shadowSolidity, s8 s
     f32 x = pos[0];
     f32 y = pos[1];
     f32 z = pos[2];
-    s8 isPlayer   = (obj == gMarioObject);
+    int isPlayer   = (obj->oFlags & OBJ_FLAG_IS_A_MARIO);
+    struct MarioState* m = (struct MarioState*) obj->oMarioState;
     s8 notHeldObj = (gCurGraphNodeHeldObject == NULL);
 
     // Attempt to use existing floors before finding a new one.
-    if (notHeldObj && isPlayer && gMarioState->floor) {
+    if (notHeldObj && isPlayer && m->floor) {
         // The object is Mario and has a referenced floor.
-        floor       = gMarioState->floor;
-        floorHeight = gMarioState->floorHeight;
+        floor       = m->floor;
+        floorHeight = m->floorHeight;
     } else if (notHeldObj && (gCurGraphNodeObject != &gMirrorMario) && obj->oFloor) {
         // The object is not Mario but has a referenced floor.
         //! Some objects only get their oFloor from bhv_init_room, which skips dynamic floors.

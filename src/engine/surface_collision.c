@@ -400,6 +400,7 @@ s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf) {
 /**
  * Iterate through the list of floors and find the first floor under a given point.
  */
+extern s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf);
 static struct Surface *find_floor_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 y, s32 z, f32 *pheight) {
     register struct Surface *surf, *floor = NULL;
     register SurfaceType type = SURFACE_DEFAULT;

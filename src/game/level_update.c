@@ -1245,6 +1245,9 @@ s32 init_level(void) {
 #endif
 
     coop_reset_state();
+    gMarioStates->floor = NULL;
+    gMarioStates->ceil = NULL;
+    gMarioStates->wall = NULL;
     set_play_mode(PLAY_MODE_NORMAL);
 
     sDelayedWarpOp = WARP_OP_NONE;

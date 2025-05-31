@@ -23,6 +23,7 @@ static Vec3f sMarioAmountDisplaced[COOP_MARIO_STATES_MAX];
  * Determine if Mario is standing on a platform object, meaning that he is
  * within 4 units of the floor. Set his referenced platform object accordingly.
  */
+extern s32 check_within_floor_triangle_bounds(s32 x, s32 z, struct Surface *surf);
 void update_mario_platform(void) {
     struct Surface *floor;
     f32 marioX, marioY, marioZ;
@@ -44,7 +45,14 @@ void update_mario_platform(void) {
         marioX = marioobj->oPosX;
         marioY = marioobj->oPosY;
         marioZ = marioobj->oPosZ;
-        floorHeight = find_floor(marioX, marioY, marioZ, &floor);
+        struct Surface *cache = gMarioStates[i].floor;
+        if (cache && check_within_floor_triangle_bounds(marioX, marioZ, cache)) {
+            floor = cache;
+            floorHeight = get_surface_height_at_location(marioX, marioZ, cache);
+        } else {
+            floorHeight = find_floor(marioX, marioY, marioZ, &floor);
+            gMarioStates[i].floor = floor;
+        }
 
         awayFromFloor =  absf(marioY - floorHeight) >= 4.0f;
 
