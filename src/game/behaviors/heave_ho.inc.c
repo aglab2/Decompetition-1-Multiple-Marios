@@ -40,19 +40,7 @@ void heave_ho_act_1(void) {
     o->oForwardVel = 0.0f;
     cur_obj_reverse_animation();
 
-    while (TRUE) {
-        if (sHeaveHoTimings[i][0] == -1) {
-            o->oAction = 2;
-            break;
-        }
-
-        if (o->oTimer < sHeaveHoTimings[i][0]) {
-            cur_obj_init_animation_with_accel_and_sound(2, sHeaveHoTimings[i][1]);
-            break;
-        }
-
-        i++;
-    }
+    o->oAction = 2;
 }
 
 void heave_ho_act_2(void) {
@@ -97,14 +85,7 @@ void heave_ho_act_3(void) {
 void heave_ho_act_0(void) {
     cur_obj_set_pos_to_home();
 
-    if (find_water_level(o->oPosX, o->oPosZ) < o->oPosY && o->oDistanceToMario < 4000.0f) {
-        cur_obj_become_tangible();
-        cur_obj_unhide();
-        o->oAction = 1;
-    } else {
-        cur_obj_become_intangible();
-        cur_obj_hide();
-    }
+    o->oAction = 1;
 }
 
 ObjActionFunc sHeaveHoActions[] = {

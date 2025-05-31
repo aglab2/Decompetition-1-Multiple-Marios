@@ -34,8 +34,8 @@ void bobomb_act_explode(void) {
         struct Object *explosion = spawn_object(o, MODEL_EXPLOSION, bhvExplosion);
         explosion->oGraphYOffset += 100.0f;
 
-        bobomb_spawn_coin();
-        create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
+        // bobomb_spawn_coin();
+        // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
 
         o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
     }
@@ -118,13 +118,13 @@ void generic_bobomb_free_loop(void) {
 
         case OBJ_ACT_LAVA_DEATH:
             if (obj_lava_death()) {
-                create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
+                // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
             }
             break;
 
         case OBJ_ACT_DEATH_PLANE_DEATH:
             o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-            create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
+            // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
             break;
     }
 
@@ -147,13 +147,13 @@ void stationary_bobomb_free_loop(void) {
 
         case OBJ_ACT_LAVA_DEATH:
             if (obj_lava_death()) {
-                create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
+                // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
             }
             break;
 
         case OBJ_ACT_DEATH_PLANE_DEATH:
             o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
-            create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
+            // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
             break;
     }
 
@@ -265,7 +265,7 @@ void bhv_bobomb_loop(void) {
 
             // oBobombFuseTimer % 2 or oBobombFuseTimer % 8
             if (!(dustPeriodMinus1 & o->oBobombFuseTimer)) {
-                spawn_object(o, MODEL_SMOKE, bhvBobombFuseSmoke);
+                // spawn_object(o, MODEL_SMOKE, bhvBobombFuseSmoke);
             }
 
             cur_obj_play_sound_1(SOUND_AIR_BOBOMB_LIT_FUSE);
