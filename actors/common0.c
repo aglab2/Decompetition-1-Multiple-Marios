@@ -34,16 +34,16 @@ UNUSED static const u64 binid_5 = 5;
 #include "purple_switch/collision.inc.c"
 UNUSED static const u64 binid_6 = 6;
 
-#include "checkerboard_platform/model.inc.c"
-#include "checkerboard_platform/collision.inc.c"
+// #include "checkerboard_platform/model.inc.c"
+// #include "checkerboard_platform/collision.inc.c"
 UNUSED static const u64 binid_7 = 7;
 
-#include "heart/model.inc.c"
+// #include "heart/model.inc.c"
 UNUSED static const u64 binid_8 = 8;
 
-#include "flyguy/model.inc.c"
-#include "flyguy/anims/data.inc.c"
-#include "flyguy/anims/table.inc.c"
+// #include "flyguy/model.inc.c"
+// #include "flyguy/anims/data.inc.c"
+// #include "flyguy/anims/table.inc.c"
 UNUSED static const u64 binid_9 = 9;
 
 #include "breakable_box/model.inc.c"
@@ -65,17 +65,21 @@ UNUSED static const u64 binid_13 = 13;
 #include "bobomb/anims/table.inc.c"
 UNUSED static const u64 binid_14 = 14;
 
-#include "metal_box/model.inc.c"
-#include "metal_box/collision.inc.c"
+// #include "metal_box/model.inc.c"
+// #include "metal_box/collision.inc.c"
 UNUSED static const u64 binid_15 = 15;
 
 #include "exclamation_box_outline/model.inc.c"
 #include "exclamation_box_outline/collision.inc.c"
 UNUSED static const u64 binid_16 = 16;
 
-#include "test_platform/model.inc.c"
-#include "test_platform/collision.inc.c"
+// #include "test_platform/model.inc.c"
+// #include "test_platform/collision.inc.c"
 UNUSED static const u64 binid_17 = 17;
 
-#include "koopa_shell/model.inc.c"
+// #include "koopa_shell/model.inc.c"
 UNUSED static const u64 binid_18 = 18;
+
+#include "heave_ho/model.inc.c"
+#include "heave_ho/anims/data.inc.c"
+#include "heave_ho/anims/table.inc.c"
