@@ -631,12 +631,12 @@ static void get_optimal_coll_dist(struct Object *obj) {
 }
 #endif
 
-static TerrainData sVertexData[600];
-
 /**
  * Transform an object's vertices, reload them, and render the object.
  */
 void load_object_collision_model(void) {
+    TerrainData sVertexData[600];
+
     PUPPYPRINT_GET_SNAPSHOT();
     TerrainData *collisionData = o->collisionData;
 
@@ -699,6 +699,8 @@ void load_object_collision_model(void) {
  * Transform an object's vertices and add them to the static surface pool.
  */
 void load_object_static_model(void) {
+    TerrainData sVertexData[600];
+
     PUPPYPRINT_GET_SNAPSHOT();
     TerrainData *collisionData = o->collisionData;
     u32 surfacePoolData;
