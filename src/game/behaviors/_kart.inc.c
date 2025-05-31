@@ -30,6 +30,7 @@ static struct SpawnerState sSpawnerState;
 extern s16 sSourceWarpNodeId;
 static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
+static s16 sSilentPeriodId = 0;
 
 #define oCtlFinalTime oF4
 
@@ -42,6 +43,49 @@ struct SpawnResult
 };
 
 static u8 uRNGScratch[270];
+
+static int can_spawn_enemy_on_part(int partId)
+{
+    return partId == 12 || partId == 32 || partId == 34 || partId == 35 || partId == 54 || partId == 53 || partId == 9 || partId == 80 || partId == 7;
+}
+
+static int part_refreshing_silent_period(int partId)
+{
+    return partId != 9; 
+}
+
+static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)
+{
+    if (trackId < sSilentPeriodId)
+        return;
+
+    if (!can_spawn_enemy_on_part(partId))
+        return;
+
+    struct Object* enemy;
+    switch (random_u16() % 3)
+    {
+        case 0:
+            enemy = spawn_object(o, MODEL_BLACK_BOBOMB, bhvBobomb);
+            break;            
+        case 1:
+            enemy = spawn_object(o, MODEL_HEAVE_HO, bhvHeaveHo);
+            break;
+        case 2:
+            enemy = spawn_object(o, MODEL_AMP, bhvCirclingAmp);
+            break;
+    }
+        
+    enemy->oPosX = x + random_f32_around_zero(800.f);
+    enemy->oPosY = y;
+    enemy->oPosZ = z + random_f32_around_zero(800.f);
+    enemy->oFaceAngleYaw = angle;
+
+    if (part_refreshing_silent_period(partId))
+    {
+        sSilentPeriodId = trackId + 5;
+    }
+}
 
 static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackSize)
 {
@@ -68,6 +112,8 @@ static struct SpawnResult spawn_track(int idx_shift, const u8* track, int trackS
             
             obj_scale(part, SCALE);
     
+            spawn_enemy(idx_shift + i, entry, sSpawnerState.pos[0], sSpawnerState.pos[1], sSpawnerState.pos[2], sSpawnerState.angle);
+
             if (i == 0)
                 firstPart = part;
             
@@ -140,7 +186,7 @@ static struct WalkResult walk_track(const u8* track, int trackSize)
         if (sSpawnerState.pos[0] < minX) minX = sSpawnerState.pos[0];
         if (sSpawnerState.pos[0] > maxX) maxX = sSpawnerState.pos[0];
         if (sSpawnerState.pos[1] < minY) minY = sSpawnerState.pos[1];
-        if (sSpawnerState.pos[2] > maxY) maxY = sSpawnerState.pos[1];
+        if (sSpawnerState.pos[1] > maxY) maxY = sSpawnerState.pos[1];
         if (sSpawnerState.pos[2] < minZ) minZ = sSpawnerState.pos[2];
         if (sSpawnerState.pos[2] > maxZ) maxZ = sSpawnerState.pos[2];
 
@@ -169,6 +215,7 @@ void bhv_ctl_init()
     o->oCtlFinalTime = 0;
     sEnableProgress = 1;
     gMarioStates->faceAngle[1] = 0x8000;
+    sSilentPeriodId = 10;
 
     const u8* track = NULL;
     int trackSize = 10;
@@ -644,6 +691,11 @@ void bhv_test_loop()
 
 void kart_deduce_progress(struct MarioState *m, struct Object* part)
 {
+    if (m == gMarioStates)
+    {
+        print_text_fmt_int(20, 20, "P %d", part->oBehParams2ndByte);
+    }
+
     if (!sEnableProgress)
     {
         return;

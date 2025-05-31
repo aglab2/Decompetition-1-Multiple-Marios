@@ -457,6 +457,7 @@ extern u8 sZoomOutAreaMasks[];
  * Starts a camera shake triggered by an interaction
  */
 void set_camera_shake_from_hit(s16 shake) {
+    return;
     switch (shake) {
         // Makes the camera stop for a bit
         case SHAKE_ATTACK:

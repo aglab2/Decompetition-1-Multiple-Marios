@@ -250,6 +250,7 @@ void bhv_circling_amp_init(void) {
     o->oMoveAngleYaw = random_u16();
 
     o->oAction = AMP_ACT_IDLE;
+    o->oDrawingDistance = 10000.0f;
 }
 
 /**

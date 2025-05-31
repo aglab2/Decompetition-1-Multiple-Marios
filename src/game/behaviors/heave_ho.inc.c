@@ -122,6 +122,7 @@ void heave_ho_move(void) {
 }
 
 void bhv_heave_ho_loop(void) {
+    o->oDrawingDistance = 10000.0f;
     cur_obj_scale(2.0f);
 
     switch (o->oHeldState) {

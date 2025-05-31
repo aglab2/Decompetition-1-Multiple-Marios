@@ -8,6 +8,11 @@
 #define MODEL_MARIO                            0x01        // mario_geo
 #define MODEL_LUIGI                            0x02        // unused
 
+#define MODEL_HEAVE_HO                    4        // heave_ho_geo
+#define MODEL_AMP                         5        // dAmpGeo
+#define MODEL_BLACK_BOBOMB                6        // black_bobomb_geo
+#define MODEL_EXPLOSION                   7        // explosion_geo
+
 /* Various static level geometry, the geo layout differs but terrain object presets treat them the same.*/
 
 #define MODEL_LEVEL_GEOMETRY_03                0x03
@@ -318,7 +323,6 @@
 #define MODEL_HOOT                        0x56        // hoot_geo
 #define MODEL_YOSHI_EGG                   0x57        // yoshi_egg_geo
 #define MODEL_THWOMP                      0x58        // thwomp_geo
-#define MODEL_HEAVE_HO                    0x59        // heave_ho_geo
 
 // group 2
 #define MODEL_BLARGG                      0x54        // blargg_geo
@@ -506,13 +510,11 @@
 #define MODEL_FISH                        0xB9        // fish_geo - fish without shadow, used
 #define MODEL_FISH_SHADOW                 0xBA        // fish_shadow_geo - fish with shadow, unused
 #define MODEL_BUTTERFLY                   0xBB        // butterfly_geo
-#define MODEL_BLACK_BOBOMB                0xBC        // black_bobomb_geo
 // find me
 #define MODEL_KOOPA_SHELL                 0xBE        // koopa_shell_geo
 #define MODEL_KOOPA_WITHOUT_SHELL         0xBF        // koopa_without_shell_geo
 #define MODEL_GOOMBA                      0xC0        // goomba_geo
 #define MODEL_SEAWEED                     0xC1        // seaweed_geo
-#define MODEL_AMP                         0xC2        // dAmpGeo
 #define MODEL_BOBOMB_BUDDY                0xC3        // bobomb_buddy_geo
 // find me
 // find me
@@ -523,7 +525,6 @@
 #define MODEL_CHECKERBOARD_PLATFORM       0xCA        // checkerboard_platform_geo
 #define MODEL_RED_FLAME_SHADOW            0xCB        // red_flame_shadow_geo
 #define MODEL_BOWSER_KEY                  0xCC        // bowser_key_geo
-#define MODEL_EXPLOSION                   0xCD        // explosion_geo
 #define MODEL_SNUFIT                      0xCE        // snufit_geo
 #define MODEL_PURPLE_SWITCH               0xCF        // purple_switch_geo
 #define MODEL_CASTLE_STAR_DOOR_30_STARS   0xD0        // castle_geo_000F00

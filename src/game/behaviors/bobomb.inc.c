@@ -17,6 +17,7 @@ void bhv_bobomb_init(void) {
     o->oFriction = 0.8f;
     o->oBuoyancy = 1.3f;
     o->oInteractionSubtype = INT_SUBTYPE_KICKABLE;
+    o->oDrawingDistance = 10000.0f;
 }
 
 void bobomb_spawn_coin(void) {
@@ -28,16 +29,9 @@ void bobomb_spawn_coin(void) {
 }
 
 void bobomb_act_explode(void) {
-    if (o->oTimer < 5) {
+    if (o->oTimer < 1) {
         cur_obj_scale(1.0f + ((f32) o->oTimer / 5.0f));
     } else {
-        struct Object *explosion = spawn_object(o, MODEL_EXPLOSION, bhvExplosion);
-        explosion->oGraphYOffset += 100.0f;
-
-        // bobomb_spawn_coin();
-        // create_respawner(MODEL_BLACK_BOBOMB, bhvBobomb, 3000);
-
-        o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
     }
 }
 
@@ -68,10 +62,10 @@ void bobomb_act_patrol(void) {
     o->oForwardVel = 5.0f;
 
     s16 collisionFlags = object_step();
-    if (obj_return_home_if_safe(o, o->oHomeX, o->oHomeY, o->oHomeZ, 400)
-     && obj_check_if_facing_toward_angle(o->oMoveAngleYaw, o->oAngleToMario, 0x2000)) {
-        o->oBobombFuseLit = TRUE;
-        o->oAction = BOBOMB_ACT_CHASE_MARIO;
+    if (obj_return_home_if_safe(o, o->oHomeX, o->oHomeY, o->oHomeZ, 210)) {
+        struct Object *explosion = spawn_object(o, MODEL_EXPLOSION, bhvExplosion);
+        explosion->oGraphYOffset += 100.0f;
+        o->activeFlags = ACTIVE_FLAG_DEACTIVATED;
     }
 
     obj_check_floor_death(collisionFlags, sObjFloor);

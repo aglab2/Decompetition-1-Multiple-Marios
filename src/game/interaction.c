@@ -670,6 +670,7 @@ u32 should_push_or_pull_door(struct MarioState *m, struct Object *obj) {
 }
 
 u32 take_damage_from_interact_object(struct MarioState *m) {
+    return 0;
     s32 shake;
     s32 damage = m->interactObj->oDamageOrCoinValue;
 
@@ -1276,7 +1277,7 @@ u32 interact_shock(struct MarioState *m, UNUSED u32 interactType, struct Object 
         m->interactObj = obj;
 
         take_damage_from_interact_object(m);
-        play_sound(SOUND_MARIO_ATTACKED, m->marioObj->header.gfx.cameraToObject);
+        // play_sound(SOUND_MARIO_ATTACKED, m->marioObj->header.gfx.cameraToObject);
 #if ENABLE_RUMBLE
         queue_rumble_data(70, 60);
 #endif
