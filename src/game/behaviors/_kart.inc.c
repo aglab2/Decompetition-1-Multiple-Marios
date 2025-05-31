@@ -400,7 +400,7 @@ void bhv_ctl_loop()
         if (10 == o->oTimer)
         {
             if (0x30 == sSourceWarpNodeId)
-                seq_player_play_sequence(0, 0x29, 0);
+                seq_player_play_sequence(0, 0x2B, 0);
         }
         if (110 == o->oTimer)
         {
