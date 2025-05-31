@@ -1035,9 +1035,6 @@ void find_surface_on_ray_cell(s32 cellX, s32 cellZ, Vec3f orig, Vec3f normalized
         if (flags & RAYCAST_FIND_WALL) {
             find_surface_on_ray_list( gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WALLS ], orig, normalized_dir, dir_length, hit_surface, hit_pos, max_length);
         }
-        if (flags & RAYCAST_FIND_WATER) {
-            find_surface_on_ray_list( gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WATER ], orig, normalized_dir, dir_length, hit_surface, hit_pos, max_length);
-        }
     }
 }
 

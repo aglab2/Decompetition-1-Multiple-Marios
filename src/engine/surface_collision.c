@@ -611,32 +611,7 @@ s32 get_room_at_pos(f32 x, f32 y, f32 z) {
  * Find the highest water floor under a given position and return the height.
  */
 f32 find_water_floor(s32 xPos, s32 yPos, s32 zPos, struct Surface **pfloor) {
-    f32 height = FLOOR_LOWER_LIMIT;
-
-    s32 x = xPos;
-    s32 y = yPos;
-    s32 z = zPos;
-
-    if (is_outside_level_bounds(x, z)) return height;
-
-    // Each level is split into cells to limit load, find the appropriate cell.
-    s32 cellX = GET_CELL_COORD(x);
-    s32 cellZ = GET_CELL_COORD(z);
-
-    // Check for surfaces that are a part of level geometry.
-    struct SurfaceNode *surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_WATER];
-    struct Surface     *floor       = find_water_floor_from_list(surfaceList, x, y, z, &height);
-
-    if (floor == NULL) {
-        height = FLOOR_LOWER_LIMIT;
-    } else {
-        *pfloor = floor;
-    }
-#ifdef VANILLA_DEBUG
-    // Increment the debug tracker.
-    gNumCalls.floor++;
-#endif
-    return height;
+    return FLOOR_LOWER_LIMIT;
 }
 
 /**************************************************
