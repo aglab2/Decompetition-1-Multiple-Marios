@@ -48,12 +48,12 @@ static u8 uRNGScratch[270];
 
 static int can_spawn_enemy_on_part(int partId)
 {
-    return partId == 12 || partId == 32 || partId == 34 || partId == 35 || partId == 54 || partId == 53 || partId == 9 || partId == 80 || partId == 7;
+    return partId == 34 || partId == 35 || partId == 54 || partId == 53 || partId == 9 || partId == 80 || partId == 7;
 }
 
 static int part_refreshing_silent_period(int partId)
 {
-    return partId != 9; 
+    return partId != 9 && partId != 80; 
 }
 
 static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)

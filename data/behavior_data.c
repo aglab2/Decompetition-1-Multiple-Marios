@@ -1682,7 +1682,7 @@ const BehaviorScript bhvHeaveHo[] = {
     // SPAWN_OBJ(/*Model*/ MODEL_NONE, /*Behavior*/ bhvHeaveHoThrowMario),
     SET_INT(oInteractType, INTERACT_GRABBABLE),
     SET_INT(oInteractionSubtype, (INT_SUBTYPE_NOT_GRABBABLE)),
-    SET_HITBOX(/*Radius*/ 120, /*Height*/ 100),
+    SET_HITBOX(/*Radius*/ 220, /*Height*/ 100),
     SET_HOME(),
     SET_INT(oIntangibleTimer, 0),
     BEGIN_LOOP(),
