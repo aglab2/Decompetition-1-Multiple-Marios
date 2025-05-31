@@ -40,5 +40,6 @@
     "25_ssr": ["0C_extended_bank"],
     "26_s": ["0C_extended_bank"],
     "27_mc": ["0C_extended_bank"],
-    "28_mush": ["0C_extended_bank"]
+    "28_mush": ["0C_extended_bank"],
+    "29_toad": ["0C_extended_bank"]
 }
