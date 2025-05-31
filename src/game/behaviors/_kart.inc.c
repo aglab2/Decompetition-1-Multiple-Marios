@@ -528,11 +528,16 @@ void coop_npc_behavior(struct MarioState * m)
         m->kartLocFuzz = random_f32_around_zero(900.0f);
     }
 
-    m->input |= INPUT_NONZERO_ANALOG;
+    if (m->action != ACT_BURNING_GROUND)
+        m->input |= INPUT_NONZERO_ANALOG;
+    else
+        m->input &= ~INPUT_NONZERO_ANALOG;
+    
     m->intendedMag = 25.0f + m->kartVelFuzz;
     if (m->floor && m->floor->object)
     {
         struct Object* currPart = m->floor->object;
+        struct Object* nextPart1 = currPart->oPartNext ?: currPart;
         struct PartConfig* currPartConfig = &sPartConfigs[currPart->oBehParams2ndByte];
         // print_text_fmt_int(200, 160, "P %d", currPart->oBehParams2ndByte);
         if (11 == currPart->oBehParams2ndByte)
@@ -617,7 +622,6 @@ void coop_npc_behavior(struct MarioState * m)
             }
             else
             {
-                struct Object* nextPart1 = currPart->oPartNext ?: currPart;
                 Vec3f loc1;
                 get_loc_fuzzed(loc1, nextPart1, m->kartLocFuzz);
 
