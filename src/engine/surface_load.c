@@ -30,9 +30,6 @@ struct CellCoords {
     u8 x;
     u8 partition;
 };
-static struct CellCoords sCellsUsed[NUM_CELLS];
-static u16 sNumCellsUsed;
-static u8 sClearAllCells;
 
 /**
  * The amount of data currently allocated to static surfaces.
@@ -98,21 +95,7 @@ static void add_surface_to_cell(s32 dynamic, s32 cellX, s32 cellZ, struct Surfac
     struct SurfaceNode *newNode = alloc_surface_node(dynamic);
     newNode->surface = surface;
 
-    if (dynamic) {
-        list = NULL;
-        if (sNumCellsUsed >= sizeof(sCellsUsed) / sizeof(struct CellCoords)) {
-            sClearAllCells = TRUE;
-        } else {
-            if (*list == NULL) {
-                sCellsUsed[sNumCellsUsed].z = cellZ;
-                sCellsUsed[sNumCellsUsed].x = cellX;
-                sCellsUsed[sNumCellsUsed].partition = listIndex;
-                sNumCellsUsed++;
-            }
-        }
-    } else {
-        list = &gStaticSurfacePartition[cellZ][cellX][listIndex];
-    }
+    list = &gStaticSurfacePartition[cellZ][cellX][listIndex];
 
     if (*list == NULL) {
         *list = newNode;
@@ -461,9 +444,6 @@ void load_area_terrain(s32 index, TerrainData *data, RoomData *surfaceRooms, s16
     gEnvironmentRegions = NULL;
     gSurfaceNodesAllocated = 0;
     gSurfacesAllocated = 0;
-    bzero(&sCellsUsed, sizeof(sCellsUsed));
-    sNumCellsUsed = 0;
-    sClearAllCells = TRUE;
 
     // Clear the static (level) surface partitions for new use.
     bzero(gStaticSurfacePartition, sizeof(gStaticSurfacePartition));
@@ -520,8 +500,6 @@ void clear_dynamic_surfaces(void) {
 
         gSurfacesAllocated = gNumStaticSurfaces;
         gSurfaceNodesAllocated = gNumStaticSurfaceNodes;
-        sNumCellsUsed = 0;
-        sClearAllCells = FALSE;
     }
     profiler_collision_update(first);
 }
