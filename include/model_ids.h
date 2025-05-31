@@ -12,6 +12,7 @@
 #define MODEL_AMP                         5        // dAmpGeo
 #define MODEL_BLACK_BOBOMB                6        // black_bobomb_geo
 #define MODEL_EXPLOSION                   7        // explosion_geo
+#define MODEL_RED_FLAME                   8        // red_flame_geo
 
 /* Various static level geometry, the geo layout differs but terrain object presets treat them the same.*/
 
@@ -465,7 +466,6 @@
 // find me
 #define MODEL_MIST                        0x8E        // mist_geo
 #define MODEL_SPARKLES_ANIMATION          0x8F        // sparkles_animation_geo
-#define MODEL_RED_FLAME                   0x90        // red_flame_geo
 #define MODEL_BLUE_FLAME                  0x91        // blue_flame_geo
 // find me
 // find me

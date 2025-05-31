@@ -79,7 +79,7 @@ extern const BehaviorScript bhvDoor[];
 #define bhvWfTumblingBridge bhvStaticObject
 #define bhvBbhTumblingBridge bhvStaticObject
 #define bhvLllTumblingBridge bhvStaticObject
-#define bhvFlame bhvStaticObject
+extern const BehaviorScript bhvFlame[];
 #define bhvAnotherElavator bhvStaticObject
 #define bhvRrElevatorPlatform bhvStaticObject
 #define bhvHmcElevatorPlatform bhvStaticObject

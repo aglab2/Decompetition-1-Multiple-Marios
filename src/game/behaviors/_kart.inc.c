@@ -62,8 +62,9 @@ static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)
     if (!can_spawn_enemy_on_part(partId))
         return;
 
+    f32 raiseY = 0.f;
     struct Object* enemy;
-    switch (random_u16() % 3)
+    switch (random_u16() % 4)
     {
         case 0:
             enemy = spawn_object(o, MODEL_BLACK_BOBOMB, bhvBobomb);
@@ -73,11 +74,16 @@ static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)
             break;
         case 2:
             enemy = spawn_object(o, MODEL_AMP, bhvCirclingAmp);
+            raiseY = 70.f;
+            break;
+        case 3:
+            enemy = spawn_object(o, MODEL_RED_FLAME, bhvFlame);
+            raiseY = 70.f;
             break;
     }
         
     enemy->oPosX = x + random_f32_around_zero(800.f);
-    enemy->oPosY = y;
+    enemy->oPosY = y + raiseY;
     enemy->oPosZ = z + random_f32_around_zero(800.f);
     enemy->oFaceAngleYaw = angle;
 

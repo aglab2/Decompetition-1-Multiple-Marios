@@ -439,15 +439,26 @@ void obj_move_xyz_using_fvel_and_yaw(struct Object *obj) {
     vec3f_add(&obj->oPosVec, &obj->oVelVec);
 }
 
+#include "mario_coop.h"
+
 /**
  * Checks if a point is within distance from Mario's graphical position. Test is exclusive.
  */
 s32 is_point_within_radius_of_mario(f32 x, f32 y, f32 z, s32 dist) {
-    f32 dx = x - gMarioObject->header.gfx.pos[0];
-    f32 dy = y - gMarioObject->header.gfx.pos[1];
-    f32 dz = z - gMarioObject->header.gfx.pos[2];
+    for (int i = 0; i < COOP_MARIO_STATES_MAX; i++)
+    {
+        struct MarioState* m = &gMarioStates[i];
+        f32 dx = x - m->pos[0];
+        f32 dy = y - m->pos[1];
+        f32 dz = z - m->pos[2];
 
-    return sqr(dx) + sqr(dy) + sqr(dz) < (f32)sqr(dist);
+        if (sqr(dx) + sqr(dy) + sqr(dz) < (f32)sqr(dist))
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
 }
 
 /**
