@@ -43,5 +43,7 @@
     "28_mush": ["0C_extended_bank"],
     "29_toad": ["0C_extended_bank"],
     "2A_sydney": ["0C_extended_bank"],
-    "2B_ninja": ["0C_extended_bank"]
+    "2B_ninja": ["0C_extended_bank"],
+    "2C_mute": ["0C_extended_bank"],
+    "2D_rainbow": ["0C_extended_bank"]
 }

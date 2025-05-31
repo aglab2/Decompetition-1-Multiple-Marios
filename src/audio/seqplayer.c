@@ -1695,7 +1695,7 @@ void sequence_channel_process_script(struct SequenceChannel *seqChannel) {
                     case 0xd3: // chan_pitchbend; pitch bend by <= 1 octave in either direction (-127..127)
                         // (m64_read_u8(state) is really s8 here)
                         cmd = m64_read_u8(state) + 128;
-                        seqChannel->freqScale = gPitchBendFrequencyScale[cmd] * gConfig.audioFrequency;
+                        // seqChannel->freqScale = gPitchBendFrequencyScale[cmd] * gConfig.audioFrequency;
 #if defined(VERSION_EU) || defined(VERSION_SH)
                         seqChannel->changes.as_bitfields.freqScale = TRUE;
 #endif
