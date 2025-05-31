@@ -622,117 +622,21 @@ f32 find_water_floor(s32 xPos, s32 yPos, s32 zPos, struct Surface **pfloor) {
  * Finds the height of water at a given location.
  */
 s32 find_water_level_and_floor(s32 x, s32 y, s32 z, struct Surface **pfloor) {
-    s32 val;
-    s32 loX, hiX, loZ, hiZ;
-    TerrainData *p = gEnvironmentRegions;
-    struct Surface *floor = NULL;
-    PUPPYPRINT_ADD_COUNTER(gPuppyCallCounter.collision_water);
-    PUPPYPRINT_GET_SNAPSHOT();
-    s32 waterLevel = find_water_floor(x, y, z, &floor);
-
-    if (p != NULL && waterLevel == FLOOR_LOWER_LIMIT) {
-        s32 numRegions = *p++;
-
-        for (s32 i = 0; i < numRegions; i++) {
-            val = *p++;
-            loX = *p++;
-            loZ = *p++;
-            hiX = *p++;
-            hiZ = *p++;
-
-            // If the location is within a water box and it is a water box.
-            // Water is less than 50 val only, while above is gas and such.
-            if (loX < x && x < hiX && loZ < z && z < hiZ && val < 50) {
-                // Set the water height. Since this breaks, only return the first height.
-                waterLevel = *p;
-                break;
-            }
-            p++;
-        }
-    } else {
-        *pfloor = floor;
-    }
-
-    profiler_collision_update(first);
-    return waterLevel;
+    return FLOOR_LOWER_LIMIT;
 }
 
 /**
  * Finds the height of water at a given location.
  */
 s32 find_water_level(s32 x, s32 z) { // TODO: Allow y pos
-    s32 val;
-    s32 loX, hiX, loZ, hiZ;
-    TerrainData *p = gEnvironmentRegions;
-    struct Surface *floor = NULL;
-    PUPPYPRINT_ADD_COUNTER(gPuppyCallCounter.collision_water);
-    PUPPYPRINT_GET_SNAPSHOT();
-    s32 waterLevel = find_water_floor(x, ((gCollisionFlags & COLLISION_FLAG_CAMERA) ? gLakituState.pos[1] : gMarioState->pos[1]), z, &floor);
-
-    if ((p != NULL) && (waterLevel == FLOOR_LOWER_LIMIT)) {
-        s32 numRegions = *p++;
-
-        for (s32 i = 0; i < numRegions; i++) {
-            val = *p++;
-            loX = *p++;
-            loZ = *p++;
-            hiX = *p++;
-            hiZ = *p++;
-
-            // If the location is within a water box and it is a water box.
-            // Water is less than 50 val only, while above is gas and such.
-            if (loX <= x && x <= hiX && loZ <= z && z <= hiZ && val < 50) {
-                // Set the water height. Since this breaks, only return the first height.
-                waterLevel = *p;
-                break;
-            }
-            p++;
-        }
-    }
-
-    profiler_collision_update(first);
-
-    return waterLevel;
+    return FLOOR_LOWER_LIMIT;
 }
 
 /**
  * Finds the height of the poison gas (used only in HMC) at a given location.
  */
 s32 find_poison_gas_level(s32 x, s32 z) {
-    s32 val;
-    s32 loX, hiX, loZ, hiZ;
-    s32 gasLevel = FLOOR_LOWER_LIMIT;
-    TerrainData *p = gEnvironmentRegions;
-    PUPPYPRINT_ADD_COUNTER(gPuppyCallCounter.collision_water);
-    PUPPYPRINT_GET_SNAPSHOT();
-
-    if (p != NULL) {
-        s32 numRegions = *p++;
-
-        for (s32 i = 0; i < numRegions; i++) {
-            val = *p;
-
-            if (val >= 50) {
-                loX = p[1];
-                loZ = p[2];
-                hiX = p[3];
-                hiZ = p[4];
-
-                // If the location is within a gas's box and it is a gas box.
-                // Gas has a value of 50, 60, etc.
-                if (loX < x && x < hiX && loZ < z && z < hiZ && val % 10 == 0) {
-                    // Set the gas height. Since this breaks, only return the first height.
-                    gasLevel = p[5];
-                    break;
-                }
-            }
-
-            p += 6;
-        }
-    }
-    
-    profiler_collision_update(first);
-    return gasLevel;
+    return FLOOR_LOWER_LIMIT;
 }
 
 /**************************************************

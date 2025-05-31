@@ -84,7 +84,7 @@ static void spawn_enemy(int trackId, int partId, f32 x, f32 y, f32 z, s16 angle)
         
     enemy->oPosX = x + random_f32_around_zero(800.f);
     enemy->oPosY = y + raiseY;
-    enemy->oPosZ = z + random_f32_around_zero(800.f);
+    enemy->oPosZ = z + random_f32_around_zero(400.f) - 400.f;
     enemy->oFaceAngleYaw = angle;
 
     if (part_refreshing_silent_period(partId))
@@ -547,7 +547,14 @@ void coop_npc_behavior(struct MarioState * m)
             f32 relProgress = m->kartProgress - (int) m->kartProgress;
             if (relProgress < 0.8f)
             {
-                m->intendedYaw = currPart->oFaceAngleYaw + mult * 0x4000;
+                if (m->wall)
+                {
+                    m->intendedYaw = currPart->oFaceAngleYaw;
+                }
+                else
+                {
+                    m->intendedYaw = currPart->oFaceAngleYaw + mult * 0x4000;   
+                }
             }
             else
             {
@@ -717,7 +724,7 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
 {
     if (m == gMarioStates)
     {
-        print_text_fmt_int(20, 20, "P %d", part->oBehParams2ndByte);
+        // print_text_fmt_int(20, 20, "P %d", part->oBehParams2ndByte);
     }
 
     if (!sEnableProgress)
