@@ -168,9 +168,9 @@ void update_sliding_angle(struct MarioState *m, f32 accel, f32 lossFactor) {
     if (sSourceWarpNodeId == 0x30)
     {
         // rubberband a tiny bit for the final level
-        f32 diffProgress = gMarioStates->kartProgress - m->kartProgress + 0.25f;
+        f32 diffProgress = gMarioStates->kartProgress - m->kartProgress + 1.f;
         if (diffProgress > 0)
-            rubberbanding = CLAMP(diffProgress * diffProgress * 0.33f, 0.f, 10.f);
+            rubberbanding = CLAMP(diffProgress * diffProgress * 0.33f, 0.f, 30.f);
 
         additiveVel += rubberbanding;
     }
