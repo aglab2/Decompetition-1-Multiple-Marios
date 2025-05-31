@@ -1905,8 +1905,7 @@ s32 render_pause_courses_and_castle(void) {
             render_pause_red_coins();
 #ifndef DISABLE_EXIT_COURSE
 #ifdef EXIT_COURSE_WHILE_MOVING
-            if ((gMarioStates[0].action & (ACT_FLAG_SWIMMING | ACT_FLAG_METAL_WATER | ACT_FLAG_PAUSE_EXIT))
-             || (gMarioStates[0].pos[1] <= gMarioStates[0].floorHeight)) {
+            if (1) {
 #else
             if (gMarioStates[0].action & ACT_FLAG_PAUSE_EXIT) {
 #endif
@@ -2104,9 +2103,18 @@ void render_save_confirmation(s16 x, s16 y, s8 *index, s16 yPos) {
     gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
 }
 
+extern int sCompletedTracks;
 s32 render_course_complete_screen(void) {
     switch (gDialogBoxState) {
         case DIALOG_STATE_OPENING:
+            if (0 == gCourseDoneMenuTimer)
+            {
+                if (sCompletedTracks == (1 | 2 | 4 | (1 << 0x10)))
+                {
+                    seq_player_play_sequence(0, 0x20, 0);
+                }
+            }
+
             render_course_complete_lvl_info_and_hud_str();
             if (gCourseDoneMenuTimer > 100 && gCourseCompleteCoinsEqual) {
                 gDialogBoxState = DIALOG_STATE_VERTICAL;

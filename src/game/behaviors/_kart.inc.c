@@ -30,7 +30,9 @@ static struct SpawnerState sSpawnerState;
 extern s16 sSourceWarpNodeId;
 static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
+static u8 sVisitedRNG = 0;
 static s16 sSilentPeriodId = 0;
+int sCompletedTracks = 0;
 
 #define oCtlFinalTime oF4
 
@@ -371,6 +373,9 @@ void bhv_ctl_loop()
         {
             gMarioStates->usedObj = o;
             int warpId = sPlacement == 1 ? 0xa : 0xf1;
+            if (1 == sPlacement)
+                sCompletedTracks |= 1 << (sSourceWarpNodeId - 0x20);
+
             gMarioStates->usedObj->oBehParams = warpId << 16;
             gMarioStates->usedObj->oBehParams2ndByte = warpId;
             level_trigger_warp(gMarioStates, WARP_OP_TELEPORT);
@@ -400,7 +405,17 @@ void bhv_ctl_loop()
         if (10 == o->oTimer)
         {
             if (0x30 == sSourceWarpNodeId)
-                seq_player_play_sequence(0, 0x2D, 0);
+            {
+                if (sVisitedRNG)
+                {
+                    seq_player_play_sequence(0, 0x27 + random_u16() % 6, 0);
+                }
+                else
+                {
+                    seq_player_play_sequence(0, 0x26, 0);
+                }
+                sVisitedRNG = 1;
+            }
         }
         if (110 == o->oTimer)
         {

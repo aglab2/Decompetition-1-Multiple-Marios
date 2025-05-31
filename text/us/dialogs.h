@@ -387,8 +387,8 @@ DEFINE_DIALOG(DIALOG_033, 1, 5, 30, 200, _("\
 Mario Adventure 35\n\
 \n\
 \n\
-   Made by aglab2\n\
-   for Decompetition 2025\n\
+  Made by aglab2\n\
+  for Decompetition 2025\n\
 This is a short racing\n\
 game that heavily uses\n\
 Sonic Adventure 2 assets\n\
@@ -408,7 +408,10 @@ Rovertronic\n\
   Competition organizer\n\
   Multi Mario code\n\
 Tsoding\n\
-  BPE videos"))
+  BPE videos\n\
+P.S. Personalized content\n\
+might be scuffed, retry\n\
+if you get stuck :)"))
 
 DEFINE_DIALOG(DIALOG_034, 1, 6, 30, 200, _("\
 Good afternoon. The\n\
@@ -1711,13 +1714,11 @@ pre-set course.\n\
 It disappears\n\
 automatically, too."))
 
-DEFINE_DIALOG(DIALOG_140, 1, 6, 30, 200, _("\
-Elevator Area\n\
-Right: Hazy Maze\n\
-/// Entrance\n\
-Left: Black Hole\n\
-///Elevator 1\n\
-Arrow: You are here"))
+DEFINE_DIALOG(DIALOG_140, 1, 4, 30, 200, _("\
+Thank you playing!\n\
+I hope you had a\n\
+good time. Till next\n\
+time, see you!"))
 
 DEFINE_DIALOG(DIALOG_141, 1, 5, 150, 200, _("\
 You've recovered one of\n\

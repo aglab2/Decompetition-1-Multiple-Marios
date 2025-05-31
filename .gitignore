@@ -1330,7 +1330,6 @@ sound/sequences/us/1C_event_toad_message.m64
 sound/sequences/us/1D_event_peach_message.m64
 sound/sequences/us/1E_cutscene_intro.m64
 sound/sequences/us/1F_cutscene_victory.m64
-sound/sequences/us/20_cutscene_ending.m64
 sound/sequences/us/22_cutscene_lakitu.m64
 textures/cave/hmc_textures.00000.rgba16.png
 textures/cave/hmc_textures.01000.rgba16.png
