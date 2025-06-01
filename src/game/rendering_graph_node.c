@@ -1417,9 +1417,9 @@ static void* clone_vtx(const void* vtx, int amt)
             nt[2] = n[0] * mat[2] + n[1] * mat[6] + n[2] * mat[10];
 
             Vtx_tn* v = &cloneVtx[i];
-            v->n[0] = (s8) 4.f * nt[0];
-            v->n[1] = (s8) 4.f * nt[1];
-            v->n[2] = (s8) 4.f * nt[2];
+            v->n[0] = (s8) (4.f * nt[0]);
+            v->n[1] = (s8) (4.f * nt[1]);
+            v->n[2] = (s8) (4.f * nt[2]);
         }
     }
 
