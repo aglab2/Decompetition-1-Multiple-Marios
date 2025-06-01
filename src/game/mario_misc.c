@@ -708,10 +708,19 @@ Gfx *geo_mirror_mario_backface_culling(s32 callContext, struct GraphNode *node, 
     Gfx *gfx = NULL;
 
     struct Object *obj = (struct Object *) gCurGraphNodeObject;
-    if (callContext == GEO_CONTEXT_RENDER && obj->oPlayerID) {
+    if (callContext == GEO_CONTEXT_RENDER) {
         gfx = alloc_display_list(3 * sizeof(*gfx));
-        gDPSetPrimColor(&gfx[0], 255, 255, sColors[obj->oPlayerID - 1].r, sColors[obj->oPlayerID - 1].g, sColors[obj->oPlayerID - 1].b, 255);
-        gSPEndDisplayList(&gfx[1]);
+        if (0 != obj->oPlayerID)
+        {
+            gDPSetPrimColor(&gfx[0], 255, 255, sColors[obj->oPlayerID - 1].r, sColors[obj->oPlayerID - 1].g, sColors[obj->oPlayerID - 1].b, 255);
+            gSPEndDisplayList(&gfx[1]);
+        }
+        else
+        {
+            gDPPipeSync(&gfx[0]);
+            gDPPipelineMode(&gfx[1], asGenerated->parameter ? G_PM_1PRIMITIVE : G_PM_NPRIMITIVE);
+            gSPEndDisplayList(&gfx[2]);
+        }
         SET_GRAPH_NODE_LAYER(asGenerated->fnNode.node.flags, LAYER_OPAQUE);
     }
     return gfx;
