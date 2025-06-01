@@ -101,7 +101,7 @@ typedef s16 ColFlags;
 typedef ROOM_DATA_TYPE RoomData;
 typedef COLLISION_DATA_TYPE Collision; // Collision is by default an s16, but it's best to have it match the type of COLLISION_DATA_TYPE
 typedef Collision TerrainData;
-typedef Collision Vec3t[3];
+typedef s32 Vec3t[3];
 typedef Collision SurfaceType;
 
 // -- Colors/Textures --

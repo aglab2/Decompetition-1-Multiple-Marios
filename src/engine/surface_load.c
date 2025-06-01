@@ -239,6 +239,50 @@ static struct Surface *read_surface_data(TerrainData *vertexData, TerrainData **
     return surface;
 }
 
+static struct Surface *read_surface_data_32(s32* vertexData, TerrainData **vertexIndices, u32 dynamic) {
+    Vec3t v[3];
+    Vec3f n;
+    Vec3t offset;
+    s32 min, max;
+
+    vec3_scale_dest(offset, (*vertexIndices), 3);
+
+    vec3s_copy(v[0], (vertexData + offset[0]));
+    vec3s_copy(v[1], (vertexData + offset[1]));
+    vec3s_copy(v[2], (vertexData + offset[2]));
+
+    find_vector_perpendicular_to_plane(n, v[0], v[1], v[2]);
+
+    f32 mag = (sqr(n[0]) + sqr(n[1]) + sqr(n[2]));
+    // This will never need to be run for custom levels because Fast64 does this step before exporting.
+    // assert(mag >= NEAR_ZERO, "Denorm tri was found.");
+#ifdef ENABLE_VANILLA_LEVEL_SPECIFIC_CHECKS
+    if (mag < NEAR_ZERO) {
+        return NULL;
+    }
+#endif
+    mag = 1.0f / sqrtf(mag);
+    vec3_scale(n, mag);
+
+    struct Surface *surface = alloc_surface(dynamic);
+
+    vec3s_copy(surface->vertex1, v[0]);
+    vec3s_copy(surface->vertex2, v[1]);
+    vec3s_copy(surface->vertex3, v[2]);
+
+    surface->normal.x = n[0];
+    surface->normal.y = n[1];
+    surface->normal.z = n[2];
+
+    surface->originOffset = -vec3_dot(n, v[0]);
+
+    min_max_3i(v[0][1], v[1][1], v[2][1], &min, &max);
+    surface->lowerY = (min - SURFACE_VERTICAL_BUFFER);
+    surface->upperY = (max + SURFACE_VERTICAL_BUFFER);
+
+    return surface;
+}
+
 #ifndef ALL_SURFACES_HAVE_FORCE
 /**
  * Returns whether a surface has exertion/moves Mario
@@ -505,7 +549,7 @@ void clear_dynamic_surfaces(void) {
 /**
  * Applies an object's transformation to the object's vertices.
  */
-void transform_object_vertices(TerrainData **data, TerrainData *vertexData) {
+void transform_object_vertices(TerrainData **data, s32 *vertexData) {
     Mat4 *objectTransform = &o->transform;
 
     register s32 numVertices = *(*data)++;
@@ -538,7 +582,7 @@ void transform_object_vertices(TerrainData **data, TerrainData *vertexData) {
 /**
  * Load in the surfaces for the o. This includes setting the flags, exertion, and room.
  */
-void load_object_surfaces(TerrainData **data, TerrainData *vertexData, u32 dynamic) {
+void load_object_surfaces(TerrainData **data, s32 *vertexData, u32 dynamic) {
     s32 i;
 
     s32 surfaceType = *(*data)++;
@@ -555,7 +599,7 @@ void load_object_surfaces(TerrainData **data, TerrainData *vertexData, u32 dynam
     RoomData room = (o->behavior == segmented_to_virtual(bhvDddWarp)) ? 5 : 0;
 
     for (i = 0; i < numSurfaces; i++) {
-        struct Surface *surface = read_surface_data(vertexData, data, dynamic);
+        struct Surface *surface = read_surface_data_32(vertexData, data, dynamic);
 
         if (surface != NULL) {
             surface->object = o;
@@ -611,7 +655,7 @@ static void get_optimal_coll_dist(struct Object *obj) {
  * Transform an object's vertices, reload them, and render the object.
  */
 void load_object_collision_model(void) {
-    TerrainData sVertexData[600];
+    s32 sVertexData[600];
 
     PUPPYPRINT_GET_SNAPSHOT();
     TerrainData *collisionData = o->collisionData;
@@ -675,7 +719,7 @@ void load_object_collision_model(void) {
  * Transform an object's vertices and add them to the static surface pool.
  */
 void load_object_static_model(void) {
-    TerrainData sVertexData[600];
+    s32 sVertexData[600];
 
     PUPPYPRINT_GET_SNAPSHOT();
     TerrainData *collisionData = o->collisionData;
