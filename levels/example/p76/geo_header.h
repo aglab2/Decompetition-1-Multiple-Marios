@@ -28,6 +28,6 @@ extern Vtx p76_object_00559E28_mesh_layer_1_vtx_6[24];
 extern Vtx p76_object_00559E28_mesh_layer_1_vtx_7[18];
 extern Vtx p76_object_00559E28_mesh_layer_1_vtx_8[16];
 extern Vtx p76_object_00559E28_mesh_layer_1_vtx_9[20];
-extern Vtx p76_object_00559E28_mesh_layer_1_vtx_10[45];
+extern Vtx p76_object_00559E28_mesh_layer_1_vtx_10[44];
 extern Vtx p76_object_00559E28_mesh_layer_1_vtx_11[16];
 extern Gfx p76_object_00559E28_mesh_layer_1[];

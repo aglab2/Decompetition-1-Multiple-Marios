@@ -24,7 +24,7 @@ extern u8 p34_cart256_4_pal_rgba16[];
 extern u8 p34_shcity128_21_ci4[];
 extern u8 p34_shcity128_21_pal_rgba16[];
 extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_cull[8];
-extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_0[54];
+extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_0[50];
 extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_1[8];
 extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_2[16];
 extern Vtx p34_object_0050B3E8_mesh_layer_1_vtx_3[10];

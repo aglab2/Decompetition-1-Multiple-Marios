@@ -30,7 +30,7 @@ extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_4[15];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_5[10];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_6[16];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_7[10];
-extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_8[54];
+extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_8[50];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_9[8];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_10[16];
 extern Vtx p35_object_0050C6F8_mesh_layer_1_vtx_11[10];

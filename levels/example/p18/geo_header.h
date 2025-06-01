@@ -35,7 +35,7 @@ extern u8 p18_shcity128_21_ci4[];
 extern u8 p18_shcity128_21_pal_rgba16[];
 extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_cull[8];
 extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_0[26];
-extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_1[43];
+extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_1[40];
 extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_2[150];
 extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_3[36];
 extern Vtx p18_object_004EFA60_mesh_layer_1_vtx_4[40];

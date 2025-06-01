@@ -35,7 +35,7 @@ extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_cull[8];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_0[16];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_1[16];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_2[26];
-extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_3[43];
+extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_3[40];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_4[150];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_5[36];
 extern Vtx p17_object_004EC0B0_mesh_layer_1_vtx_6[40];
