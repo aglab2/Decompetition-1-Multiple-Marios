@@ -346,7 +346,14 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
  * parameter. Look at the RenderModeContainer struct to see the corresponding
  * render modes of layers.
  */
+static u8 gDryRun = 0;
+extern void dry_run_append_display_list(const u8 *displayList, s32 layer);
 void geo_append_display_list(void *displayList, s32 layer) {
+    if (gDryRun)
+    {
+        return dry_run_append_display_list((const u8*) displayList, layer);
+    }
+
 #ifdef F3DEX_GBI_2
     gSPLookAt(gDisplayListHead++, gCurLookAt);
 #endif
@@ -383,6 +390,7 @@ void geo_append_display_list(void *displayList, s32 layer) {
 }
 
 static void inc_mat_stack() {
+    // during dry run this will leak memory, but it doesn't matter because it will be flushed next frame
     Mtx *mtx = alloc_display_list(sizeof(*mtx));
     gMatStackIndex++;
     mtxf_to_mtx(mtx, gMatStack[gMatStackIndex]);
@@ -1328,4 +1336,116 @@ Gfx *geo_render_backdrop(s32 callContext, struct GraphNode *node, UNUSED f32 b[4
         gMatStackIndex--;
     }
     return 0;
+}
+
+#include "PR/gbi-ex3.h"
+
+extern struct Object *gCurrentObject;
+void make_cached_anim(void)
+{
+    gDryRun = 1;
+    gMatStackIndex = 0;
+    gCurrAnimType = ANIM_TYPE_NONE;
+    struct Object* node = gCurrentObject;
+
+    // needed for dl allocations
+    sMainPool.start = (void*) ALIGN16(sMainPool.start);
+    void* dl = sMainPool.start;
+    sMainPool.end = (void*) ALIGN16(sMainPool.end - 16);
+
+    mtxf_identity(gMatStack[gMatStackIndex]);
+    {
+        // FIXME: correct types
+        if (node->header.gfx.animInfo.curAnim != NULL) {
+            geo_set_animation_globals(&node->header.gfx.animInfo, (node->header.gfx.node.flags & GRAPH_RENDER_HAS_ANIMATION) != 0);
+        }
+
+        {
+            if (node->header.gfx.sharedChild != NULL) {
+                gCurGraphNodeObject = (struct GraphNodeObject *) node;
+                node->header.gfx.sharedChild->parent = &node->header.gfx.node;
+                geo_process_node_and_siblings(node->header.gfx.sharedChild);
+                node->header.gfx.sharedChild->parent = NULL;
+                gCurGraphNodeObject = NULL;
+            }
+            if (node->header.gfx.node.children != NULL) {
+                geo_process_node_and_siblings(node->header.gfx.node.children);
+            }
+        }
+
+        gCurrAnimType = ANIM_TYPE_NONE;
+    }
+    gDryRun = 0;
+
+    Gfx* content = main_pool_alloc(8);
+    gSPEndDisplayList(content);
+
+    // first node is shadow with children...
+    struct GraphNode* fakeMarioNode = gLoadedGraphNodes[0x20];
+    // ...and 3rd child is the dl
+    struct GraphNode* fakeMarioNodeChild = fakeMarioNode->children->next;
+    struct GraphNodeDisplayList* dlNode = (struct GraphNodeDisplayList*)fakeMarioNodeChild;
+    dlNode->displayList = (Gfx*)dl;
+}
+
+static void* clone_vtx(const void* vtx, int amt)
+{
+    f32* mat = gMatStack[gMatStackIndex];
+    Vtx_t* cloneVtx = main_pool_alloc_from_end(amt * sizeof(Vtx_t));
+    memcpy(cloneVtx, vtx, amt * sizeof(Vtx_t));
+    for (int i = 0; i < amt; i++)
+    {
+        Vec3f ob;
+        ob[0] = cloneVtx[i].ob[0];
+        ob[1] = cloneVtx[i].ob[1];
+        ob[2] = cloneVtx[i].ob[2];
+
+        Vtx_t* v = &cloneVtx[i];
+        v->ob[0] = (s16)(ob[0] * mat[0] + ob[1] * mat[4] + ob[2] * mat[8] + mat[12]);
+        v->ob[1] = (s16)(ob[0] * mat[1] + ob[1] * mat[5] + ob[2] * mat[9] + mat[13]);
+        v->ob[2] = (s16)(ob[0] * mat[2] + ob[1] * mat[6] + ob[2] * mat[10] + mat[14]);
+    }
+
+    return cloneVtx;
+}
+
+static void clone_dl(const u8 *dl)
+{
+    while (G_ENDDL != *dl)
+    {
+        if (G_DL == *dl)
+        {
+            clone_dl(segmented_to_virtual(*(void**)(dl + 4)));
+        }
+        else
+        {
+            u32* content = main_pool_alloc(8);
+            content[0] = *(u32*)dl;
+            if (G_VTX == *dl)
+            {
+                u32 cmd = *(u32*)dl;
+                content[1] = (u32) VIRTUAL_TO_PHYSICAL2(clone_vtx(segmented_to_virtual(*(void**)(dl + 4)), (cmd >> 12) & 63));
+            }
+            else
+            {
+                content[1] = *(u32*)(dl + 4);
+            }
+        }
+
+        dl += 8;
+    }
+}
+
+void dry_run_append_display_list(const u8 *dl, s32 layer)
+{
+    if (1 != layer)
+        return;
+    
+    u8 seg = ((u32) dl) >> 24;
+    // this is a generated dl, we do not need it.
+    // we will set it manually anyways.
+    if (0 == seg)
+        return;
+
+    clone_dl(segmented_to_virtual(dl));
 }

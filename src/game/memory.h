@@ -49,6 +49,14 @@ static ALWAYS_INLINE void *main_pool_alloc(u32 size) {
     return buf;
 }
 
+static ALWAYS_INLINE void* main_pool_alloc_from_end(u32 size) {
+    u8* region_end = sMainPool.end;
+    u8* new_end = region_end - size;
+    sMainPool.end -= size;
+    return new_end;
+}
+
+
 static inline void *main_pool_alloc_aligned(u32 size, s32 alignment)
 {
     if (!alignment)

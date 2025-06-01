@@ -22,6 +22,8 @@
 #include "puppyprint.h"
 #include "profiling.h"
 
+#include "game/emutest.h"
+
 
 /**
  * Flags controlling what debug info is displayed.
@@ -254,6 +256,8 @@ void spawn_particle(u32 activeParticleFlag, ModelID16 model, const BehaviorScrip
 /**
  * Mario's primary behavior update function.
  */
+extern u8 sCachedEntry;
+extern void make_cached_anim(void);
 void bhv_mario_update(void) {
     u32 particleFlags = 0;
     s32 i;
@@ -267,6 +271,17 @@ void bhv_mario_update(void) {
     // to sync it with the Mario object
     copy_mario_state_to_object(m);
 
+    // TODO: bring back gIsConsole
+    if (gCurrentObject->oPlayerID && !sCachedEntry)
+    {
+        make_cached_anim();
+        sCachedEntry = 1;
+    }
+
+    if (gCurrentObject->oPlayerID % 2 == 1)
+    {
+        obj_set_model(gCurrentObject, m->action == ACT_STOMACH_SLIDE ? 0x20 : 2);
+    }
 }
 
 /**

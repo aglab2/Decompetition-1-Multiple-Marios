@@ -16,6 +16,7 @@
 #include "levels/example/header.h"
 
 /* Fast64 begin persistent block [scripts] */
+extern const GeoLayout mario_stub_geo[];
 /* Fast64 end persistent block [scripts] */
 
 const LevelScript level_example_entry[] = {
@@ -27,6 +28,7 @@ const LevelScript level_example_entry[] = {
 	ALLOC_LEVEL_POOL(),
     JUMP_LINK(script_func_global_1),
 	MARIO(MODEL_MARIO, 0x00000001, bhvMario), 
+	LOAD_MODEL_FROM_GEO(0x20, mario_stub_geo),
 	LOAD_MODEL_FROM_GEO(0x20 + 1, p1_geo),
 	LOAD_MODEL_FROM_GEO(0x20 + 2, p2_geo),
 	LOAD_MODEL_FROM_GEO(0x20 + 3, p3_geo),

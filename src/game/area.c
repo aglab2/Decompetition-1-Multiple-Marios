@@ -236,12 +236,14 @@ void clear_area_graph_nodes(void) {
     }
 }
 
+u8 sCachedEntry;
 void load_area(s32 index) {
     if (gCurrentArea == NULL && gAreaData[index].graphNode != NULL) {
         gCurrentArea = &gAreaData[index];
         gCurrAreaIndex = gCurrentArea->index;
         main_pool_pop_state();
         main_pool_push_state();
+        sCachedEntry = 0;
 
         gMarioCurrentRoom = 0;
 
