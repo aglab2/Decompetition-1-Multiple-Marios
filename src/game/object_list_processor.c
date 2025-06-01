@@ -278,7 +278,7 @@ void bhv_mario_update(void) {
         sCachedEntry = 1;
     }
 
-    if (gCurrentObject->oPlayerID % 2 == 1)
+    if (gCurrentObject->oPlayerID)
     {
         obj_set_model(gCurrentObject, m->action == ACT_STOMACH_SLIDE ? 0x20 : 2);
     }

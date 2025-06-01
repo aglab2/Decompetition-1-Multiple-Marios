@@ -1383,7 +1383,7 @@ void make_cached_anim(void)
     // first node is shadow with children...
     struct GraphNode* fakeMarioNode = gLoadedGraphNodes[0x20];
     // ...and 3rd child is the dl
-    struct GraphNode* fakeMarioNodeChild = fakeMarioNode->children->next;
+    struct GraphNode* fakeMarioNodeChild = fakeMarioNode->children->next->next;
     struct GraphNodeDisplayList* dlNode = (struct GraphNodeDisplayList*)fakeMarioNodeChild;
     dlNode->displayList = (Gfx*)dl;
 }
@@ -1391,19 +1391,36 @@ void make_cached_anim(void)
 static void* clone_vtx(const void* vtx, int amt)
 {
     f32* mat = gMatStack[gMatStackIndex];
-    Vtx_t* cloneVtx = main_pool_alloc_from_end(amt * sizeof(Vtx_t));
-    memcpy(cloneVtx, vtx, amt * sizeof(Vtx_t));
+    Vtx_tn* cloneVtx = main_pool_alloc_from_end(amt * sizeof(Vtx_tn));
+    memcpy(cloneVtx, vtx, amt * sizeof(Vtx_tn));
     for (int i = 0; i < amt; i++)
     {
-        Vec3f ob;
-        ob[0] = cloneVtx[i].ob[0];
-        ob[1] = cloneVtx[i].ob[1];
-        ob[2] = cloneVtx[i].ob[2];
+        {
+            Vec3f ob;
+            ob[0] = cloneVtx[i].ob[0];
+            ob[1] = cloneVtx[i].ob[1];
+            ob[2] = cloneVtx[i].ob[2];
 
-        Vtx_t* v = &cloneVtx[i];
-        v->ob[0] = (s16)(ob[0] * mat[0] + ob[1] * mat[4] + ob[2] * mat[8] + mat[12]);
-        v->ob[1] = (s16)(ob[0] * mat[1] + ob[1] * mat[5] + ob[2] * mat[9] + mat[13]);
-        v->ob[2] = (s16)(ob[0] * mat[2] + ob[1] * mat[6] + ob[2] * mat[10] + mat[14]);
+            Vtx_tn* v = &cloneVtx[i];
+            v->ob[0] = (s16)(ob[0] * mat[0] + ob[1] * mat[4] + ob[2] * mat[8] + mat[12]);
+            v->ob[1] = (s16)(ob[0] * mat[1] + ob[1] * mat[5] + ob[2] * mat[9] + mat[13]);
+            v->ob[2] = (s16)(ob[0] * mat[2] + ob[1] * mat[6] + ob[2] * mat[10] + mat[14]);
+        }
+        {
+            Vec3f n;
+            n[0] = cloneVtx[i].n[0];
+            n[1] = cloneVtx[i].n[1];
+            n[2] = cloneVtx[i].n[2];
+            Vec3f nt;
+            nt[0] = n[0] * mat[0] + n[1] * mat[4] + n[2] * mat[8];
+            nt[1] = n[0] * mat[1] + n[1] * mat[5] + n[2] * mat[9];
+            nt[2] = n[0] * mat[2] + n[1] * mat[6] + n[2] * mat[10];
+
+            Vtx_tn* v = &cloneVtx[i];
+            v->n[0] = (s8) 4.f * nt[0];
+            v->n[1] = (s8) 4.f * nt[1];
+            v->n[2] = (s8) 4.f * nt[2];
+        }
     }
 
     return cloneVtx;

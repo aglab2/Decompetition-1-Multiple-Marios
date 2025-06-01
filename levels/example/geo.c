@@ -17,7 +17,7 @@ const GeoLayout mario_stub_geo[] = {
    GEO_SHADOW(SHADOW_CIRCLE_PLAYER, 0xB4, 100),
    GEO_OPEN_NODE(),
 		GEO_ASM(0, geo_mirror_mario_backface_culling),
-		// GEO_ASM(0, geo_mirror_mario_set_alpha),
+		GEO_ASM(0, geo_mirror_mario_set_alpha),
 		GEO_DISPLAY_LIST(LAYER_OPAQUE, p1_object_0049F6B0_mesh_layer_1),
 		GEO_ASM(1, geo_mirror_mario_backface_culling),
    GEO_CLOSE_NODE(),
