@@ -164,6 +164,75 @@ extern u8 *gGfxPoolEnd;
     ptr; \
 })
 
+#define main_pool_alloc_aligned_cde(_size) ({ \
+    u32 size = ALIGN16(_size); \
+    u8* ptr = gMainPoolCurrentRegion->start; \
+    if (__builtin_constant_p(_size)) { \
+        switch (size) { \
+            case 0x0: \
+                break; \
+            case 0x10: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                break; \
+            case 0x20: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                break; \
+            case 0x30: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                break; \
+            case 0x40: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                break; \
+            case 0x50: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                break; \
+            case 0x60: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                break; \
+            case 0x70: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                __builtin_mips_cache(0xd, ptr + 0x60); \
+                break; \
+            case 0x80: \
+                __builtin_mips_cache(0xd, ptr + 0x0); \
+                __builtin_mips_cache(0xd, ptr + 0x10); \
+                __builtin_mips_cache(0xd, ptr + 0x20); \
+                __builtin_mips_cache(0xd, ptr + 0x30); \
+                __builtin_mips_cache(0xd, ptr + 0x40); \
+                __builtin_mips_cache(0xd, ptr + 0x50); \
+                __builtin_mips_cache(0xd, ptr + 0x60); \
+                __builtin_mips_cache(0xd, ptr + 0x70); \
+                break; \
+            default: \
+                break; \
+        } \
+    } \
+    u8* newStart = ptr + size; \
+    gMainPoolCurrentRegion->start = newStart; \
+    if (!ptr) __builtin_unreachable(); \
+    ptr; \
+})
+
 void setup_dma_table_list(struct DmaHandlerList *list, void *srcAddr, void *buffer);
 s32 load_patchable_table(struct DmaHandlerList *list, s32 index);
 

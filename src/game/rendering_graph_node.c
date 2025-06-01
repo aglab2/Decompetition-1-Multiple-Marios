@@ -285,43 +285,23 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
         for (currLayer = startLayer; currLayer <= endLayer; currLayer++) {
             // Set 'currList' to the first DisplayListNode on the current layer.
             currList = node->listHeads[currLayer];
-#if defined(DISABLE_AA) || !SILHOUETTE
             // Set the render mode for the current layer.
             gDPSetRenderMode(tempGfxHead++, mode1List->modes[currLayer],
                                                  mode2List->modes[currLayer]);
-#else
-            if (phaseIndex == RENDER_PHASE_NON_SILHOUETTE) {
-                // To properly cover the silhouette, disable AA.
-                // The silhouette model does not have AA due to the hack used to prevent triangle overlap.
-                gDPSetRenderMode(tempGfxHead++, (mode1List->modes[currLayer] & ~IM_RD),
-                                                     (mode2List->modes[currLayer] & ~IM_RD));
-            } else {
-                // Set the render mode for the current dl.
-                gDPSetRenderMode(tempGfxHead++, mode1List->modes[currLayer],
-                                                     mode2List->modes[currLayer]);
-            }
-#endif
+
             // Iterate through all the displaylists on the current layer.
+            u32 shift = ((u32) tempGfxHead) & 0xF;
             while (currList != NULL) {
+                __builtin_mips_cache(0xd, ((u8*) tempGfxHead) + shift);
                 // Add the display list's transformation to the master list.
                 gSPMatrix(tempGfxHead++, VIRTUAL_TO_PHYSICAL(currList->transform),
                           (G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH));
-#if SILHOUETTE
-                if (phaseIndex == RENDER_PHASE_SILHOUETTE) {
-                    // Add the current display list to the master list, with silhouette F3D.
-                    gSPDisplayList(tempGfxHead++, dl_silhouette_begin);
-                    gSPDisplayList(tempGfxHead++, currList->displayList);
-                    gSPDisplayList(tempGfxHead++, dl_silhouette_end);
-                } else {
-                    // Add the current display list to the master list.
-                    gSPDisplayList(tempGfxHead++, currList->displayList);
-                }
-#else
                 // Add the current display list to the master list.
                 gSPDisplayList(tempGfxHead++, currList->displayList);
-#endif
                 // Move to the next DisplayListNode.
+                void* to_free = currList;
                 currList = currList->next;
+                __builtin_mips_cache(0x11, to_free);
             }
         }
     }
@@ -375,7 +355,7 @@ void geo_append_display_list(void *displayList, s32 layer) {
 #endif // F3DEX_GBI_2 || SILHOUETTE
     if (gCurGraphNodeMasterList != NULL) {
         struct DisplayListNode *listNode =
-            main_pool_alloc(sizeof(struct DisplayListNode));
+            main_pool_alloc_aligned_cde(sizeof(struct DisplayListNode));
 
         listNode->transform = gMatStackFixed[gMatStackIndex];
         listNode->displayList = displayList;
