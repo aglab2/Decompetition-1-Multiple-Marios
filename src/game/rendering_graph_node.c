@@ -973,7 +973,8 @@ s32 obj_is_in_view(struct GraphNodeObject *node) {
     if (geo != NULL && geo->type == GRAPH_NODE_TYPE_CULLING_RADIUS) {
         cullingRadius = ((struct GraphNodeCullingRadius *) geo)->cullingRadius;
     } else {
-        cullingRadius = DEFAULT_CULLING_RADIUS;
+        struct Object *obj = (struct Object *) node;
+        cullingRadius = (obj->oFlags & OBJ_FLAG_IS_A_MARIO) ? 100 : DEFAULT_CULLING_RADIUS;
     }
 
     // Check whether the object is not too far away or too close / behind the camera.
