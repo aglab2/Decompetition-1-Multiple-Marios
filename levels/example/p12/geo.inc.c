@@ -3,7 +3,7 @@
 const GeoLayout p12_geo[] = {
 	GEO_NODE_START(),
 	GEO_OPEN_NODE(),
-		GEO_DISPLAY_LIST(LAYER_OPAQUE, p12_object_004E0420_mesh_layer_1),
+		GEO_BATCHSET(LAYER_OPAQUE, p12_object_004E0420_mesh_layer_1),
 	GEO_CLOSE_NODE(),
 	GEO_END(),
 };
