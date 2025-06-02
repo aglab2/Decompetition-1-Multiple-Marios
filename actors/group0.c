@@ -31,9 +31,9 @@
 #include FONT_C_FILE
 #endif
 
-#include "exampleSeesaw/collision.inc.c"
-#include "exampleSeesaw/model.inc.c"
-#include "raisePlatform/collision.inc.c"
-#include "raisePlatform/model.inc.c"
+// #include "exampleSeesaw/collision.inc.c"
+// #include "exampleSeesaw/model.inc.c"
+// #include "raisePlatform/collision.inc.c"
+// #include "raisePlatform/model.inc.c"
 #include "doubleCherry/model.inc.c"
 #include "mario_real/model.inc.c"
