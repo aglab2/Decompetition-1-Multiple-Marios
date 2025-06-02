@@ -380,6 +380,21 @@ struct GraphNodeDisplayList *init_graph_node_display_list(struct GraphNodeDispla
     return graphNode;
 }
 
+struct GraphNodeBatchSet *init_graph_node_batchset(struct GraphNodeBatchSet *graphNode, s32 drawingLayer, void *batchSet)
+{
+    if (!graphNode) {
+        graphNode = main_pool_alloc(sizeof(struct GraphNodeBatchSet));
+    }
+
+    if (graphNode != NULL) {
+        init_scene_graph_node_links(&graphNode->node, GRAPH_NODE_TYPE_BATCHSET);
+        SET_GRAPH_NODE_LAYER(graphNode->node.flags, drawingLayer);
+        graphNode->batchSet = segmented_to_virtual(batchSet);
+    }
+
+    return graphNode;
+}
+
 /**
  * Allocates and returns a newly created shadow node
  */

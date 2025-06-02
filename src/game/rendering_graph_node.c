@@ -23,6 +23,21 @@
 #include "config/config_world.h"
 #include "engine/gut.h"
 
+struct DisplayListLinks {
+    struct DisplayListNode* head;
+    struct DisplayListNode* tail;
+};
+
+union BatchContainer {
+    struct DisplayListLinks list;
+};
+
+struct BatchArray {
+    union BatchContainer batches[80];
+};
+
+static struct BatchArray gBatchArray;
+
 /**
  * This file contains the code that processes the scene graph for rendering.
  * The scene graph is responsible for drawing everything except the HUD / text boxes.
@@ -196,7 +211,7 @@ struct RenderPhase {
     u8 endLayer;
 };
 
-static struct RenderPhase sRenderPhases[] = {
+static const struct RenderPhase sRenderPhases[] = {
 #if SILHOUETTE
     [RENDER_PHASE_ZEX_BEFORE_SILHOUETTE]   = {
         .startLayer = LAYER_FIRST,
@@ -247,6 +262,46 @@ Mtx identityMatrixWorldScale = {{
      0x00000000,                            LOWER_FIXED(1.0f)               <<  0}
 }};
 
+static ALWAYS_INLINE void render_lists(Gfx **ptempGfxHead, struct DisplayListNode* currList)
+{
+#define tempGfxHead (*ptempGfxHead)
+    u32 shift = ((u32) tempGfxHead) & 0xF;
+    do {
+        __builtin_mips_cache(0xd, ((u8*) tempGfxHead) + shift);
+        gSPMatrix(tempGfxHead++, VIRTUAL_TO_PHYSICAL(currList->transform), (G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH));
+        _gSPDisplayListRaw(tempGfxHead++, currList->displayList, currList->hint);
+        void* to_free = currList;
+        currList = currList->next;
+        __builtin_mips_cache(0x11, to_free);
+    } while (currList != NULL);
+#undef tempGfxHead
+}
+
+extern struct BatchDisplayLists batch_lvl_dls_LAYER_OPAQUE[];
+static int render_batches(Gfx **ptempGfxHead)
+{
+#define tempGfxHead (*ptempGfxHead)
+    struct BatchArray* arr = &gBatchArray;
+    int currLayer = LAYER_OPAQUE;
+
+    int amountRendered = 0;
+
+    for (int batch = 0; batch < (int) (sizeof(arr->batches) / sizeof(*arr->batches)); batch++) {
+        struct DisplayListLinks* batchLinks = &arr->batches[batch].list;
+        if (!batchLinks->head)
+            continue;
+
+        const struct BatchDisplayLists* batchDisplayLists = segmented_to_virtual(batch_lvl_dls_LAYER_OPAQUE);
+        _gSPDisplayListRaw(tempGfxHead++, batchDisplayLists->startDl, batchDisplayLists->startHint);
+        amountRendered++;
+        render_lists(&tempGfxHead, batchLinks->head);
+        _gSPDisplayListRaw(tempGfxHead++, batchDisplayLists->endDl, batchDisplayLists->endHint);
+    }
+#undef tempGfxHead
+
+    return amountRendered;
+}
+
 /**
  * Process a master list node. This has been modified, so now it runs twice, for each microcode.
  * It iterates through the first 5 layers of if the first index using F3DLX2.Rej, then it switches
@@ -254,7 +309,7 @@ Mtx identityMatrixWorldScale = {{
  * 3. It does this, because layers 5-7 are non zbuffered, and just doing 0-7 of ZEX, then 0-7 of REJ
  * would make the ZEX 0-4 render on top of Rej's 5-7.
  */
-void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
+static void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
     struct RenderPhase *renderPhase;
     struct DisplayListNode *currList;
     s32 currLayer     = LAYER_FIRST;
@@ -302,6 +357,15 @@ void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
                 void* to_free = currList;
                 currList = currList->next;
                 __builtin_mips_cache(0x11, to_free);
+            }
+
+            if (currLayer == LAYER_OPAQUE)
+            {
+                gDPPipeSync(tempGfxHead++);
+                gDPPipelineMode(tempGfxHead++, G_PM_NPRIMITIVE);
+                render_batches(&tempGfxHead);
+                gDPPipeSync(tempGfxHead++);
+                gDPPipelineMode(tempGfxHead++, G_PM_1PRIMITIVE);
             }
         }
     }
@@ -387,6 +451,14 @@ static void append_dl_and_return(struct GraphNodeDisplayList *node) {
     gMatStackIndex--;
 }
 
+static void batches_clean(void)
+{
+    struct BatchArray* task = &gBatchArray;
+    for (int batch = 0; batch < (int) (sizeof(task->batches) / sizeof(*task->batches)); batch++) {
+        task->batches[batch].list.head = NULL;
+    }
+}
+
 /**
  * Process the master list node.
  */
@@ -395,6 +467,7 @@ void geo_process_master_list(struct GraphNodeMasterList *node) {
 
     if (gCurGraphNodeMasterList == NULL && node->node.children != NULL) {
         gCurGraphNodeMasterList = node;
+        batches_clean();
         for (layer = LAYER_FIRST; layer < LAYER_COUNT; layer++) {
             node->listHeads[layer] = NULL;
         }
@@ -698,6 +771,71 @@ void geo_process_billboard(struct GraphNodeBillboard *node) {
 void geo_process_display_list(struct GraphNodeDisplayList *node) {
     append_dl_and_return((struct GraphNodeDisplayList *)node);
 
+    gMatStackIndex++;
+}
+
+struct BatchCmd
+{
+    s16 idx;
+    u8 _pad;
+    u8 hint;
+    void* data;
+};
+
+static void append_dl_with_hint(struct DisplayListLinks* list, void* dl, u8 hint) {
+    struct DisplayListNode *listNode = main_pool_alloc_aligned_cde(sizeof(struct DisplayListNode));
+
+    listNode->transform = gMatStackFixed[gMatStackIndex];
+    listNode->displayList = dl;
+    listNode->hint = hint;
+    listNode->next = NULL;
+    if (list->head == NULL) {
+        list->head = listNode;
+    } else {
+        list->tail->next = listNode;
+    }
+    list->tail = listNode;
+}
+
+static void geo_lvl_append_display_list(void *displayList, s32 layer) {
+    (void) layer; // always opaque
+    struct BatchArray* task = &gBatchArray;
+    struct BatchCmd* data = displayList;
+    while (data->idx)
+    {
+        int batchIdx = -data->idx - 1;
+#ifdef ENABLE_HEAP_BATCHES
+        append_dl_with_hint_course(&task->mat_heap, &task->batches[batchIdx].heap, data->data, data->hint, gPriority + batchIdx, batchIdx);
+#else
+        append_dl_with_hint(&task->batches[batchIdx].list, data->data, data->hint);
+#endif
+        data++;
+    }
+}
+
+#if 0
+static void geo_process_node_and_siblings_quick(struct GraphNode *firstNode) {
+    struct GraphNode *curGraphNode = firstNode;
+    do {
+        GeoProcessJumpTable[curGraphNode->type](curGraphNode);
+    } while ((curGraphNode = curGraphNode->next) != firstNode);
+}
+#else
+#define geo_process_node_and_siblings_quick geo_process_node_and_siblings
+#endif
+
+static void append_lvl_dl_and_return(struct GraphNodeBatchSet *node) {
+    void* batchSet = node->batchSet;
+    geo_lvl_append_display_list(batchSet, GET_GRAPH_NODE_LAYER(node->node.flags));
+    if (node->node.children != NULL) {
+        geo_process_node_and_siblings_quick(node->node.children);
+    }
+    gMatStackIndex--;
+}
+
+void geo_process_batchset(struct GraphNodeBatchSet *node)
+{
+    append_lvl_dl_and_return(node);
     gMatStackIndex++;
 }
 
@@ -1204,6 +1342,7 @@ static GeoProcessFunc GeoProcessJumpTable[] = {
     [GRAPH_NODE_TYPE_CULLING_RADIUS      ] = geo_try_process_children,
     [GRAPH_NODE_TYPE_ROOT                ] = geo_try_process_children,
     [GRAPH_NODE_TYPE_START               ] = geo_try_process_children,
+    [GRAPH_NODE_TYPE_BATCHSET            ] = geo_process_batchset,
 };
 
 /**

@@ -69643,7 +69643,7 @@ u32 p84_object_005719F0_mesh_layer_1[] = {
 	BATCH_END(),
 };
 
-static struct BatchDisplayLists batch_lvl_dls_LAYER_OPAQUE[] = {
+struct BatchDisplayLists batch_lvl_dls_LAYER_OPAQUE[] = {
 	[LVL_BATCH_LAYER_OPAQUE_P1_MIU32_RH004_PAL_RGBA16] = { mat_p1__001_sa2bmdl_0_f3d, mat_revert_p1__001_sa2bmdl_0_f3d, DL_HINT(mat_p1__001_sa2bmdl_0_f3d), DL_HINT(mat_revert_p1__001_sa2bmdl_0_f3d), },
 	[LVL_BATCH_LAYER_OPAQUE_P1_MIU64_RH009_PAL_RGBA16] = { mat_p1__001_sa2bmdl_1_f3d, mat_revert_p1__001_sa2bmdl_1_f3d, DL_HINT(mat_p1__001_sa2bmdl_1_f3d), DL_HINT(mat_revert_p1__001_sa2bmdl_1_f3d), },
 	[LVL_BATCH_LAYER_OPAQUE_P1_MIU128_RH002_PAL_RGBA16] = { mat_p1__001_sa2bmdl_2_f3d, mat_revert_p1__001_sa2bmdl_2_f3d, DL_HINT(mat_p1__001_sa2bmdl_2_f3d), DL_HINT(mat_revert_p1__001_sa2bmdl_2_f3d), },

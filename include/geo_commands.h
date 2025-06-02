@@ -51,7 +51,7 @@ enum GeoLayoutCommands {
     /*0x17*/ GEO_CMD_NODE_OBJECT_PARENT,
     /*0x18*/ GEO_CMD_NODE_GENERATED,
     /*0x19*/ GEO_CMD_NODE_BACKGROUND,
-    /*0x1A*/ GEO_CMD_NOP_1A,
+    /*0x1A*/ GEO_CMD_NODE_BATCHSET,
     /*0x1B*/ GEO_CMD_COPY_VIEW,
     /*0x1C*/ GEO_CMD_NODE_HELD_OBJ,
     /*0x1D*/ GEO_CMD_NODE_SCALE,
@@ -360,6 +360,10 @@ enum GeoLayoutCommands {
     CMD_BBH(GEO_CMD_NODE_DISPLAY_LIST, layer, 0x0000), \
     CMD_PTR(displayList)
 
+#define GEO_BATCHSET(layer, displayList) \
+    CMD_BBH(GEO_CMD_NODE_BATCHSET, layer, 0x0000), \
+    CMD_PTR(displayList)
+
 /**
  * 0x16: Create shadow scene graph node
  *   0x01: unused
@@ -398,13 +402,6 @@ enum GeoLayoutCommands {
     CMD_PTR(function)
 #define GEO_BACKGROUND_COLOR(background) \
     GEO_BACKGROUND(background, NULL)
-
-/**
- * 0x1A: No operation
- */
-#define GEO_NOP_1A() \
-    CMD_BBH(GEO_CMD_NOP_1A, 0x00, 0x0000), \
-    CMD_HH(0x0000, 0x0000)
 
 /**
  * 0x1B: Copy the shared children from an object parent node from a specific view

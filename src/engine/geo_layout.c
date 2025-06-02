@@ -36,7 +36,7 @@ GeoLayoutCommandProc GeoLayoutJumpTable[] = {
     /*GEO_CMD_NODE_OBJECT_PARENT        */ geo_layout_cmd_node_object_parent,
     /*GEO_CMD_NODE_GENERATED            */ geo_layout_cmd_node_generated,
     /*GEO_CMD_NODE_BACKGROUND           */ geo_layout_cmd_node_background,
-    /*GEO_CMD_NOP_1A                    */ geo_layout_cmd_nop,
+    /*GEO_CMD_NODE_BATCHSET             */ geo_layout_cmd_node_batchset,
     /*GEO_CMD_COPY_VIEW                 */ geo_layout_cmd_copy_view,
     /*GEO_CMD_NODE_HELD_OBJ             */ geo_layout_cmd_node_held_obj,
     /*GEO_CMD_NODE_SCALE                */ geo_layout_cmd_node_scale,
@@ -618,6 +618,18 @@ void geo_layout_cmd_node_display_list(void) {
     void *displayList = cur_geo_cmd_ptr(0x04);
 
     graphNode = init_graph_node_display_list(NULL, drawingLayer, displayList);
+
+    register_scene_graph_node(&graphNode->node);
+
+    gGeoLayoutCommand += 0x08 << CMD_SIZE_SHIFT;
+}
+
+void geo_layout_cmd_node_batchset(void) {
+    struct GraphNodeDisplayList *graphNode;
+    s32 drawingLayer = cur_geo_cmd_u8(0x01);
+    void *batchSet = cur_geo_cmd_ptr(0x04);
+
+    graphNode = init_graph_node_batchset(NULL, drawingLayer, batchSet);
 
     register_scene_graph_node(&graphNode->node);
 

@@ -65,6 +65,8 @@ enum GraphNodeTypes {
     GRAPH_NODE_TYPE_CULLING_RADIUS,
     GRAPH_NODE_TYPE_ROOT,
     GRAPH_NODE_TYPE_START,
+
+    GRAPH_NODE_TYPE_BATCHSET,
 };
 
 // Passed as first argument to a GraphNodeFunc to give information about in
@@ -137,6 +139,7 @@ struct GraphNodePerspective {
 struct DisplayListNode {
     Mtx *transform;
     void *displayList;
+    u8 hint;
     struct DisplayListNode *next;
 };
 
@@ -271,6 +274,11 @@ struct GraphNodeDisplayList {
     /*0x14*/ void *displayList;
 };
 
+struct GraphNodeBatchSet {
+    /*0x00*/ struct GraphNode node;
+    /*0x14*/ u32 *batchSet;
+};
+
 /** GraphNode part that scales itself and its children.
  *  Usage example: Mario's fist or shoe, which grows when attacking. This can't
  *  be done with an animated part sine animation data doesn't support scaling.
@@ -378,6 +386,7 @@ struct GraphNodeCullingRadius       *init_graph_node_culling_radius      (struct
 struct GraphNodeAnimatedPart        *init_graph_node_animated_part       (struct GraphNodeAnimatedPart        *graphNode, s32 drawingLayer, void *displayList, Vec3s translation);
 struct GraphNodeBillboard           *init_graph_node_billboard           (struct GraphNodeBillboard           *graphNode, s32 drawingLayer, void *displayList, Vec3s translation);
 struct GraphNodeDisplayList         *init_graph_node_display_list        (struct GraphNodeDisplayList         *graphNode, s32 drawingLayer, void *displayList);
+struct GraphNodeBatchSet            *init_graph_node_batchset            (struct GraphNodeBatchSet            *graphNode, s32 drawingLayer, void *displayList);
 struct GraphNodeShadow              *init_graph_node_shadow              (struct GraphNodeShadow              *graphNode, s16 shadowScale, u8 shadowSolidity, u8 shadowType);
 struct GraphNodeObjectParent        *init_graph_node_object_parent       (struct GraphNodeObjectParent        *graphNode, struct GraphNode *sharedChild);
 struct GraphNodeGenerated           *init_graph_node_generated           (struct GraphNodeGenerated           *graphNode, GraphNodeFunc gfxFunc, s32 parameter);
