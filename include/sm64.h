@@ -101,6 +101,27 @@ enum RenderLayers {
 #define LAYER_NON_ZB_FIRST                  (LAYER_ZB_LAST + 1)
 #define LAYER_NON_ZB_LAST                   LAYER_LAST
 
+#define DL_HINT(dl) _DLHINTVALUE(sizeof(dl) / 8)
+
+#define BATCH_SET_TEXTURE(texture) (((-texture-1)) << 16)
+#define BATCH_LOAD_DL(dl) ((uint32_t)dl)
+
+#define BATCH_DL(texture, dl) (BATCH_SET_TEXTURE(texture) | DL_HINT(dl)), ((uint32_t)dl)
+#define BATCH_END() 0
+
+struct BatchDisplayLists {
+    const void* startDl;
+    const void* endDl;
+    u8 startHint;
+    u8 endHint;
+};
+
+struct BatchLevelDisplayLists
+{
+    int count;
+    struct BatchDisplayLists* lists;
+};
+
 enum MarioInput {
     INPUT_NONE                   = /* 0x0000 */ (0 <<  0),
     INPUT_NONZERO_ANALOG         = /* 0x0001 */ (1 <<  0),

@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 class GeoLayout:
@@ -603,7 +604,7 @@ def serialize_model(model, layered_batches, path):
             for k, v in content_deduper.deduped_names.items():
                 for entry in model.entries:
                     for i, line in enumerate(entry.data):
-                        entry.data[i] = line.replace(k, v)
+                        entry.data[i] = re.sub(r"\b%s\b" % k , v, line)
 
         for entry in model.entries:
             mark_static = False
