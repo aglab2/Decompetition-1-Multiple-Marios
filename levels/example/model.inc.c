@@ -39,10 +39,6 @@ Gfx mat_revert_example_dl_f3dlite_material[] = {
 };
 
 Gfx example_dl_Plane_mesh_layer_1[] = {
-	gsSPClearGeometryMode(G_LIGHTING),
-	gsSPVertex(example_dl_Plane_mesh_layer_1_vtx_cull + 0, 8, 0),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPCullDisplayList(0, 7),
 	gsSPDisplayList(mat_example_dl_f3dlite_material),
 	gsSPDisplayList(example_dl_Plane_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_example_dl_f3dlite_material),
