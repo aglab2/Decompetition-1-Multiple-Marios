@@ -286,12 +286,13 @@ static int render_batches(Gfx **ptempGfxHead)
 
     int amountRendered = 0;
 
+    const struct BatchDisplayLists* batchDisplayListsAll = segmented_to_virtual(batch_lvl_dls_LAYER_OPAQUE);
     for (int batch = 0; batch < (int) (sizeof(arr->batches) / sizeof(*arr->batches)); batch++) {
         struct DisplayListLinks* batchLinks = &arr->batches[batch].list;
         if (!batchLinks->head)
             continue;
 
-        const struct BatchDisplayLists* batchDisplayLists = segmented_to_virtual(batch_lvl_dls_LAYER_OPAQUE);
+        const struct BatchDisplayLists* batchDisplayLists = &batchDisplayListsAll[batch];
         _gSPDisplayListRaw(tempGfxHead++, batchDisplayLists->startDl, batchDisplayLists->startHint);
         amountRendered++;
         render_lists(&tempGfxHead, batchLinks->head);
