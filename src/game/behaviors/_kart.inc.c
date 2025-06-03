@@ -421,7 +421,7 @@ void bhv_ctl_loop()
             {
                 if (sVisitedRNG)
                 {
-                    seq_player_play_sequence(0, 0x27 + random_u16() % 6, 0);
+                    seq_player_play_sequence(0, 0x27 + random_u16() % 7, 0);
                 }
                 else
                 {
