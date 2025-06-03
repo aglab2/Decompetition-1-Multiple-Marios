@@ -284,7 +284,7 @@ static f32 find_floor_cache(f32 x, f32 y, f32 z, struct Surface* cache, struct S
     return find_floor(x, y, z, floor);
 }
 
-static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
+static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos, struct Surface* floorValid, f32 floorValidHeight) {
     struct WallCollisionData lowerWall, upperWall;
     struct Surface *ceil, *floor;
 
@@ -295,7 +295,17 @@ static s32 perform_ground_quarter_step(struct MarioState *m, Vec3f nextPos) {
     resolve_and_return_wall_collisions(nextPos, 30.0f, 24.0f, &lowerWall);
     resolve_and_return_wall_collisions(nextPos, 60.0f, 50.0f, &upperWall);
 
-    f32 floorHeight = find_floor_cache(nextPos[0], nextPos[1], nextPos[2], m->floor, &floor);
+    f32 floorHeight;
+    if (!floorValid)
+    {
+        floorHeight = find_floor_cache(nextPos[0], nextPos[1], nextPos[2], m->floor, &floor);
+    }
+    else
+    {
+        floorHeight = floorValidHeight;
+        floor = floorValid;
+    }
+
     f32 ceilHeight = find_mario_ceil(m, nextPos, floorHeight, &ceil);
 
     f32 waterLevel = find_water_level(nextPos[0], nextPos[2]);
@@ -359,16 +369,31 @@ s32 perform_ground_step(struct MarioState *m) {
     s32 i;
     u32 stepResult;
     Vec3f intendedPos;
-    const f32 numSteps = 4.0f;
+    int numStepsi = 4;
+    f32 numSteps = 4.0f;
 
     set_mario_wall(m, NULL);
 
-    for (i = 0; i < 4; i++) {
+    // lookahead for distance m->vel ahead. if there is still floor, we can use only 1 qstep
+    Vec3f lookaheadPos;
+    vec3f_copy(lookaheadPos, m->pos);
+    lookaheadPos[0] += m->vel[0];
+    lookaheadPos[2] += m->vel[2];
+    struct Surface *floor = m->floor;
+    struct Surface *floorValid = NULL;
+    f32 floorHeight = find_floor_cache(lookaheadPos[0], lookaheadPos[1], lookaheadPos[2], floor, &floor);
+    if (floor->type != SURFACE_DEATH_PLANE) {
+        numStepsi = 1;
+        numSteps = 1.f;
+        floorValid = floor;
+    }
+
+    for (i = 0; i < numStepsi; i++) {
         intendedPos[0] = m->pos[0] + m->floor->normal.y * (m->vel[0] / numSteps);
         intendedPos[2] = m->pos[2] + m->floor->normal.y * (m->vel[2] / numSteps);
         intendedPos[1] = m->pos[1];
 
-        stepResult = perform_ground_quarter_step(m, intendedPos);
+        stepResult = perform_ground_quarter_step(m, intendedPos, floorValid, floorHeight);
         if (stepResult == GROUND_STEP_LEFT_GROUND || stepResult == GROUND_STEP_HIT_WALL_STOP_QSTEPS) {
             break;
         }
