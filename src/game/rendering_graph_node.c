@@ -1108,7 +1108,7 @@ s32 obj_is_in_view(struct GraphNodeObject *node) {
         cullingRadius = (obj->oFlags & OBJ_FLAG_IS_A_MARIO) ? 100 : DEFAULT_CULLING_RADIUS;
     }
 
-    if (obj->behavior == segmented_to_virtual(bhvPart))
+    if (gIsConsole && obj->behavior == segmented_to_virtual(bhvPart))
     {
         int progress = (int) gMarioStates->kartProgress;
         int objIndex = obj->oPartIndex;

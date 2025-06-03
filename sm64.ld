@@ -298,13 +298,21 @@ SECTIONS
    }
    END_NOLOAD(sbss)
 
-   BEGIN_NOLOAD(framebuffers)
+   BEGIN_NOLOAD(framebuffer0)
    {
       BUILD_DIR/src/buffers/framebuffer0.o(.bss*);
+   }
+   END_NOLOAD(framebuffer0)
+   BEGIN_NOLOAD(framebuffer1)
+   {
       BUILD_DIR/src/buffers/framebuffer1.o(.bss*);
+   }
+   END_NOLOAD(framebuffer1)
+   BEGIN_NOLOAD(framebuffer2)
+   {
       BUILD_DIR/src/buffers/framebuffer2.o(.bss*);
    }
-   END_NOLOAD(framebuffers)
+   END_NOLOAD(framebuffer2)
 
    __mainPoolStart = .;
    __mainPoolSize  = (RAM_END - .);
