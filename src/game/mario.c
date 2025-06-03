@@ -1372,7 +1372,7 @@ void update_mario_inputs(struct MarioState *m) {
     if ((m->controlMode == COOP_CM_NPC) && gMarioState != m) {
         coop_npc_behavior(m);
     }
-    if (gMarioStates == m && gCamera->mode == CAMERA_MODE_FIXED) {
+    if (gMarioStates == m && gCamera->cutscene) {
         coop_npc_behavior(m);
     }
 
