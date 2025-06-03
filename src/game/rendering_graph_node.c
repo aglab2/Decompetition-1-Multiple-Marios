@@ -1092,16 +1092,41 @@ skip:
 
 #define NO_CULLING_EMULATOR_BLACKLIST (EMU_CONSOLE | EMU_WIIVC | EMU_ARES | EMU_SIMPLE64 | EMU_CEN64)
 
+#define oPartIndex oF4
+
+extern u16 gAmountOfParts;
+static s8 gDrawDistance = 10;
 s32 obj_is_in_view(struct GraphNodeObject *node) {
     struct GraphNode *geo = node->sharedChild;
 
     s16 cullingRadius;
 
+    struct Object *obj = (struct Object *) node;
     if (geo != NULL && geo->type == GRAPH_NODE_TYPE_CULLING_RADIUS) {
         cullingRadius = ((struct GraphNodeCullingRadius *) geo)->cullingRadius;
     } else {
-        struct Object *obj = (struct Object *) node;
         cullingRadius = (obj->oFlags & OBJ_FLAG_IS_A_MARIO) ? 100 : DEFAULT_CULLING_RADIUS;
+    }
+
+    if (obj->behavior == segmented_to_virtual(bhvPart))
+    {
+        int progress = (int) gMarioStates->kartProgress;
+        int objIndex = obj->oPartIndex;
+
+        int diff0 = progress - objIndex;
+        int diff1 = diff0 - gAmountOfParts;
+        int diff2 = diff0 + gAmountOfParts;
+
+        int drawn = 0;
+        if (-gDrawDistance < diff0 && diff0 < gDrawDistance)
+            drawn = 1;
+        if (-gDrawDistance < diff1 && diff1 < gDrawDistance)
+            drawn = 1;
+        if (-gDrawDistance < diff2 && diff2 < gDrawDistance)
+            drawn = 1;
+
+        if (!drawn)
+            return FALSE;
     }
 
     // Check whether the object is not too far away or too close / behind the camera.

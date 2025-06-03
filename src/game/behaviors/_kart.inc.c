@@ -28,6 +28,7 @@ static struct SpawnerState sSpawnerState;
 #define WALK_LIMIT_SAFEGAP 10
 
 extern s16 sSourceWarpNodeId;
+u16 gAmountOfParts;
 static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
 static u8 sVisitedRNG = 0;
@@ -234,7 +235,7 @@ void bhv_ctl_init()
     sSilentPeriodId = 10;
 
     const u8* track = NULL;
-    int trackSize = 10;
+    int trackSize = 0;
     switch (sSourceWarpNodeId)
     {
         case 0x20: 
@@ -250,6 +251,8 @@ void bhv_ctl_init()
             trackSize = sizeof(uExpertTrack);
             break;
     }
+
+    gAmountOfParts = trackSize;
 
 retry:
     sSpawnerState.pos[0] = 0;
