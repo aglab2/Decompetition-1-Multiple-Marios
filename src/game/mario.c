@@ -1400,7 +1400,7 @@ void update_mario_inputs(struct MarioState *m) {
 
     // This function is located near other unused trampoline functions,
     // perhaps logically grouped here with the timers.
-    stub_mario_step_1(m);
+    // stub_mario_step_1(m);
 
     if (m->wallKickTimer > 0) {
         m->wallKickTimer--;

@@ -615,30 +615,6 @@ f32 find_water_floor(s32 xPos, s32 yPos, s32 zPos, struct Surface **pfloor) {
     return FLOOR_LOWER_LIMIT;
 }
 
-/**************************************************
- *               ENVIRONMENTAL BOXES              *
- **************************************************/
-
-/**
- * Finds the height of water at a given location.
- */
-s32 find_water_level_and_floor(s32 x, s32 y, s32 z, struct Surface **pfloor) {
-    return FLOOR_LOWER_LIMIT;
-}
-
-/**
- * Finds the height of water at a given location.
- */
-s32 find_water_level(s32 x, s32 z) { // TODO: Allow y pos
-    return FLOOR_LOWER_LIMIT;
-}
-
-/**
- * Finds the height of the poison gas (used only in HMC) at a given location.
- */
-s32 find_poison_gas_level(s32 x, s32 z) {
-    return FLOOR_LOWER_LIMIT;
-}
 
 /**************************************************
  *                      DEBUG                     *
