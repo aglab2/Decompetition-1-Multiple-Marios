@@ -371,21 +371,27 @@ s32 perform_ground_step(struct MarioState *m) {
     Vec3f intendedPos;
     int numStepsi = 4;
     f32 numSteps = 4.0f;
+    int hadWall = !!m->wall;
 
     set_mario_wall(m, NULL);
 
     // lookahead for distance m->vel ahead. if there is still floor, we can use only 1 qstep
-    Vec3f lookaheadPos;
-    vec3f_copy(lookaheadPos, m->pos);
-    lookaheadPos[0] += m->vel[0];
-    lookaheadPos[2] += m->vel[2];
-    struct Surface *floor = m->floor;
     struct Surface *floorValid = NULL;
-    f32 floorHeight = find_floor_cache(lookaheadPos[0], lookaheadPos[1], lookaheadPos[2], floor, &floor);
-    if (floor->type != SURFACE_DEATH_PLANE) {
-        numStepsi = 1;
-        numSteps = 1.f;
-        floorValid = floor;
+    f32 floorHeight = 0.f;
+
+    if (!hadWall)
+    {
+        Vec3f lookaheadPos;
+        vec3f_copy(lookaheadPos, m->pos);
+        lookaheadPos[0] += m->vel[0];
+        lookaheadPos[2] += m->vel[2];
+        struct Surface *floor = m->floor;
+        floorHeight = find_floor_cache(lookaheadPos[0], lookaheadPos[1], lookaheadPos[2], floor, &floor);
+        if (floor->type != SURFACE_DEATH_PLANE) {
+            numStepsi = 1;
+            numSteps = 1.f;
+            floorValid = floor;
+        }
     }
 
     for (i = 0; i < numStepsi; i++) {
