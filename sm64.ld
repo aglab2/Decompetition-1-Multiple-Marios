@@ -300,7 +300,9 @@ SECTIONS
 
    BEGIN_NOLOAD(framebuffers)
    {
-      BUILD_DIR/src/buffers/framebuffers.o(.bss*);
+      BUILD_DIR/src/buffers/framebuffer0.o(.bss*);
+      BUILD_DIR/src/buffers/framebuffer1.o(.bss*);
+      BUILD_DIR/src/buffers/framebuffer2.o(.bss*);
    }
    END_NOLOAD(framebuffers)
 

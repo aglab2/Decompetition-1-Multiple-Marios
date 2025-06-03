@@ -157,7 +157,8 @@ static void setup_mesg_queues(void) {
     osSetEventMesg(OS_EVENT_DP, &gIntrMesgQueue, (OSMesg) MESG_DP_COMPLETE);
     osSetEventMesg(OS_EVENT_PRENMI, &gIntrMesgQueue, (OSMesg) MESG_NMI_REQUEST);
 }
-
+    
+extern u8 __mainPoolStart[];
 extern void comp_colors();
 static void alloc_pool(void) {
     void *start = (void *) SEG_POOL_START;
