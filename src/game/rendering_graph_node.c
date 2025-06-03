@@ -1094,7 +1094,7 @@ skip:
 
 #define oPartIndex oF4
 
-extern u16 gAmountOfParts;
+extern s8 gAmountOfParts;
 static s8 gDrawDistance = 10;
 s32 obj_is_in_view(struct GraphNodeObject *node) {
     struct GraphNode *geo = node->sharedChild;

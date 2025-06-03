@@ -28,7 +28,7 @@ static struct SpawnerState sSpawnerState;
 #define WALK_LIMIT_SAFEGAP 10
 
 extern s16 sSourceWarpNodeId;
-u16 gAmountOfParts;
+s8 gAmountOfParts;
 static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
 static u8 sVisitedRNG = 0;
