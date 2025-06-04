@@ -2995,44 +2995,8 @@ void update_camera(struct Camera *c) {
                     mode_cannon_camera(c);
                     break;
 
-                case CAMERA_MODE_8_DIRECTIONS:
+                default:
                     mode_8_directions_camera(c);
-                    break;
-
-                case CAMERA_MODE_RADIAL:
-                    mode_radial_camera(c);
-                    break;
-
-                case CAMERA_MODE_OUTWARD_RADIAL:
-                    mode_outward_radial_camera(c);
-                    break;
-
-                case CAMERA_MODE_CLOSE:
-                    mode_lakitu_camera(c);
-                    break;
-
-                case CAMERA_MODE_FREE_ROAM:
-                    mode_lakitu_camera(c);
-                    break;
-
-                case CAMERA_MODE_BOSS_FIGHT:
-                    mode_boss_fight_camera(c);
-                    break;
-
-                case CAMERA_MODE_PARALLEL_TRACKING:
-                    mode_parallel_tracking_camera(c);
-                    break;
-
-                case CAMERA_MODE_SLIDE_HOOT:
-                    mode_slide_camera(c);
-                    break;
-
-                case CAMERA_MODE_FIXED:
-                    mode_fixed_camera(c);
-                    break;
-
-                case CAMERA_MODE_SPIRAL_STAIRS:
-                    mode_spiral_stairs_camera(c);
                     break;
             }
         }
@@ -6230,6 +6194,7 @@ s16 camera_course_processing(struct Camera *c) {
         level = LEVEL_COUNT + 1;
     }
 
+#if 0
     if (sCameraTriggers[level] != NULL) {
         b = 0;
 
@@ -6271,6 +6236,8 @@ s16 camera_course_processing(struct Camera *c) {
             b++;
         }
     }
+#endif
+
 #if defined(ENABLE_VANILLA_CAM_PROCESSING) && !defined(FORCED_CAMERA_MODE) && !defined(USE_COURSE_DEFAULT_MODE)
     // Area-specific camera processing
     if (!(sStatusFlags & CAM_FLAG_BLOCK_AREA_PROCESSING)) {
