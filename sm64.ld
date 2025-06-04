@@ -303,19 +303,22 @@ SECTIONS
       BUILD_DIR/src/buffers/framebuffer0.o(.bss*);
    }
    END_NOLOAD(framebuffer0)
+   __mainPoolStart = .;
+   __mainPoolSize  = (RAM_END - .);
+
+   . = 0x80700000 - 0x25800;
    BEGIN_NOLOAD(framebuffer1)
    {
       BUILD_DIR/src/buffers/framebuffer1.o(.bss*);
    }
    END_NOLOAD(framebuffer1)
+
+   . = 0x80800000 - 0x25800;
    BEGIN_NOLOAD(framebuffer2)
    {
       BUILD_DIR/src/buffers/framebuffer2.o(.bss*);
    }
    END_NOLOAD(framebuffer2)
-
-   __mainPoolStart = .;
-   __mainPoolSize  = (RAM_END - .);
 
    __expansionRamStart = (RAM_START + (RAM_1MB * 4));
 #ifndef USE_EXT_RAM

@@ -1413,9 +1413,9 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
         Vp *viewport = alloc_display_list(sizeof(*viewport));
 
 
-        u8* savedStart = sMainPool.start;
+        u8* savedStart = sMainPool.regions[0].start;
         // required for CDE optimization 
-        sMainPool.start = (void*) ALIGN16(savedStart);
+        sMainPool.regions[0].start = (void*) ALIGN16(savedStart);
 
         initialMatrix = alloc_display_list(sizeof(*initialMatrix));
         gCurLookAt = (LookAt*)alloc_display_list(sizeof(LookAt));
@@ -1458,7 +1458,7 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
             geo_process_node_and_siblings(node->node.children);
         }
         gCurGraphNodeRoot = NULL;
-        sMainPool.start = savedStart;
+        sMainPool.regions[0].start = savedStart;
     }
 }
 
@@ -1494,9 +1494,9 @@ void make_cached_anim(void)
     struct Object* node = gCurrentObject;
 
     // needed for dl allocations
-    sMainPool.start = (void*) ALIGN16(sMainPool.start);
-    void* dl = sMainPool.start;
-    sMainPool.end = (void*) ALIGN16(sMainPool.end - 16);
+    sMainPool.regions[0].start = (void*) ALIGN16(sMainPool.regions[0].start);
+    void* dl = sMainPool.regions[0].start;
+    sMainPool.regions[0].end = (void*) ALIGN16(sMainPool.regions[0].end - 16);
 
     mtxf_identity(gMatStack[gMatStackIndex]);
     {

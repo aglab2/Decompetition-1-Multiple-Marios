@@ -24,47 +24,48 @@ struct DmaHandlerList {
     void *bufTarget;
 };
 
+struct MainPoolRegion {
+    u8 *start;
+    u8 *end;
+};
+
 struct MainPoolContext {
-    u8* start;
-    u8* end;
+    struct MainPoolRegion regions[2];
 };
 
 extern struct MainPoolContext sMainPool;
-#define gMainPoolCurrentRegion (&sMainPool)
+#define gMainPoolCurrentRegion (&sMainPool.regions[0])
+#define gMainPoolLowPrioRegion (&sMainPool.regions[1])
 
 #define MAIN_POOL_ALIGNMENT_DISABLE -1
 
 // takes the first 'size' bytes from 'region'
-static ALWAYS_INLINE void* main_pool_region_alloc_from_start(u32 size, s32 alignment) {
-    u8* ret = alignment < 0 ? gMainPoolCurrentRegion->start : (u8*) ALIGN(gMainPoolCurrentRegion->start, alignment);
+static ALWAYS_INLINE void* main_pool_region_alloc_from_start(int regionIdx, u32 size, s32 alignment) {
+    struct MainPoolRegion *region = &sMainPool.regions[regionIdx];
+    u8* ret = alignment < 0 ? region->start : (u8*) ALIGN(region->start, alignment);
     u8* newStart = ret + size;
-    gMainPoolCurrentRegion->start = newStart;
+    region->start = newStart;
     if (!ret) __builtin_unreachable();
     return ret;
 }
 
 static ALWAYS_INLINE void *main_pool_alloc(u32 size) {
-    void* buf = main_pool_region_alloc_from_start(ALIGN4(size), MAIN_POOL_ALIGNMENT_DISABLE);
+    void* buf = main_pool_region_alloc_from_start(0, ALIGN4(size), MAIN_POOL_ALIGNMENT_DISABLE);
+    if (!buf) __builtin_unreachable();
+    return buf;
+}
+
+static ALWAYS_INLINE void *main_pool_alloc_lowprio(u32 size) {
+    void* buf = main_pool_region_alloc_from_start(1, ALIGN4(size), MAIN_POOL_ALIGNMENT_DISABLE);
     if (!buf) __builtin_unreachable();
     return buf;
 }
 
 static ALWAYS_INLINE void* main_pool_alloc_from_end(u32 size) {
-    u8* region_end = sMainPool.end;
+    u8* region_end = gMainPoolCurrentRegion->end;
     u8* new_end = region_end - size;
-    sMainPool.end -= size;
+    gMainPoolCurrentRegion->end -= size;
     return new_end;
-}
-
-
-static inline void *main_pool_alloc_aligned(u32 size, s32 alignment)
-{
-    if (!alignment)
-        alignment = 16;
-
-    void* buf = main_pool_region_alloc_from_start(ALIGN4(size), alignment);
-    if (!buf) __builtin_unreachable();
-    return buf;
 }
 
 #define EFFECTS_MEMORY_POOL 0x4000

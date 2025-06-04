@@ -162,9 +162,8 @@ extern u8 __mainPoolStart[];
 extern void comp_colors();
 static void alloc_pool(void) {
     void *start = (void *) SEG_POOL_START;
-    void *end = (void *) (SEG_POOL_START + POOL_SIZE);
 
-    main_pool_init(start, end);
+    main_pool_init(start, (void*) (0x80700000 - 0x25800));
     gEffectsMemoryPool = mem_pool_init(EFFECTS_MEMORY_POOL);
 }
 

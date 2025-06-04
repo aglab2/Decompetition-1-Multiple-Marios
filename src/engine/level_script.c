@@ -332,32 +332,6 @@ static void level_cmd_init_level(void) {
     sCurrentCmd = CMD_NEXT;
 }
 
-extern s32 gTlbEntries __attribute__((section(".bss.gTlbEntries")));
-extern u8  gTlbSegments[NUM_TLB_SEGMENTS] __attribute__((section(".bss.gTlbSegments")));
-
-// This clears all the temporary bank TLB maps. group0, common1 and behavourdata are always loaded,
-// and they're also loaded first, so that means we just leave the first 3 indexes mapped.
-void unmap_tlbs(void) {
-    s32 i;
-    for (i = 0; i < NUM_TLB_SEGMENTS; i++) {
-        if (gTlbSegments[i]) {
-            if (i != SEGMENT_GROUP0_GEO && i != SEGMENT_COMMON1_GEO && i != SEGMENT_BEHAVIOR_DATA) {
-                while (gTlbSegments[i] > 0) {
-                    osUnmapTLB(gTlbEntries);
-                    gTlbSegments[i]--;
-                    gTlbEntries--;
-#ifdef PUPPYPRINT_DEBUG
-                    set_segment_memory_printout(i, 0);
-#endif
-                }
-            } else {
-                gTlbEntries -= gTlbSegments[i];
-                gTlbSegments[i] = 0;
-            }
-        }
-    }
-}
-
 static void level_cmd_clear_level(void) {
     clear_objects();
     clear_area_graph_nodes();
@@ -365,7 +339,6 @@ static void level_cmd_clear_level(void) {
     main_pool_pop_state();
     // the game does a push on level load and a pop on level unload, we need to add another push to store state after the level has been loaded, so one more pop is needed
     main_pool_pop_state();
-    unmap_tlbs();
 
     sCurrentCmd = CMD_NEXT;
 }
@@ -506,7 +479,7 @@ static void level_cmd_place_object(void) {
 static void level_cmd_create_warp_node(void) {
     if (sCurrAreaIndex != -1) {
         struct ObjectWarpNode *warpNode =
-            main_pool_alloc(sizeof(struct ObjectWarpNode));
+            main_pool_alloc_lowprio(sizeof(struct ObjectWarpNode));
 
         warpNode->node.id = CMD_GET(u8, 2);
         warpNode->node.destLevel = CMD_GET(u8, 3) + CMD_GET(u8, 6);
@@ -527,7 +500,7 @@ static void level_cmd_create_instant_warp(void) {
     if (sCurrAreaIndex != -1) {
         if (gAreas[sCurrAreaIndex].instantWarps == NULL) {
             gAreas[sCurrAreaIndex].instantWarps =
-                main_pool_alloc(INSTANT_WARP_INDEX_STOP * sizeof(struct InstantWarp));
+                main_pool_alloc_lowprio(INSTANT_WARP_INDEX_STOP * sizeof(struct InstantWarp));
 
             for (i = INSTANT_WARP_INDEX_START; i < INSTANT_WARP_INDEX_STOP; i++) {
                 gAreas[sCurrAreaIndex].instantWarps[i].id = 0;
@@ -562,7 +535,7 @@ static void level_cmd_create_painting_warp_node(void) {
     if (sCurrAreaIndex != -1) {
         if (gAreas[sCurrAreaIndex].paintingWarpNodes == NULL) {
             gAreas[sCurrAreaIndex].paintingWarpNodes =
-                main_pool_alloc(NUM_PAINTINGS * sizeof(struct WarpNode));
+                main_pool_alloc_lowprio(NUM_PAINTINGS * sizeof(struct WarpNode));
 
             for (i = 0; i < NUM_PAINTINGS; i++) {
                 gAreas[sCurrAreaIndex].paintingWarpNodes[i].id = 0;
@@ -586,7 +559,7 @@ static void level_cmd_3A(void) {
     if (sCurrAreaIndex != -1) {
         if ((val4 = gAreas[sCurrAreaIndex].unused) == NULL) {
             val4 = gAreas[sCurrAreaIndex].unused =
-                main_pool_alloc(sizeof(struct UnusedArea28));
+                main_pool_alloc_lowprio(sizeof(struct UnusedArea28));
         }
 
         val4->unk00 = CMD_GET(s16, 2);

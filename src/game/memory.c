@@ -108,8 +108,10 @@ void move_segment_table_to_dmem(void) {
  * freeing the object that was most recently allocated from a side.
  */
 void main_pool_init(void *start, void *end) {
-    sMainPool.start = (u8 *) ALIGN16((uintptr_t) start) + 16;
-    sMainPool.end = (u8 *) ALIGN16((uintptr_t) end) - 16;
+    sMainPool.regions[0].start = (u8 *) ALIGN16((uintptr_t) start) + 16;
+    sMainPool.regions[0].end = (u8 *) ALIGN16((uintptr_t) end) - 16;
+    sMainPool.regions[1].start = (u8*) 0x80700000;
+    sMainPool.regions[1].end = (u8*) (0x80800000 - 0x25800);
 }
 
 /**
@@ -117,7 +119,7 @@ void main_pool_init(void *start, void *end) {
  * pool.
  */
 u32 main_pool_available(void) {
-    return sMainPool.end - sMainPool.start;
+    return 0;
 }
 
 /**
@@ -128,7 +130,7 @@ void main_pool_push_state(void) {
     struct MainPoolState *prevState = gMainPoolState;
     struct MainPoolContext ctx = sMainPool;
 
-    gMainPoolState = main_pool_alloc(sizeof(*gMainPoolState));
+    gMainPoolState = main_pool_alloc_lowprio(sizeof(*gMainPoolState));
     gMainPoolState->ctx = ctx;
     gMainPoolState->prev = prevState;
 }
@@ -142,13 +144,33 @@ void main_pool_pop_state(void) {
     gMainPoolState = gMainPoolState->prev;
 }
 
+static inline void *main_pool_alloc_aligned(int region, u32 size, s32 alignment)
+{
+    if (!alignment)
+        alignment = 16;
+
+    void* buf = main_pool_region_alloc_from_start(region, ALIGN4(size), alignment);
+    if (!buf) __builtin_unreachable();
+    return buf;
+}
+
+static int to_region(int segment) {
+    if (segment > 0xf)
+        return 1;
+
+    if (SEGMENT_GROUPA_GEO == segment || SEGMENT_GROUPB_GEO == segment || SEGMENT_COMMON0_GEO == segment || SEGMENT_LEVEL_SCRIPT == segment)
+        return 1;
+
+    return 0;
+}
+
 /**
  * Perform a DMA read from ROM, allocating space in the memory pool to write to.
  * Return the destination address.
  */
-static void *dynamic_dma_read(u8 *srcStart, u8 *srcEnd, u32 alignment, u32 bssLength) {
+static void *dynamic_dma_read(int region, u8 *srcStart, u8 *srcEnd, u32 alignment, u32 bssLength) {
     u32 size = ALIGN16(srcEnd - srcStart);
-    void* dest = main_pool_alloc_aligned(size + bssLength, alignment);
+    void* dest = main_pool_alloc_aligned(region, size + bssLength, alignment);
     if (dest != NULL) {
         dma_read(((u8 *)dest), srcStart, srcEnd);
         if (bssLength) {
@@ -156,28 +178,6 @@ static void *dynamic_dma_read(u8 *srcStart, u8 *srcEnd, u32 alignment, u32 bssLe
         }
     }
     return dest;
-}
-
-#define TLB_PAGE_SIZE 4096 // Blocksize of TLB transfers. Larger values can be faster to transfer, but more wasteful of RAM.
-s32 gTlbEntries = 0;
-u8 gTlbSegments[NUM_TLB_SEGMENTS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-void mapTLBPages(uintptr_t virtualAddress, uintptr_t physicalAddress, s32 length, s32 segment) {
-    while (length > 0) {
-        if (length > TLB_PAGE_SIZE) {
-            osMapTLB(gTlbEntries++, OS_PM_4K, (void *)virtualAddress, physicalAddress, (physicalAddress + TLB_PAGE_SIZE), -1);
-            virtualAddress  += TLB_PAGE_SIZE;
-            physicalAddress += TLB_PAGE_SIZE;
-            length          -= TLB_PAGE_SIZE;
-            gTlbSegments[segment]++;
-        } else {
-            osMapTLB(gTlbEntries++, OS_PM_4K, (void *)virtualAddress, physicalAddress, -1, -1);
-            gTlbSegments[segment]++;
-        }
-        virtualAddress  += TLB_PAGE_SIZE;
-        physicalAddress += TLB_PAGE_SIZE;
-        length          -= TLB_PAGE_SIZE;
-    }
 }
 
 #ifndef NO_SEGMENTED_MEMORY
@@ -189,12 +189,12 @@ void *load_segment(s32 segment, u8 *srcStart, u8 *srcEnd, u8 *bssStart, u8 *bssE
     void *addr;
 
     if ((bssStart != NULL)) {
-        addr = dynamic_dma_read(srcStart, srcEnd, 0, ((uintptr_t)bssEnd - (uintptr_t)bssStart));
+        addr = dynamic_dma_read(to_region(segment), srcStart, srcEnd, 0, ((uintptr_t)bssEnd - (uintptr_t)bssStart));
         if (addr != NULL) {
             set_segment_base_addr(segment, addr); sSegmentROMTable[segment] = (uintptr_t) srcStart;
         }
     } else {
-        addr = dynamic_dma_read(srcStart, srcEnd, 0, 0);
+        addr = dynamic_dma_read(to_region(segment), srcStart, srcEnd, 0, 0);
         if (addr != NULL) {
             set_segment_base_addr(segment, addr); sSegmentROMTable[segment] = (uintptr_t) srcStart;
         }
@@ -239,14 +239,15 @@ struct MainPoolFreeableHeader {
 };
 
 static ALWAYS_INLINE void* main_pool_region_try_alloc_from_end_freeable(u32 size, int alignment) {
-    u8* region_end = sMainPool.end;
+    struct MainPoolRegion* region = &sMainPool.regions[0];
+    u8* region_end = region->end;
     u8* new_end;
     if (alignment > 0)
         new_end = (u8*) DOWN(region_end - size, alignment) - sizeof(struct MainPoolFreeableHeader);
     else
         new_end = region_end - size - sizeof(struct MainPoolFreeableHeader);
 
-    if (new_end < sMainPool.start)
+    if (new_end < region->start)
         return NULL;
 
     size = region_end - new_end;
@@ -254,14 +255,14 @@ static ALWAYS_INLINE void* main_pool_region_try_alloc_from_end_freeable(u32 size
     struct MainPoolFreeableHeader* header = (struct MainPoolFreeableHeader*) new_end;
     header->ptr = region_end;
 
-    sMainPool.end -= size;
+    region->end -= size;
 
     return header->data;
 }
 
 static void main_pool_free(void *addr) {
     const struct MainPoolFreeableHeader* header = (struct MainPoolFreeableHeader*) ((u8*) addr - sizeof(struct MainPoolFreeableHeader));
-    struct MainPoolContext* region = &sMainPool;
+    struct MainPoolRegion* region = &sMainPool.regions[0];
     region->end = header->ptr;
 }
 
@@ -292,7 +293,7 @@ void *load_segment_decompress(s32 segment, u8 *srcStart, u8 *srcEnd) {
         dma_read(dest, srcStart, srcEnd);
 #else
         dma_read(compressed, srcStart, srcEnd);
-        dest = main_pool_alloc_aligned(*size, 0);
+        dest = main_pool_alloc_aligned(to_region(segment), *size, 0);
 #endif
         if (dest != NULL) {
             osSyncPrintf("start decompress\n");
@@ -418,7 +419,7 @@ void mem_pool_free(struct MemoryPool *pool, void *addr) {
     }
 }
 
-static void *main_pool_alloc_aligned_freeable(int region, u32 size, u32 alignment) {
+static void *main_pool_alloc_aligned_freeable(u32 size, u32 alignment) {
     if (!alignment)
         alignment = 16;
 
@@ -426,9 +427,9 @@ static void *main_pool_alloc_aligned_freeable(int region, u32 size, u32 alignmen
     return main_pool_region_try_alloc_from_end_freeable(size, MAIN_POOL_ALIGNMENT_DISABLE);
 }
 
-static void *dynamic_dma_read_freeable(int region, u8 *srcStart, u8 *srcEnd, u32 alignment, u32 bssLength) {
+static void *dynamic_dma_read_freeable(u8 *srcStart, u8 *srcEnd, u32 alignment, u32 bssLength) {
     u32 size = ALIGN16(srcEnd - srcStart);
-    void* dest = main_pool_alloc_aligned_freeable(region, size + bssLength, alignment);
+    void* dest = main_pool_alloc_aligned_freeable(size + bssLength, alignment);
     if (dest != NULL) {
         dma_read(((u8 *)dest), srcStart, srcEnd);
         if (bssLength) {
@@ -439,12 +440,12 @@ static void *dynamic_dma_read_freeable(int region, u8 *srcStart, u8 *srcEnd, u32
 }
 
 static struct DmaTable *load_dma_table_address(u8 *srcAddr) {
-    struct DmaTable *table = dynamic_dma_read_freeable(0, srcAddr, srcAddr + sizeof(u32), 0, 0);
+    struct DmaTable *table = dynamic_dma_read_freeable(srcAddr, srcAddr + sizeof(u32), 0, 0);
     u32 size = table->count * sizeof(struct OffsetSizePair) +
         sizeof(struct DmaTable) - sizeof(struct OffsetSizePair);
     main_pool_free(table);
 
-    table = dynamic_dma_read(srcAddr, srcAddr + size, 0, 0);
+    table = dynamic_dma_read(0, srcAddr, srcAddr + size, 0, 0);
     table->srcAddr = srcAddr;
     return table;
 }
