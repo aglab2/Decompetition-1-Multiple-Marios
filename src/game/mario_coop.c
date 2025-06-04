@@ -97,7 +97,7 @@ int coop_delete_mario(struct MarioState * m) {
     m->faceAngle[0] = 0;
     m->faceAngle[1] = m->kartSafeAngle + 0x8000 + kart_angle(m->kartId) / 2;
     m->faceAngle[2] = 0;
-    m->action = ACT_BUTT_SLIDE;
+    m->action = ACT_SPAWN_SPIN_AIRBORNE;
     if (m == gMarioState)
     {
         reset_camera(gCurrentArea->camera);
