@@ -10,8 +10,8 @@
 
 #include "make_const_nonconst.h"
 
-#include "levels/example/mosh/geo_header.h"
-#include "levels/example/mosh/model.inc.c"
+#include "levels/example/mosh/geo_header_opt.h"
+#include "levels/example/mosh/model_opt.inc.c"
 
 //#include "levels/example/textures.inc.c"
 #include "levels/example/leveldata.inc.c"
