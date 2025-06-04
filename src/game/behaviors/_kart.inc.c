@@ -1,5 +1,16 @@
 #include "game/mario_coop.h"
 
+extern const u8* bpe_pairs[];
+extern const u8* bpe_relations[];
+
+extern const u8 uRoute101Track[];
+extern const u8 uRoute280Track[];
+extern const u8 uExpertTrack[];
+extern const u8 uStandardTrack[];
+extern const u8 sBeginnerTrack[];
+
+extern const int sRouteSizes[];
+
 #define RACERS_COUNT 35
 // #define DEBUG_DISABLE_FUZZ
 // #define DEBUG_LOC_TEST_PARTICLES
@@ -236,19 +247,20 @@ void bhv_ctl_init()
 
     const u8* track = NULL;
     int trackSize = 0;
+    int* ptrackSize = segmented_to_virtual(sRouteSizes);
     switch (sSourceWarpNodeId)
     {
         case 0x20: 
-            track = sBeginnerTrack;
-            trackSize = sizeof(sBeginnerTrack);
+            track = segmented_to_virtual(sBeginnerTrack);
+            trackSize = ptrackSize[0];
             break;
         case 0x21: 
-            track = uStandardTrack;
-            trackSize = sizeof(uStandardTrack);
+            track = segmented_to_virtual(uStandardTrack);
+            trackSize = ptrackSize[1];
             break;
         case 0x22: 
-            track = uExpertTrack;
-            trackSize = sizeof(uExpertTrack);
+            track = segmented_to_virtual(uExpertTrack);
+            trackSize = ptrackSize[2];
             break;
     }
 
@@ -809,8 +821,6 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
     m->kartProgress = progress + (f32) id;
 }
 
-#include "_model.inc.c"
-
 static int bpe_arrlen(const u8* arr)
 {
     int len = 0;
@@ -834,11 +844,14 @@ static u8 bpe_pick(const u8* arr)
 
 static void bpe_gen(void)
 {
+    void** _bpe_pairs = segmented_to_virtual(bpe_pairs);
+    void** _bpe_relations = segmented_to_virtual(bpe_relations);
+
     int amountGenerated = 0;
     u8 lastGenerated = 3;
     while (amountGenerated < 250)
     {
-        u8 next = bpe_pick(bpe_relations[lastGenerated]);
+        u8 next = bpe_pick(segmented_to_virtual(_bpe_relations[lastGenerated]));
         lastGenerated = next;
         if (lastGenerated < 100)
         {
@@ -847,7 +860,7 @@ static void bpe_gen(void)
         }
         else
         {
-            const u8* desc = bpe_pairs[lastGenerated - 100];
+            const u8* desc = segmented_to_virtual(_bpe_pairs[lastGenerated - 100]);
             int arrlen = bpe_arrlen(desc);
             memcpy(uRNGScratch + amountGenerated, desc, arrlen);
             amountGenerated += arrlen;

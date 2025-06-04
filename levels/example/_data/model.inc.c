@@ -111,7 +111,7 @@ static const u8 bpe_pair_209[] = { 3,17,3,34 ,0 };
 static const u8 bpe_pair_210[] = { 10,10,10 ,0 };
 static const u8 bpe_pair_211[] = { 28,29,3 ,0 };
 
-static const u8* bpe_pairs[] = {
+const u8* bpe_pairs[] = {
     bpe_pair_100,
     bpe_pair_101,
     bpe_pair_102,
@@ -406,7 +406,7 @@ static u8 bpe_relations_209[] = { 17,18 ,0 };
 static u8 bpe_relations_210[] = { 17,48,161 ,0 };
 static u8 bpe_relations_211[] = { 35 ,0 };
 
-static const u8* bpe_relations[] = {
+const u8* bpe_relations[] = {
     NULL,
     bpe_relations_1,
     bpe_relations_2,

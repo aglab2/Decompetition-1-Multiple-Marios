@@ -17,6 +17,10 @@
 
 /* Fast64 begin persistent block [scripts] */
 extern const GeoLayout mario_stub_geo[];
+
+#include "levels/example/_data/routes.inc.c"
+#include "levels/example/_data/model.inc.c"
+
 #include "levels/example/p1/collision.inc.c"
 #include "levels/example/p2/collision.inc.c"
 #include "levels/example/p3/collision.inc.c"
