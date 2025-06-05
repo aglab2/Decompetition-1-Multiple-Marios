@@ -1901,7 +1901,7 @@ static const Vtx mario_face_back_hair_cap_on_dl_vertex_group2[] = {
     {{{    31,    -85,     87}, 0, {     0,      0}, {0xdb, 0xfd, 0x79, 0xff}}},
 };
 
-#define	G_CC_AGLAB                   SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0
+// #define	G_CC_AGLAB                   SHADE, 0, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0
 
 // 0x040112B0 - 0x040112E8
 const Gfx mario_m_logo_dl[] = {
