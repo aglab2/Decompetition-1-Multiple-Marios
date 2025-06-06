@@ -42,7 +42,6 @@ extern s16 sSourceWarpNodeId;
 s8 gAmountOfParts;
 static u16 sWalkLimit = 0;
 static u8 sEnableProgress = 1;
-static u8 sVisitedRNG = 0;
 static s16 sSilentPeriodId = 0;
 int sCompletedTracks = 0;
 
@@ -383,6 +382,22 @@ char timerLine[20];
 char placeLine[30];
 u8 sPlacement;
 
+static void shuffle_u8(u8 *array, s32 n)
+{
+    if (n > 1) {
+        s32 i;
+        for (i = n - 1; i > 0; i--) {
+            s32 j = (unsigned int) (random_float() * (i+1));
+            int t = array[j];
+            array[j] = array[i];
+            array[i] = t;
+        }
+    }
+}
+
+static s8 sLastPickedTrack = -1;
+static u8 sMusicTracks[] = { 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d };
+
 extern void set_camera_mode_fixed2(struct Camera* c);
 void bhv_ctl_loop()
 {
@@ -431,15 +446,26 @@ void bhv_ctl_loop()
         {
             if (0x30 == sSourceWarpNodeId)
             {
-                if (sVisitedRNG)
+                if (sLastPickedTrack < 0)
                 {
-                    seq_player_play_sequence(0, 0x27 + random_u16() % 7, 0);
+                    shuffle_u8(sMusicTracks + 1, sizeof(sMusicTracks) / sizeof(sMusicTracks[0]) - 1);
+                    sLastPickedTrack = 0;
+                    seq_player_play_sequence(0, 0x26, 0);
                 }
                 else
                 {
-                    seq_player_play_sequence(0, 0x26, 0);
+                    if (sLastPickedTrack == sizeof(sMusicTracks) / sizeof(sMusicTracks[0]) - 1)
+                    {
+                        sLastPickedTrack = 0;
+                        shuffle_u8(sMusicTracks, sizeof(sMusicTracks) / sizeof(sMusicTracks[0]));
+                    }
+                    else
+                    {
+                        sLastPickedTrack++;
+                    }
+
+                    seq_player_play_sequence(0, sMusicTracks[sLastPickedTrack], 0);
                 }
-                sVisitedRNG = 1;
             }
         }
         if (110 == o->oTimer)
@@ -760,7 +786,7 @@ void bhv_test_loop()
     }
 }
 
-void kart_deduce_progress(struct MarioState *m, struct Object* part)
+int kart_deduce_progress(struct MarioState *m, struct Object* part)
 {
     if (m == gMarioStates)
     {
@@ -769,12 +795,12 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
 
     if (!sEnableProgress)
     {
-        return;
+        return 0;
     }
 
     if (gCurrCourseNum != COURSE_EXAMPLE)
     {
-        return;
+        return 0;
     }
 
     // truncated progress is the part index
@@ -797,7 +823,7 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
      && curProgressRounded != id - 4
      && curProgressRounded != id - 5)
     {
-        return;
+        return 0;
     }
 
     const struct PartConfig* partConfig = &sPartConfigs[part->oBehParams2ndByte];
@@ -819,6 +845,7 @@ void kart_deduce_progress(struct MarioState *m, struct Object* part)
     }
 
     m->kartProgress = progress + (f32) id;
+    return 1;
 }
 
 static int bpe_arrlen(const u8* arr)

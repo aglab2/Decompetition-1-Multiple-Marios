@@ -283,8 +283,8 @@ class ModelMeshEntry(ModelEntry):
         vtx_arg_split = vtx_arg.split(' ')
 
         self._base_vertices_model_entry = ModelVtxEntry(f'static Vtx {self.name}_vtxopt[] = {{\n')
-        # assert '+' == vtx_arg_split[1], "offset must be 0"
-        # assert '0' == vtx_arg_split[2], "offset must be 0"
+        assert '+' == vtx_arg_split[1], "offset must be 0"
+        assert '0' == vtx_arg_split[2], "offset must be 0"
 
         self._vertices = []
         self._vertices_lookup = {}
@@ -399,7 +399,7 @@ class ModelMeshEntry(ModelEntry):
             args = get_args(data)
             vtx_arg = args[0]
             vtx_arg_split = vtx_arg.split(' ')
-            # assert '+' == vtx_arg_split[1], "incorrect vtx declaration"
+            assert '+' == vtx_arg_split[1], "incorrect vtx declaration"
 
             vertices_model_name = vtx_arg_split[0]
             if self._parser_vertices_model_name != vertices_model_name:
@@ -407,7 +407,7 @@ class ModelMeshEntry(ModelEntry):
                 _, model_entry = self._model.find(vertices_model_name)
                 self._parser_vertices_model_entry = model_entry
 
-            vtx_offset = 0 # int(vtx_arg_split[2])
+            vtx_offset = int(vtx_arg_split[2])
             num = int(args[1])
             vbo_offset = int(args[2])
             for i in range(num):
@@ -983,7 +983,7 @@ def patch_header(header_path, header_patched_path):
             f_header.write(line)
 
 if '__main__' in __name__:
-    path = f"{sys.argv[1]}/actors/mario"
+    path = f"{sys.argv[1]}/actors/mario_real"
     slash_idx = sys.argv[1].rfind('/')
     name = sys.argv[1][slash_idx+1:]
 

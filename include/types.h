@@ -464,6 +464,7 @@ struct MarioState {
     Vec3f kartSafePos;
     s16 kartSafeAngle;
     u8 kartId;
+    u8 kartFloorId;
     u8 kartRNGTime;
     Vec3f kartHome;
     f32 kartLocFuzz;

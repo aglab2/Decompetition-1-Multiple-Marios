@@ -1110,7 +1110,7 @@ s32 obj_is_in_view(struct GraphNodeObject *node) {
 
     if (gIsConsole && obj->behavior == segmented_to_virtual(bhvPart))
     {
-        int progress = (int) gMarioStates->kartProgress;
+        int progress = gMarioStates->kartFloorId;
         int objIndex = obj->oPartIndex;
 
         int diff0 = progress - objIndex;
