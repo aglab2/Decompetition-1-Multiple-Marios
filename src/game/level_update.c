@@ -34,6 +34,7 @@
 #include "level_commands.h"
 #include "debug.h"
 #include "mario_coop.h"
+#include "game/emutest.h"
 
 #include "config.h"
 
@@ -1392,14 +1393,28 @@ typedef struct
     /* 0x24 */ __OSViScale y;
 } __OSViContext; // 0x30 bytes
 
+#define VI_STATE_XSCALE_UPDATED 0x02
+
 extern __OSViContext *__osViNext __attribute__((section(".data")));
-void set_vi_mode(void)
+
+static void osViSetXScaleRaw(u32 scale) {
+    register u32 nomValue;
+    register u32 saveMask = __osDisableInt();
+    
+    __osViNext->x.factor = 0;
+    __osViNext->state |= VI_STATE_XSCALE_UPDATED;
+    __osViNext->x.scale = scale;
+    __osRestoreInt(saveMask);
+}
+
+static void set_vi_mode(void)
 {
-    const int enabled = 6;
+    const int enabled = 7;
     register u32 saveMask = __osDisableInt();
     if (enabled & 1)
     {
         __osViNext->control |= VI_CTRL_ANTIALIAS_MODE_1;
+        osViSetXScaleRaw(0x201);
     }
     else
     {
