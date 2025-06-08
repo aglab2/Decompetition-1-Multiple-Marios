@@ -1409,6 +1409,9 @@ static void osViSetXScaleRaw(u32 scale) {
 
 static void set_vi_mode(void)
 {
+    if (!gIsConsole)
+        return;
+
     const int enabled = 7;
     register u32 saveMask = __osDisableInt();
     if (enabled & 1)
